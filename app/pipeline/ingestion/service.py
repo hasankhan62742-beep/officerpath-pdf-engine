@@ -25,13 +25,14 @@ from sqlalchemy.orm import Session
 from app.config import Settings
 from app.database.repositories import DocumentRepository, JobRepository
 from app.db.models import DocumentPage, ProcessingError, ProcessingStage
+from app.db.models import OCRBlock as OCRBlockRow
 from app.pipeline.ingestion.classifier import PageClassification, classify_pages
 from app.pipeline.ingestion.validator import (
     ValidationIssue,
     ValidationReport,
     validate_file,
 )
-from app.pipeline.interfaces import PipelineStage
+from app.pipeline.interfaces import OCRBlock, PipelineStage
 from app.schemas.documents import DocumentRegisterRequest
 from app.services import jobs as job_service
 from app.storage.base import StorageBackend, safe_storage_name
@@ -46,7 +47,9 @@ class StageRecorder(Protocol):
     M2 extends the protocol with the page-level operations the PDF
     stage needs: update_page (metrics / render paths on a
     document_pages row) and record_error (a failed page, recorded
-    without failing the document). Both recorders implement all three
+    without failing the document). M3 adds record_ocr_blocks (the
+    OCR stage persists every engine's blocks verbatim — originals
+    are never edited after insert). Both recorders implement all
     methods; the Null recorder logs, the SQLAlchemy one persists."""
 
     def record(
@@ -77,6 +80,14 @@ class StageRecorder(Protocol):
         error_code: str,
         message: str,
         detail: dict[str, Any] | None = None,
+    ) -> None: ...
+
+    def record_ocr_blocks(
+        self,
+        *,
+        document_id: uuid.UUID,
+        page_number: int,
+        blocks: list[OCRBlock],
     ) -> None: ...
 
 
@@ -145,6 +156,28 @@ class NullStageRecorder:
                     "stage": stage,
                     "error_code": error_code,
                     "message": message,
+                }
+            },
+        )
+
+    def record_ocr_blocks(
+        self,
+        *,
+        document_id: uuid.UUID,
+        page_number: int,
+        blocks: list[OCRBlock],
+    ) -> None:
+        """No database configured: OCR blocks are log-only (count +
+        engines). The blocks themselves are returned to the caller;
+        nothing is persisted."""
+        log.info(
+            "pipeline ocr blocks (no database configured)",
+            extra={
+                "fields": {
+                    "document_id": str(document_id),
+                    "page_number": page_number,
+                    "block_count": len(blocks),
+                    "engines": sorted({block.engine for block in blocks}),
                 }
             },
         )
@@ -226,6 +259,45 @@ class SqlAlchemyStageRecorder:
                 detail=detail,
             )
         )
+        self._session.commit()
+
+    def record_ocr_blocks(
+        self,
+        *,
+        document_id: uuid.UUID,
+        page_number: int,
+        blocks: list[OCRBlock],
+    ) -> None:
+        """Persist OCR blocks verbatim (one row per block, original
+        engine output — never edited after insert). The page_id is
+        resolved from the document_pages row when it exists; the
+        blocks are still stored when it does not (page_id NULL)."""
+        page_row = (
+            self._session.query(DocumentPage)
+            .filter_by(document_id=document_id, page_number=page_number)
+            .one_or_none()
+        )
+        for block in blocks:
+            bbox = block.bbox
+            self._session.add(
+                OCRBlockRow(
+                    document_id=document_id,
+                    page_id=page_row.id if page_row is not None else None,
+                    page_number=page_number,
+                    engine=block.engine,
+                    engine_version=block.engine_version,
+                    language=block.language,
+                    text=block.text,
+                    bbox_x_min=bbox.x_min if bbox else None,
+                    bbox_y_min=bbox.y_min if bbox else None,
+                    bbox_x_max=bbox.x_max if bbox else None,
+                    bbox_y_max=bbox.y_max if bbox else None,
+                    reading_order=block.reading_order,
+                    confidence=block.confidence,
+                    word_confidences=block.word_confidences,
+                    style=block.style,
+                )
+            )
         self._session.commit()
 
     def record_pages(self, document_id: uuid.UUID, pages: list[PageClassification]) -> None:

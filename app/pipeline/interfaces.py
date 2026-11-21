@@ -118,9 +118,14 @@ class OCRBlock:
 
 @dataclass
 class PageContext:
-    """Everything a stage needs about one page. Bytes are passed by
-    reference (storage path), never copied into the context: a page
-    render can be megabytes and stages run page by page."""
+    """Everything a stage needs about one page.
+
+    M3 extension (recorded reason): OCR adapters need the actual page
+    bytes, not just a storage path. `image_png` / `pdf_bytes` are
+    therefore optional fields, set by the orchestrator for ONE page at
+    a time and released by the caller after the stage returns — the
+    M2 streaming rule (one page in memory, buffers released per page)
+    is preserved; the context never holds a whole document."""
 
     document_id: uuid.UUID
     page_number: int
@@ -129,6 +134,9 @@ class PageContext:
     width_px: int | None = None
     height_px: int | None = None
     correlation_id: str = ""
+    image_png: bytes | None = None
+    pdf_bytes: bytes | None = None
+    dpi_used: float | None = None
 
 
 @dataclass
@@ -149,7 +157,9 @@ class OCREngine(Protocol):
     """recognize(page) -> OCR blocks, in reading order. M3."""
 
     name: str
-    version: str
+
+    @property
+    def version(self) -> str: ...
 
     def recognize(self, page: PageContext) -> list[OCRBlock]: ...
 

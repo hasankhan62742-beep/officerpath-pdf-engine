@@ -93,6 +93,36 @@ class Settings(BaseSettings):
     # (recorded, never silently picked). Disable to save CPU on Render.
     preprocess_compare_second_profile: bool = True
 
+    # --- M3: OCR engines + layout (prompt §8/§9, ADR-002, ADR-005) ---
+    # Routing is "auto": digital text first, OCR for scanned regions,
+    # mixed pages combine both with deduplication (see router.py).
+    # An engine that is not installed/available reports unavailable
+    # and is skipped — never faked.
+    ocr_routing: str = "auto"
+    # Tesseract languages for the adapter (eng+urd). The binary + these
+    # traineddata files must exist (apt: tesseract-ocr tesseract-ocr-urd
+    # tesseract-ocr-ara). PSM 3 = fully automatic page segmentation
+    # (handles two-column pages); PSM 6 assumes one uniform block.
+    tesseract_languages: str = "eng+urd"
+    tesseract_psm: int = 3
+    tesseract_binary: str = "tesseract"
+    # PaddleOCR: PP-OCRv5 Arabic-script models ("ar" language). The
+    # adapter is availability-gated: if the package or models cannot
+    # load, it reports unavailable with the reason (M3 report).
+    paddleocr_language: str = "ar"
+    paddleocr_enabled: bool = True
+    # Gemini advisory (AIAssistProvider, prompt §15 / ADR-002): DISABLED
+    # by default. Enabling ALSO needs a server key in the environment
+    # (GEMINI_API_KEY — never in code); with no key the provider
+    # reports disabled. Suggestions only, never a verified answer.
+    gemini_advisory_enabled: bool = False
+    gemini_model: str = "gemini-3.5-flash-lite"  # 2.5-flash-lite 404s (19 Nov)
+    gemini_api_key: str | None = None
+    gemini_max_calls_per_day: int = 0  # 0 = advisory disabled entirely
+    gemini_max_output_tokens: int = 2048
+    # Golden dataset version used by the benchmark harness.
+    benchmark_dataset_version: str = "golden-v1"
+
     @property
     def supabase_configured(self) -> bool:
         return bool(self.supabase_url and self.supabase_anon_key)

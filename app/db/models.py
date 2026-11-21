@@ -165,6 +165,9 @@ class DocumentPage(Base):
     original_render_path: Mapped[str | None] = mapped_column(Text, nullable=True)
     processed_render_path: Mapped[str | None] = mapped_column(Text, nullable=True)
     preprocessing_applied: Mapped[dict[str, Any] | None] = mapped_column(JSONVariant, nullable=True)
+    # M3: layout analysis result for the page (columns, regions,
+    # tables, figures, continuation flags) — Alembic 0002.
+    layout_applied: Mapped[dict[str, Any] | None] = mapped_column(JSONVariant, nullable=True)
     created_at: Mapped[datetime] = _created_at()
 
     document: Mapped[Document] = relationship(back_populates="pages")
