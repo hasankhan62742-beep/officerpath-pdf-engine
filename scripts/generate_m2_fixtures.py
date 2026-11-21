@@ -65,15 +65,17 @@ def _mcq_page(page: fitz.Page, two_column: bool = False) -> dict:
             for oi, option in enumerate(options):
                 label = chr(ord("A") + oi)
                 oy = yy
-                page.insert_text((x0 + 12, oy), f"({label}) {option}", fontsize=11, fontname="helv")
                 if qi == 0 and oi == 1:
-                    # Yellow highlight behind option B of Q1.
+                    # Yellow highlight behind option B of Q1. The rect
+                    # is drawn BEFORE the text, so the text is drawn
+                    # once, on top. (M3 fix: the old code drew the
+                    # rect over the text and re-inserted the text,
+                    # which duplicated "(B) Lahore" in the text layer
+                    # and broke digital ground truth.)
                     rect = fitz.Rect(x0 + 8, oy - 12, x0 + 130, oy + 4)
                     page.draw_rect(rect, color=(1, 1, 0), fill=(1, 1, 0))
-                    page.insert_text(
-                        (x0 + 12, oy), f"({label}) {option}", fontsize=11, fontname="helv"
-                    )
                     marks["highlight"] = [rect.x0, rect.y0, rect.x1, rect.y1]
+                page.insert_text((x0 + 12, oy), f"({label}) {option}", fontsize=11, fontname="helv")
                 if qi == 1 and oi == 2:
                     # Tick mark left of option C of Q2.
                     tick = [(x0 - 2, oy - 6), (x0 + 3, oy - 1), (x0 + 10, oy - 10)]
