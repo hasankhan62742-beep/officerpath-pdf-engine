@@ -1,0 +1,40 @@
+# OfficerPath AI — PDF Engine (Phase 1, M1)
+# Render Blueprint for Stage 1 (ADR-001: Render free tier).
+# This file is NOT applied by any agent: the owner connects the GitHub
+# repo to Render (Dashboard -> New -> Blueprint, or New -> Web Service)
+# and Render reads this file. Nothing here provisions anything until
+# the owner does that step. No paid plan is referenced anywhere.
+# Free tier limits (verified 2026-11-21): 512 MB RAM, 0.1 CPU,
+# 750 instance-hours/month, spins down after 15 min idle.
+
+services:
+  - type: web
+    name: officerpath-pdf-engine
+    runtime: docker
+    plan: free
+    repo: https://github.com/hasankhan62742-beep/officerpath-pdf-engine
+    branch: officerpath-phase1-engine
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: PORT
+        value: 8000
+      # Secrets below are set in the Render Dashboard (never in this
+      # file, never in the repo). The service starts without them and
+      # /health reports `degraded` until they are set — that is the
+      # honest behaviour, not a failure.
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      # Keep-alive decision (ADR-001): DEFERRED. Render free sleeps
+      # after 15 min idle (~30-60 s wake). A keep-alive ping would
+      # prevent sleep but consumes instance-hours and can mask real
+      # outages. Do NOT add an uptime pinger until the owner decides
+      # explicitly; the first request after idle is simply slow.

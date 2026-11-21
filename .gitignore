@@ -1,0 +1,17 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+.pytest_cache/
+# M1: local storage root (uploaded originals must never be committed).
+var/
+# M1: local test databases.
+*.db
+*.sqlite3
+# Keystores / signing material (audit D10).
+*.keystore
+*.jks
+key.properties
+# Alembic / editor artefacts.
+.mypy_cache/
+.ruff_cache/
