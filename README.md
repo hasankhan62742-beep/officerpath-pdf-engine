@@ -3,7 +3,7 @@
 Server-side document intelligence engine for **OfficerPath AI**
 (Phase 1, Master Prompt Ultimate Edition + v2, Milestones M0–M8).
 
-> **Phase 1 M2 scope.** This service registers documents, ingests and
+> **Phase 1 M3 scope.** This service registers documents, ingests and
 > validates uploaded files (magic bytes, limits, SHA-256 dedup,
 > per-page classification), stores originals immutably, tracks
 > processing jobs + pipeline stage history, and exposes health/version
@@ -11,11 +11,17 @@ Server-side document intelligence engine for **OfficerPath AI**
 > mixed/blank per page), rendering at bounded DPI, measured per-page
 > quality (blur, contrast, noise, skew, ink), and adaptive OpenCV
 > preprocessing with mark preservation (ticks/stars/circles/underlines/
-> highlights survive; colour copies kept). Run it with
-> `scripts/run_m2_pipeline.py <file>` (the M7 worker will call the same
-> `run_pdf_stage`). It does **not** do OCR, layout, or parsing yet —
-> that is M3–M5. The Flutter app and live Supabase are untouched by this
-> repo except for the documented migration steps below.
+> highlights survive; colour copies kept). M3 adds OCR + layout: a
+> pluggable OCR registry (digital extractor, Tesseract eng+urd,
+> PaddleOCR PP-OCRv5 Arabic-script via ONNX Runtime, Gemini-advisory
+> disabled by default with no key provisioned), per-page engine
+> routing with disagreement handling, and geometry layout analysis
+> (columns, reading order, header/footer, regions, grid tables,
+> figures). Benchmark it with `scripts/benchmark_m3.py` against the
+> golden dataset v1 (`docs/benchmarks/`). It does **not** do MCQ
+> extraction, answer detection, or matching yet — that is M4–M6.
+> The Flutter app and live Supabase are untouched by this repo except
+> for the documented migration steps below.
 
 ## What it does (M1)
 
@@ -197,12 +203,14 @@ render.yaml          Render Blueprint (Stage 1, free tier)
 Dockerfile  .github/workflows/ci.yml  requirements.txt
 ```
 
-## M2+ (not started)
+## M3 (done, local only — 2026-11-21)
 
 - M2: PDF analysis, page classification (exact, PyMuPDF), rendering,
   adaptive preprocessing (OpenCV).
 - M3: OCR abstraction + engines (digital extractor, Tesseract,
-  PaddleOCR benchmarked; Gemini-advisory disabled by default).
+  PaddleOCR benchmarked; Gemini-advisory disabled by default) +
+  layout analysis + golden dataset v1 + benchmark report
+  (`docs/benchmarks/BENCHMARK_M3_2026-11-21.md`).
 - M4–M5: MCQ/option extraction, answer detection.
 - M6: matching, confidence scoring, reports, review APIs.
 - M7–M8: background jobs, security hardening, benchmarks, deployment.

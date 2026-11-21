@@ -2,6 +2,70 @@
 
 All notable changes to this project. Dates in PKT (Asia/Karachi).
 
+## [0.4.0] — 2026-11-21 — Phase 1 M3: OCR + layout, golden dataset v1, benchmark
+
+### Added
+- OCR abstraction (`app/pipeline/ocr/`): `OCREngine` protocol +
+  `OCRRegistry` (lazy availability probing; an unavailable engine
+  reports its reason and is skipped, never faked), per-page routing
+  (`router.py`: digital first, OCR for scanned, mixed combines both
+  with IoU+similarity dedup), disagreement comparison (agreement
+  score + flagged regions, both outputs stored).
+- Adapters: digital extractor (PyMuPDF dict-blocks; exact text +
+  font/size/bold/italic/colour, confidence left None, never 1.0);
+  Tesseract 5.3.4 (eng+urd, PSM 3, OSD rotation probe);
+  PaddleOCR 3.7.0 (PP-OCRv5 Arabic-script models via ONNX Runtime —
+  ships without paddlepaddle; line-level scores only); Gemini
+  advisory provider (disabled by default; needs flag + server key +
+  nonzero budget; no key provisioned, no calls made; Flutter prompt
+  reused verbatim; crop-retry plan for the recitation filter).
+- Layout analysis (`app/pipeline/layout/`): column detection by
+  left-edge clustering + reading order (column-major, spanning
+  blocks inserted by y), header/footer/page-number detection,
+  region classification (question/option/key/heading/table/figure/
+  noise), grid-table detection from OCR geometry, figure
+  association with nearest block, cross-page continuation flags.
+- OCR + layout pipeline stages (`app/pipeline/ocr/service.py`,
+  `app/pipeline/layout/service.py`) with per-page failure isolation;
+  OCR blocks persist to the `ocr_blocks` table and layout JSON to
+  `document_pages.layout_applied` (Alembic 0002).
+- Golden dataset v1 (`app/tests/fixtures/golden/dataset.json`, 19
+  entries): exact ground truth for the M2 synthetic fixtures +
+  Gemini reference text (labelled as reference, not ground truth)
+  for PPSC-66 p1–p7 and both table photos; p1 hand-verified
+  (1 word error in ~700). Paper 60 has no file in the source
+  fixtures — recorded as `reference_kind: none`, not silently
+  dropped.
+- Benchmark harness (`scripts/benchmark_m3.py`,
+  `scripts/benchmark_paddleocr_perpage.py`) + report
+  (`docs/benchmarks/BENCHMARK_M3_2026-11-21.md`): digital CER
+  0.0000; Tesseract PPSC-66 CER 0.07–0.54; PaddleOCR synthetic CER
+  0.016–0.024 but PPSC-66 CER 0.31–0.43, 42–63 s/page, 1.8–3.7 GB
+  peak RSS, OOM on full-res phone photos — PaddleOCR cannot run on
+  Render free (ADR-005).
+- ADR-005 (OCR engine evaluation) + M3 milestone report.
+
+### Fixed
+- M2 fixture generator drew the highlighted option twice (text over
+  highlight rect), duplicating "(B) Lahore" in the text layer. The
+  rect is now drawn before the text; all M2 fixtures regenerated
+  (manifest mark bboxes byte-identical; full suite still passes).
+- Column clustering first used x-interval overlap (single-linkage),
+  which chained all 37 Tesseract blocks on PPSC-66 p1 into one
+  column and gave CER 0.61 where the engine scores 0.06. Replaced
+  with left-edge (x_min) gap clustering + distance-limited
+  singleton merge: layout-order CER on p1 is now 0.0935.
+
+### Changed
+- `OCREngine.version` is a read-only property in the protocol
+  (adapters were split between plain attributes and properties).
+- `requirements.txt`: + pytesseract 0.3.13, pdfplumber 0.11.11,
+  paddleocr 3.7.0, onnxruntime 1.32.0 (PaddleOCR optional/heavy).
+  Dockerfile + CI install the Tesseract binary + `urd`/`ara` data.
+  pip-audit: 0 known vulnerabilities.
+- `.env.example`: M3 OCR + Gemini-advisory settings (all defaults
+  shown; advisory stays off).
+
 ## [0.3.0] — 2026-11-21 — Phase 1 M2: PDF analysis, rendering, adaptive preprocessing
 
 ### Added

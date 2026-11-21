@@ -51,6 +51,14 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      # M3: the Tesseract tests run the real binary (eng+urd). Without
+      # these packages the adapter reports unavailable and the tests
+      # fail. PaddleOCR is NOT run in unit tests (parse-only tests +
+      # the benchmark script), so no model download happens in CI.
+      - name: Install Tesseract (system binary + language data)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq tesseract-ocr tesseract-ocr-urd tesseract-ocr-ara
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip

@@ -15,3 +15,22 @@ PyMuPDF==1.26.3
 opencv-python-headless==4.11.0.86
 Pillow==13.0.0
 numpy==2.3.2
+# --- M3: OCR + layout (ADR-005) ---
+# pytesseract: thin wrapper over the system tesseract binary (needs
+# the tesseract-ocr + tesseract-ocr-urd + tesseract-ocr-ara apt
+# packages — see Dockerfile). No heavy dependency of its own.
+pytesseract==0.3.13
+# pdfplumber: ruled-table extraction on DIGITAL pages only (M3 decision:
+# adds value for ruled answer-key grids; NOT a text extractor — PyMuPDF
+# stays the digital extractor). Pure Python over pdfminer.six.
+pdfplumber==0.11.11
+# PaddleOCR + onnxruntime: OPTIONAL and HEAVY. PaddleOCR 3.7 ships
+# without paddlepaddle; the adapter runs the ONNX Runtime engine
+# (onnxruntime) with the PP-OCRv5 Arabic-script models. The venv grows
+# by ~900 MB and models download ~50-100 MB on first use. Omit both
+# lines for a slim digital+Tesseract-only build (the registry degrades
+# honestly: PaddleOCR reports unavailable, routing falls back to
+# Tesseract). Render free (512 MB / 0.1 CPU) has NOT been verified with
+# PaddleOCR — see ADR-005 and the M3 benchmark report.
+paddleocr==3.7.0
+onnxruntime==1.32.0

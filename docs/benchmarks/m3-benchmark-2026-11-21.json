@@ -1,0 +1,623 @@
+{
+  "dataset_version": "golden-v1",
+  "created": "2026-11-21",
+  "hardware_note": "VM numbers — NOT Render numbers (Render free: 0.1 CPU / 512 MB)",
+  "engines": {
+    "digital": {
+      "engine": "digital",
+      "engine_version": "1.26.3",
+      "load_seconds": 0.0,
+      "total_seconds": 0.2,
+      "peak_rss_mb": 62.8,
+      "python": "3.12.3",
+      "machine": "x86_64 Linux",
+      "rows": [
+        {
+          "entry": "synthetic-clean-p1",
+          "status": "ok",
+          "engine": "digital",
+          "seconds": 0.01,
+          "blocks": 9,
+          "cer": 0.0,
+          "wer": 0.0,
+          "order_score": 1.0,
+          "layout_column_count": 1,
+          "layout_tables": 0
+        },
+        {
+          "entry": "synthetic-clean-p2",
+          "status": "ok",
+          "engine": "digital",
+          "seconds": 0.0,
+          "blocks": 9,
+          "cer": 0.0,
+          "wer": 0.0,
+          "order_score": 1.0,
+          "layout_column_count": 2,
+          "layout_tables": 0,
+          "column_order_accuracy": 1.0
+        },
+        {
+          "entry": "synthetic-scanned-p1",
+          "status": "not_applicable_digital"
+        },
+        {
+          "entry": "synthetic-mixed-p1",
+          "status": "ok",
+          "engine": "digital",
+          "seconds": 0.0,
+          "blocks": 9,
+          "cer": 0.0,
+          "wer": 0.0,
+          "order_score": 1.0,
+          "layout_column_count": 1,
+          "layout_tables": 0
+        },
+        {
+          "entry": "synthetic-mixed-p2",
+          "status": "not_applicable_digital"
+        },
+        {
+          "entry": "synthetic-skewed-p1",
+          "status": "not_applicable_digital"
+        },
+        {
+          "entry": "synthetic-low_contrast-p1",
+          "status": "ok",
+          "engine": "digital",
+          "seconds": 0.0,
+          "blocks": 9,
+          "cer": 0.0,
+          "wer": 0.0,
+          "order_score": 1.0,
+          "layout_column_count": 1,
+          "layout_tables": 0
+        },
+        {
+          "entry": "synthetic-noisy-p1",
+          "status": "not_applicable_digital"
+        },
+        {
+          "entry": "synthetic-blank-p1",
+          "status": "ok",
+          "engine": "digital",
+          "seconds": 0.0,
+          "blocks": 0,
+          "cer": 0.0,
+          "wer": 0.0,
+          "order_score": 1.0,
+          "layout_column_count": 0,
+          "layout_tables": 0
+        },
+        {
+          "entry": "ppsc66-p1",
+          "status": "not_applicable_digital"
+        },
+        {
+          "entry": "ppsc66-p2",
+          "status": "not_applicable_digital"
+        },
+        {
+          "entry": "ppsc66-p3",
+          "status": "not_applicable_digital"
+        },
+        {
+          "entry": "ppsc66-p4",
+          "status": "not_applicable_digital"
+        },
+        {
+          "entry": "ppsc66-p5",
+          "status": "not_applicable_digital"
+        },
+        {
+          "entry": "ppsc66-p6",
+          "status": "not_applicable_digital"
+        },
+        {
+          "entry": "ppsc66-p7",
+          "status": "not_applicable_digital"
+        },
+        {
+          "entry": "ppsc66-table-computer-q67-81",
+          "status": "not_applicable_digital"
+        },
+        {
+          "entry": "ppsc66-table-interjection-q230-257",
+          "status": "not_applicable_digital"
+        },
+        {
+          "entry": "paper60-photo",
+          "status": "no_reference"
+        }
+      ]
+    },
+    "tesseract": {
+      "engine": "tesseract",
+      "engine_version": "5.3.4",
+      "load_seconds": 0.7,
+      "total_seconds": 195.4,
+      "peak_rss_mb": 228.7,
+      "python": "3.12.3",
+      "machine": "x86_64 Linux",
+      "rows": [
+        {
+          "entry": "synthetic-clean-p1",
+          "status": "ok",
+          "engine": "tesseract",
+          "seconds": 1.34,
+          "blocks": 5,
+          "cer": 0.0755,
+          "wer": 0.1231,
+          "order_score": 1.0,
+          "layout_column_count": 1,
+          "layout_tables": 0
+        },
+        {
+          "entry": "synthetic-clean-p2",
+          "status": "ok",
+          "engine": "tesseract",
+          "seconds": 1.69,
+          "blocks": 3,
+          "cer": 0.5445,
+          "wer": 0.7077,
+          "order_score": 1.0,
+          "layout_column_count": 1,
+          "layout_tables": 0,
+          "column_order_accuracy": 1.0
+        },
+        {
+          "entry": "synthetic-scanned-p1",
+          "status": "ok",
+          "engine": "tesseract",
+          "seconds": 1.32,
+          "blocks": 5,
+          "cer": 0.0755,
+          "wer": 0.1231,
+          "order_score": 1.0,
+          "layout_column_count": 1,
+          "layout_tables": 0
+        },
+        {
+          "entry": "synthetic-mixed-p1",
+          "status": "ok",
+          "engine": "tesseract",
+          "seconds": 1.32,
+          "blocks": 5,
+          "cer": 0.0755,
+          "wer": 0.1231,
+          "order_score": 1.0,
+          "layout_column_count": 1,
+          "layout_tables": 0
+        },
+        {
+          "entry": "synthetic-mixed-p2",
+          "status": "ok",
+          "engine": "tesseract",
+          "seconds": 1.68,
+          "blocks": 5,
+          "cer": 0.0755,
+          "wer": 0.1231,
+          "order_score": 1.0,
+          "layout_column_count": 1,
+          "layout_tables": 0
+        },
+        {
+          "entry": "synthetic-skewed-p1",
+          "status": "ok",
+          "engine": "tesseract",
+          "seconds": 2.05,
+          "blocks": 11,
+          "cer": 0.0943,
+          "wer": 0.1692,
+          "order_score": 1.0,
+          "layout_column_count": 1,
+          "layout_tables": 0
+        },
+        {
+          "entry": "synthetic-low_contrast-p1",
+          "status": "ok",
+          "engine": "tesseract",
+          "seconds": 1.18,
+          "blocks": 5,
+          "cer": 0.0027,
+          "wer": 0.0154,
+          "order_score": 1.0,
+          "layout_column_count": 1,
+          "layout_tables": 0
+        },
+        {
+          "entry": "synthetic-noisy-p1",
+          "status": "ok",
+          "engine": "tesseract",
+          "seconds": 3.33,
+          "blocks": 6,
+          "cer": 0.0728,
+          "wer": 0.1077,
+          "order_score": 1.0,
+          "layout_column_count": 1,
+          "layout_tables": 0
+        },
+        {
+          "entry": "synthetic-blank-p1",
+          "status": "ok",
+          "engine": "tesseract",
+          "seconds": 0.48,
+          "blocks": 0,
+          "cer": 0.0,
+          "wer": 0.0,
+          "order_score": 1.0,
+          "layout_column_count": 0,
+          "layout_tables": 0
+        },
+        {
+          "entry": "ppsc66-p1",
+          "status": "ok",
+          "engine": "tesseract",
+          "seconds": 11.08,
+          "blocks": 38,
+          "cer": 0.0935,
+          "wer": 0.1627,
+          "order_score": 0.696,
+          "layout_column_count": 3,
+          "layout_tables": 0
+        },
+        {
+          "entry": "ppsc66-p2",
+          "status": "ok",
+          "engine": "tesseract",
+          "seconds": 14.47,
+          "blocks": 44,
+          "cer": 0.1113,
+          "wer": 0.2329,
+          "order_score": 0.638,
+          "layout_column_count": 3,
+          "layout_tables": 0
+        },
+        {
+          "entry": "ppsc66-p3",
+          "status": "ok",
+          "engine": "tesseract",
+          "seconds": 17.02,
+          "blocks": 31,
+          "cer": 0.0681,
+          "wer": 0.1357,
+          "order_score": 0.367,
+          "layout_column_count": 3,
+          "layout_tables": 0
+        },
+        {
+          "entry": "ppsc66-p4",
+          "status": "ok",
+          "engine": "tesseract",
+          "seconds": 15.86,
+          "blocks": 41,
+          "cer": 0.1273,
+          "wer": 0.2343,
+          "order_score": 0.457,
+          "layout_column_count": 3,
+          "layout_tables": 0
+        },
+        {
+          "entry": "ppsc66-p5",
+          "status": "ok",
+          "engine": "tesseract",
+          "seconds": 18.82,
+          "blocks": 38,
+          "cer": 0.1519,
+          "wer": 0.2703,
+          "order_score": 0.438,
+          "layout_column_count": 3,
+          "layout_tables": 0
+        },
+        {
+          "entry": "ppsc66-p6",
+          "status": "ok",
+          "engine": "tesseract",
+          "seconds": 20.89,
+          "blocks": 28,
+          "cer": 0.5368,
+          "wer": 0.6454,
+          "order_score": 0.875,
+          "layout_column_count": 4,
+          "layout_tables": 0
+        },
+        {
+          "entry": "ppsc66-p7",
+          "status": "ok",
+          "engine": "tesseract",
+          "seconds": 15.05,
+          "blocks": 20,
+          "cer": 0.3183,
+          "wer": 0.4049,
+          "order_score": 0.844,
+          "layout_column_count": 4,
+          "layout_tables": 0
+        },
+        {
+          "entry": "ppsc66-table-computer-q67-81",
+          "status": "ok",
+          "engine": "tesseract",
+          "seconds": 10.53,
+          "blocks": 48,
+          "cer": 0.541,
+          "wer": 0.6757,
+          "order_score": 1.0,
+          "layout_column_count": 5,
+          "layout_tables": 0
+        },
+        {
+          "entry": "ppsc66-table-interjection-q230-257",
+          "status": "ok",
+          "engine": "tesseract",
+          "seconds": 19.65,
+          "blocks": 4,
+          "cer": 0.3434,
+          "wer": 0.5668,
+          "order_score": 1.0,
+          "layout_column_count": 2,
+          "layout_tables": 0
+        },
+        {
+          "entry": "paper60-photo",
+          "status": "no_reference"
+        }
+      ]
+    },
+    "paddleocr": {
+      "engine": "paddleocr",
+      "engine_version": "3.7.0 (PP-OCRv5 server det + arabic mobile rec, onnxruntime 1.32.0)",
+      "load_seconds": null,
+      "total_seconds": 614.6,
+      "peak_rss_mb": 3667.4,
+      "python": "3.12.3",
+      "machine": "x86_64 Linux",
+      "method": "per-page subprocess (single-process pass OOM-killed, exit 137); table photos downscaled to max 1600px for the retry (full-res OOM, exit 137, twice)",
+      "entries_run": [
+        "ppsc66-p1",
+        "ppsc66-p3",
+        "ppsc66-p6",
+        "ppsc66-table-computer-q67-81",
+        "ppsc66-table-interjection-q230-257",
+        "synthetic-clean-p1",
+        "synthetic-clean-p2",
+        "synthetic-scanned-p1"
+      ],
+      "rows": [
+        {
+          "entry": "synthetic-clean-p1",
+          "status": "ok",
+          "engine": "paddleocr",
+          "load_seconds": 2.8,
+          "seconds": 62.69,
+          "blocks": 21,
+          "cer": 0.0162,
+          "wer": 0.0462,
+          "order_score": 1.0,
+          "layout_column_count": 1,
+          "layout_tables": 0,
+          "peak_rss_mb": 3586.0
+        },
+        {
+          "entry": "synthetic-clean-p2",
+          "status": "ok",
+          "engine": "paddleocr",
+          "load_seconds": 24.4,
+          "seconds": 58.31,
+          "blocks": 21,
+          "cer": 0.0243,
+          "wer": 0.1077,
+          "order_score": 1.0,
+          "layout_column_count": 2,
+          "layout_tables": 0,
+          "peak_rss_mb": 3667.4,
+          "column_order_accuracy": 1.0
+        },
+        {
+          "entry": "synthetic-scanned-p1",
+          "status": "ok",
+          "engine": "paddleocr",
+          "load_seconds": 8.2,
+          "seconds": 55.7,
+          "blocks": 21,
+          "cer": 0.0243,
+          "wer": 0.0923,
+          "order_score": 1.0,
+          "layout_column_count": 1,
+          "layout_tables": 0,
+          "peak_rss_mb": 3652.8
+        },
+        {
+          "entry": "ppsc66-p1",
+          "status": "ok",
+          "engine": "paddleocr",
+          "load_seconds": 7.4,
+          "seconds": 56.1,
+          "blocks": 189,
+          "cer": 0.3434,
+          "wer": 0.427,
+          "order_score": 0.649,
+          "layout_column_count": 5,
+          "layout_tables": 3,
+          "peak_rss_mb": 1775.4
+        },
+        {
+          "entry": "ppsc66-p3",
+          "status": "ok",
+          "engine": "paddleocr",
+          "load_seconds": 8.3,
+          "seconds": 57.0,
+          "blocks": 168,
+          "cer": 0.3128,
+          "wer": 0.4055,
+          "order_score": 0.406,
+          "layout_column_count": 5,
+          "layout_tables": 1,
+          "peak_rss_mb": 1775.7
+        },
+        {
+          "entry": "ppsc66-p6",
+          "status": "ok",
+          "engine": "paddleocr",
+          "load_seconds": 4.2,
+          "seconds": 42.29,
+          "blocks": 199,
+          "cer": 0.4316,
+          "wer": 0.5489,
+          "order_score": 0.961,
+          "layout_column_count": 5,
+          "layout_tables": 1,
+          "peak_rss_mb": 1782.2
+        },
+        {
+          "entry": "ppsc66-table-computer-q67-81",
+          "status": "ok",
+          "engine": "paddleocr",
+          "load_seconds": 9.8,
+          "seconds": 34.23,
+          "blocks": 162,
+          "cer": 0.6692,
+          "wer": 0.8132,
+          "order_score": 1.0,
+          "layout_column_count": 8,
+          "layout_tables": 2,
+          "peak_rss_mb": 1707.4,
+          "downscaled_to_max_1600px": true
+        },
+        {
+          "entry": "ppsc66-table-interjection-q230-257",
+          "status": "ok",
+          "engine": "paddleocr",
+          "load_seconds": 4.1,
+          "seconds": 40.76,
+          "blocks": 261,
+          "cer": 0.738,
+          "wer": 0.852,
+          "order_score": 1.0,
+          "layout_column_count": 7,
+          "layout_tables": 2,
+          "peak_rss_mb": 1708.4,
+          "downscaled_to_max_1600px": true
+        }
+      ]
+    },
+    "stored-tesseract": {
+      "engine": "stored-tesseract",
+      "engine_version": "5.3.4 (stored output, 20 Nov 2026)",
+      "load_seconds": 0.0,
+      "total_seconds": 0.0,
+      "peak_rss_mb": 59.0,
+      "python": "3.12.3",
+      "machine": "x86_64 Linux",
+      "rows": [
+        {
+          "entry": "ppsc66-p1",
+          "status": "ok",
+          "engine": "stored-tesseract",
+          "seconds": 0.0,
+          "blocks": null,
+          "cer": 0.0663,
+          "wer": 0.1257,
+          "order_score": 0.704,
+          "layout_column_count": null,
+          "layout_tables": null
+        },
+        {
+          "entry": "ppsc66-p2",
+          "status": "ok",
+          "engine": "stored-tesseract",
+          "seconds": 0.0,
+          "blocks": null,
+          "cer": 0.1189,
+          "wer": 0.2314,
+          "order_score": 0.638,
+          "layout_column_count": null,
+          "layout_tables": null
+        },
+        {
+          "entry": "ppsc66-p3",
+          "status": "ok",
+          "engine": "stored-tesseract",
+          "seconds": 0.0,
+          "blocks": null,
+          "cer": 0.0678,
+          "wer": 0.1311,
+          "order_score": 0.367,
+          "layout_column_count": null,
+          "layout_tables": null
+        },
+        {
+          "entry": "ppsc66-p4",
+          "status": "ok",
+          "engine": "stored-tesseract",
+          "seconds": 0.0,
+          "blocks": null,
+          "cer": 0.1247,
+          "wer": 0.236,
+          "order_score": 0.457,
+          "layout_column_count": null,
+          "layout_tables": null
+        },
+        {
+          "entry": "ppsc66-p5",
+          "status": "ok",
+          "engine": "stored-tesseract",
+          "seconds": 0.0,
+          "blocks": null,
+          "cer": 0.1522,
+          "wer": 0.2576,
+          "order_score": 0.433,
+          "layout_column_count": null,
+          "layout_tables": null
+        },
+        {
+          "entry": "ppsc66-p6",
+          "status": "ok",
+          "engine": "stored-tesseract",
+          "seconds": 0.0,
+          "blocks": null,
+          "cer": 0.5515,
+          "wer": 0.6739,
+          "order_score": 0.844,
+          "layout_column_count": null,
+          "layout_tables": null
+        },
+        {
+          "entry": "ppsc66-p7",
+          "status": "ok",
+          "engine": "stored-tesseract",
+          "seconds": 0.0,
+          "blocks": null,
+          "cer": 0.3895,
+          "wer": 0.4553,
+          "order_score": 0.817,
+          "layout_column_count": null,
+          "layout_tables": null
+        },
+        {
+          "entry": "ppsc66-table-computer-q67-81",
+          "status": "ok",
+          "engine": "stored-tesseract",
+          "seconds": 0.0,
+          "blocks": null,
+          "cer": 0.586,
+          "wer": 0.7402,
+          "order_score": 1.0,
+          "layout_column_count": null,
+          "layout_tables": null
+        },
+        {
+          "entry": "ppsc66-table-interjection-q230-257",
+          "status": "ok",
+          "engine": "stored-tesseract",
+          "seconds": 0.0,
+          "blocks": null,
+          "cer": 0.3315,
+          "wer": 0.556,
+          "order_score": 1.0,
+          "layout_column_count": null,
+          "layout_tables": null
+        }
+      ]
+    }
+  }
+}

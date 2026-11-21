@@ -33,6 +33,17 @@ resource in Phase 1.
   pipeline, Tesseract on large pages) as a routine path — see ADR-002.
   Stage-1 OCR is Gemini-vision (network-bound) when a server key
   exists, PaddleOCR/Tesseract as fallback.
+- M3 MEASURED (2026-11-21, VM 4 vCPU / 8 GB — see
+  docs/benchmarks/BENCHMARK_M3_2026-11-21.md): PaddleOCR 3.7
+  (PP-OCRv5, ONNX engine) peaks at 1.8–3.7 GB RSS per page and
+  OOM-kills (exit 137) on 2160×3840 phone photos — it CANNOT run in
+  the 512 MB Render free container, full stop. Tesseract 5.3.4 peaks
+  at 229 MB and ~13 s/page on the VM (much slower on 0.1 CPU, not
+  measured). So on Render free the only viable OCR paths are
+  Gemini-vision (needs the server key) and Tesseract; PaddleOCR
+  belongs on the Hostinger VPS (Stage 2, 4 GB) or not at all. The
+  Docker image still ships the Tesseract binary + language data;
+  PaddleOCR stays an optional dependency (requirements.txt note).
 - One service only within the quota; Render Background Workers are
   not free. Stage-1 background work must run in-process (a worker
   loop inside the web container) — M7 designs this.
