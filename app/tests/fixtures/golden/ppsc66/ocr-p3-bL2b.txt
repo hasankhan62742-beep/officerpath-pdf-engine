@@ -1,0 +1,11 @@
+L1: the sentence are given four options, one of
+L2: which can complete and meaningful. Spot it
+L3: 
+L4: Azmat hasn't been in school for many years
+L5: and he's likely to find learning English
+L6: difficult. I think he speaks English
+L7: .55. Comp
+L8: phras
+L9: Out o
+L10: (A) ir
+L11: (C) in

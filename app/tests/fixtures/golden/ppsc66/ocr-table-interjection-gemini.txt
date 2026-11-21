@@ -1,0 +1,34 @@
+230 | Choose the right one | Neither Ali nor Aslam has taken his test | Neither Ali nor Aslam have taken his test | Neither Ali nor Aslam has taken their test | None of these | A | Corelative Conjunction
+231 | He is ______ worried about his car issue ____ he gets to the garage | so much/that | so/- | -/the | None of these | A | Corelative Conjunction
+232 | He have had _____ trouble ____ he parked the car in the garage. | Much/and | Some/that | So much/that | None of these | C | Corelative Conjunction
+233 | He is looking for a residence _____ in a hostel or in a room? | Or | Either | And | Nor | B | Corelative Conjunction
+234 | His behavior was unprofessional enough _____ he terminated immediately. | That | so | though | None of these | B | Corelative Conjunction
+Interjection
+235 | Which part of speech can act as an independently complete sentence? | Interjection | Conjunction | Noun | Preposition | A | Interjection
+236 | well! I don't think I will be home before 6 pm. In this sentence well is: | Adverb | Adjective | Interjection | None of these | C | Interjection
+237 | WOW! is an: | Adverb | Adjective | Interjection | Conjunction | C | Interjection
+238 | Well is which part of speech: | Conjunction | Interjection | Noun | None of these | B | Interjection
+239 | Identify the underlined parts of speech: Wow! It is a beautiful symphony. | Interjection | Adjective | Article | Conjunction | A | Interjection
+Parts of Speech Identification
+240 | Identify the underlined parts of speech: He also likes to eat strawberries. | Noun | Adverb | Adjective | Verb | D | Identification of Parts of Speech
+241 | Identify the underlined parts of speech: He also likes to eat strawberries. | Noun | Adverb | Adjective | Verb | D | Identification of Parts of Speech
+242 | The cat was ____ by him. | Kill | Killed | Has kill | None of these | B | Identification of Parts of Speech
+243 | Choose the subject used in sentence: "I met the old beggar across the road": | I | Old | Beggar | Road | A | Identification of Parts of Speech
+244 | I helped him. Here subject is: | I | Helped | Him | I helped | A | Identification of Parts of Speech
+245 | In the sentence "I know all the people sitting in the hall," the complete object is: | I know | People | All the people sitting in the hall | In the hall | C | Identification of Parts of Speech
+246 | How many parts of speech? | 7 | 8 | 9 | None of these | B | Identification of Parts of Speech
+247 | Identify the underline part of speech: Faint heart never won fair lady. | Verb | Adjective | Adverb | Noun | A | Identification of Parts of Speech
+Gerund / Infinitives / Participle
+248 | I enjoy ______ tennis. | to playing | Playing | Plays | to play | B | Gerund
+249 | I am ____ to weekend. | Look forward | Look forwarded | Looking forward | None of these | C | Gerund
+250 | I don't mind ______ if you are tired. | driving | to drive | drive | None of these | A | Gerund
+251 | A _____ is a verb in its present participle form ("ing") that acts as a noun in a sentence | verb | adjective | gerund | adverb | C | Gerund
+252 | "Ing" used in a sentence. It is called | Gerund | Command | Exclamation | None of these | A | Gerund
+253 | She wants --- a complaint about the waiter. | To make | Making | Made | Makes | A | Infinitive
+162 | I used to _____ hardship of life: | Embrace | Facing | To Face | Face | D | Infinitive
+164 | Do you want something--- now? | To drink | drinking | for drink | None of these | A | Infinitive
+254 | He wants ____ a cold drink. | Drink | To drink | Drinking | Drinks | B | Infinitive
+255 | "To help" is which type of verb? | Participle | Infinitive | Gerund | Modal | B | Infinitive
+256 | Replace the underlined word "He is very obliged." | Much | many | So | None of these | A | Past Participle
+257 | I am very obliged to him. Correct the following Sentence | Many obliged | Much obliged | So obliged | None of these | B | Past Participle
+Present / Past / Perfect Tenses

@@ -1,0 +1,19 @@
+Sr# | Question | A | B | C | D | Ans
+--- | --- | --- | --- | --- | --- | ---
+67 | From where you can access Save command in Microsoft Word? | A. Home tab | B. Insert tab | C. Review tab | D. None of above | D
+68 | To verify that the note text is positioned correctly on the page, switch to ________ view or display the document in print preview | A. normal | B. print layout | C. page layout | D. page edit | B
+69 | What is the default left margins in word 2003 document? | A. 1 | B. 1.25 | C. 1.5 | D. 2 | B
+70 | Ms Word includes a series of predefined graphics called __________ that can be inserted into a Word document. | A. clip art | B. hyperlinks | C. captions | D. bookmarks | A
+71 | Which key deletes the character to the right of the cursor in Ms Word? | A. End | B. Backspace | C. Home | D. Delete | D
+72 | To exit from the Resume Wizard and return to the document window without creating a resume, click the __________ button in any panel in the Resume Wizard dialog box. | A. Cancel | B. Back | C. Next | D. Finish | D
+73 | A __________ is not attached to an edge of the Word window; that is, it displays in the middle of the Word window and can be moved anywhere in the window | A. floating toolbar | B. scroll bar | C. status toolbar | D. menu bar | A
+74 | Ctrl + J Shortcut key is used in Microsoft Word to __________? | A. Align Justify | B. Insert Hyperlink | C. Search | D. Print | A
+75 | Which of the following is not essential component to perform a mail merge operation? | A. Main document | B. Data source | C. Merge fields | D. Word fields | D
+76 | When you save a file as a Web page, Word converts the contents of the document into __________. | A. Java | B. Perl | C. HTML | D. Unix | C
+77 | Although it is not shown in normal view, to view a header, click __________ on the menu bar and then click Header and Footer. | A. View | B. Edit | C. Format | D. Tools | A
+78 | By default, your document prints with__________? | A. 1 inch top and bottom margins | B. a portrait orientation | C. 1.25 inches left and right margins | D. all of the above | D
+79 | When typing in a word field manually, what must you press to insert the code's brackets? | A. Ctrl + F6 | B. Ctrl + F9 | C. Alt + F11 | D. Shift + F12 | B
+80 | What would you do when you want to update the data in an embedded worksheet range? | A. double click the worksheet range object | B. right click worksheet range object & choose format object | C. edit the data in the destination document | D. edit the data in the source document. | A
+81 | Who invented the difference engine and analytical engine? | A. Vint cerf | B. Mark zukerberg | C. Charles Babbage | D. None | C
+
+Page 5 of 71
