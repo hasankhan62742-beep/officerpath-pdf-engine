@@ -24,7 +24,7 @@ from sqlalchemy.orm import Session
 
 from app.config import Settings
 from app.database.repositories import DocumentRepository, JobRepository
-from app.db.models import DocumentPage, ProcessingStage
+from app.db.models import DocumentPage, ProcessingError, ProcessingStage
 from app.pipeline.ingestion.classifier import PageClassification, classify_pages
 from app.pipeline.ingestion.validator import (
     ValidationIssue,
@@ -41,7 +41,13 @@ log = get_logger(__name__)
 
 
 class StageRecorder(Protocol):
-    """Persist one pipeline-stage transition (prompt §5.3)."""
+    """Persist one pipeline-stage transition (prompt §5.3).
+
+    M2 extends the protocol with the page-level operations the PDF
+    stage needs: update_page (metrics / render paths on a
+    document_pages row) and record_error (a failed page, recorded
+    without failing the document). Both recorders implement all three
+    methods; the Null recorder logs, the SQLAlchemy one persists."""
 
     def record(
         self,
@@ -52,6 +58,25 @@ class StageRecorder(Protocol):
         status: str,
         detail: dict[str, Any] | None = None,
         correlation_id: str | None = None,
+    ) -> None: ...
+
+    def update_page(
+        self,
+        document_id: uuid.UUID,
+        page_number: int,
+        **fields: Any,
+    ) -> None: ...
+
+    def record_error(
+        self,
+        *,
+        document_id: uuid.UUID,
+        job_id: uuid.UUID | None,
+        page_number: int | None,
+        stage: str,
+        error_code: str,
+        message: str,
+        detail: dict[str, Any] | None = None,
     ) -> None: ...
 
 
@@ -77,6 +102,49 @@ class NullStageRecorder:
                     "stage": stage.value,
                     "status": status,
                     "correlation_id": correlation_id,
+                }
+            },
+        )
+
+    def update_page(
+        self,
+        document_id: uuid.UUID,
+        page_number: int,
+        **fields: Any,
+    ) -> None:
+        """No database configured: page metrics are log-only."""
+        log.info(
+            "pipeline page update (no database configured)",
+            extra={
+                "fields": {
+                    "document_id": str(document_id),
+                    "page_number": page_number,
+                    "fields": sorted(fields),
+                }
+            },
+        )
+
+    def record_error(
+        self,
+        *,
+        document_id: uuid.UUID,
+        job_id: uuid.UUID | None,
+        page_number: int | None,
+        stage: str,
+        error_code: str,
+        message: str,
+        detail: dict[str, Any] | None = None,
+    ) -> None:
+        """No database configured: page failures are log-only."""
+        log.info(
+            "pipeline page error (no database configured)",
+            extra={
+                "fields": {
+                    "document_id": str(document_id),
+                    "page_number": page_number,
+                    "stage": stage,
+                    "error_code": error_code,
+                    "message": message,
                 }
             },
         )
@@ -112,6 +180,53 @@ class SqlAlchemyStageRecorder:
 
     def close(self) -> None:
         self._session.close()
+
+    def update_page(
+        self,
+        document_id: uuid.UUID,
+        page_number: int,
+        **fields: Any,
+    ) -> None:
+        """Update one document_pages row (M2 metrics / render paths).
+        Silently no-ops when the row does not exist yet (the M2
+        pipeline creates page rows first via record_pages)."""
+        row = (
+            self._session.query(DocumentPage)
+            .filter_by(document_id=document_id, page_number=page_number)
+            .one_or_none()
+        )
+        if row is None:
+            return
+        for key, value in fields.items():
+            if hasattr(row, key):
+                setattr(row, key, value)
+        self._session.commit()
+
+    def record_error(
+        self,
+        *,
+        document_id: uuid.UUID,
+        job_id: uuid.UUID | None,
+        page_number: int | None,
+        stage: str,
+        error_code: str,
+        message: str,
+        detail: dict[str, Any] | None = None,
+    ) -> None:
+        """Persist one page-level failure (prompt §2: a failed page
+        never fails the whole document silently)."""
+        self._session.add(
+            ProcessingError(
+                document_id=document_id,
+                job_id=job_id,
+                page_number=page_number,
+                stage=stage,
+                error_code=error_code,
+                message=message,
+                detail=detail,
+            )
+        )
+        self._session.commit()
 
     def record_pages(self, document_id: uuid.UUID, pages: list[PageClassification]) -> None:
         for page in pages:
@@ -178,7 +293,9 @@ def ingest_file(
         )
         return IngestionOutcome(status="rejected", filename=filename, report=report)
 
-    pages = classify_pages(report)
+    # M2: pass the raw bytes so PDFs get exact PyMuPDF classification;
+    # without them the M1 byte heuristic is the fallback.
+    pages = classify_pages(report, data=data)
 
     # SHA-256 dedup (per user — never reveal another user's file).
     existing = documents.find_by_user_and_sha256(user_id, report.sha256)

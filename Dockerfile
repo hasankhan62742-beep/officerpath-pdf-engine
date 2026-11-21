@@ -9,6 +9,12 @@
 # work short or use the async job model).
 
 # ---- Build stage: install dependencies into a venv ----
+# M2 note (ADR-004): PyMuPDF, opencv-python-headless, Pillow and NumPy
+# all install as manylinux wheels — no compiler and no system libraries
+# are needed for them (headless OpenCV needs no libGL). build-essential
+# stays only for any future source build; the runtime stage below needs
+# no new apt packages for M2. (UNVERIFIED in Docker itself — no Docker
+# on the dev VM; the first CI Docker build after the push verifies it.)
 FROM python:3.12-slim AS builder
 WORKDIR /build
 RUN apt-get update && apt-get install -y --no-install-recommends \

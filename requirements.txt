@@ -8,3 +8,10 @@ SQLAlchemy==2.0.44
 alembic==1.16.4
 psycopg[binary]==3.2.10
 python-multipart==0.0.34
+# --- M2: PDF analysis + rendering + preprocessing (ADR-004) ---
+# PyMuPDF: MuPDF bindings (AGPLv3 dual licence — see ADR-004 licence note).
+PyMuPDF==1.26.3
+# OpenCV headless: no libGL system dependency, fits python:3.12-slim.
+opencv-python-headless==4.11.0.86
+Pillow==13.0.0
+numpy==2.3.2

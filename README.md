@@ -3,13 +3,19 @@
 Server-side document intelligence engine for **OfficerPath AI**
 (Phase 1, Master Prompt Ultimate Edition + v2, Milestones M0–M8).
 
-> **Phase 1 M1 scope.** This service registers documents, ingests and
+> **Phase 1 M2 scope.** This service registers documents, ingests and
 > validates uploaded files (magic bytes, limits, SHA-256 dedup,
 > per-page classification), stores originals immutably, tracks
 > processing jobs + pipeline stage history, and exposes health/version
-> endpoints. It does **not** do OCR, layout, or parsing yet — that is
-> M2–M5. The Flutter app and live Supabase are untouched by this repo
-> except for the documented migration steps below.
+> endpoints. M2 adds the PDF stage: PyMuPDF analysis (digital/scanned/
+> mixed/blank per page), rendering at bounded DPI, measured per-page
+> quality (blur, contrast, noise, skew, ink), and adaptive OpenCV
+> preprocessing with mark preservation (ticks/stars/circles/underlines/
+> highlights survive; colour copies kept). Run it with
+> `scripts/run_m2_pipeline.py <file>` (the M7 worker will call the same
+> `run_pdf_stage`). It does **not** do OCR, layout, or parsing yet —
+> that is M3–M5. The Flutter app and live Supabase are untouched by this
+> repo except for the documented migration steps below.
 
 ## What it does (M1)
 
@@ -37,6 +43,7 @@ Server-side document intelligence engine for **OfficerPath AI**
 ## Stack
 
 Python 3.12 · FastAPI · Pydantic v2 · SQLAlchemy 2.x + Alembic ·
+PyMuPDF · OpenCV (headless) · Pillow · NumPy ·
 Uvicorn · Supabase Python client · structured JSON logging · pytest ·
 ruff · mypy.
 

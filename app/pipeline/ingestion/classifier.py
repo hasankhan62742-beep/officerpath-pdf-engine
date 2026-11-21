@@ -32,9 +32,25 @@ class PageClassification:
     note: str | None = None
 
 
-def classify_pages(report: ValidationReport) -> list[PageClassification]:
-    """Classify every page of a validated file from the byte-level evidence."""
+def classify_pages(report: ValidationReport, data: bytes | None = None) -> list[PageClassification]:
+    """Classify every page of a validated file.
+
+    M2: when the raw PDF bytes are supplied, PyMuPDF evidence decides
+    per page (exact). Without bytes — or if PyMuPDF fails — the M1
+    byte heuristic is the fallback, labelled as such. Image/txt/docx
+    files never needed PyMuPDF (their classification is by file type).
+    """
     ext = report.extension
+    if ext == "pdf" and data is not None:
+        try:
+            from app.pipeline.pdf.analysis import analyze_pdf
+            from app.pipeline.pdf.classifier import classify_pages_from_analysis
+
+            return classify_pages_from_analysis(analyze_pdf(data).pages)
+        except Exception:
+            # Fall through to the byte heuristic below; the M1 note
+            # records that exact classification was unavailable.
+            pass
     if ext in ("jpg", "jpeg", "png", "webp", "tiff", "tif"):
         img = report.image
         return [

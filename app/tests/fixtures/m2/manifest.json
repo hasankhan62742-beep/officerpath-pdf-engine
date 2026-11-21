@@ -1,0 +1,109 @@
+{
+  "dpi": 200,
+  "files": {
+    "clean.pdf": {
+      "kind": "digital",
+      "pages": 2,
+      "marks_page_1": {
+        "underline": {
+          "points": [
+            72,
+            109.0,
+            282,
+            122.0
+          ],
+          "pixels_at_200dpi": [
+            200,
+            303,
+            783,
+            339
+          ]
+        },
+        "highlight": {
+          "points": [
+            80.0,
+            142.0,
+            202.0,
+            158.0
+          ],
+          "pixels_at_200dpi": [
+            222,
+            394,
+            561,
+            439
+          ]
+        },
+        "tick": {
+          "points": [
+            68,
+            254.0,
+            84,
+            267.0
+          ],
+          "pixels_at_200dpi": [
+            189,
+            706,
+            233,
+            742
+          ]
+        },
+        "star": {
+          "points": [
+            68,
+            316.0,
+            84,
+            332.0
+          ],
+          "pixels_at_200dpi": [
+            189,
+            878,
+            233,
+            922
+          ]
+        },
+        "circle": {
+          "points": [
+            80.0,
+            414.0,
+            222.0,
+            430.0
+          ],
+          "pixels_at_200dpi": [
+            222,
+            1150,
+            617,
+            1194
+          ]
+        }
+      }
+    },
+    "scanned.pdf": {
+      "kind": "scanned",
+      "pages": 1,
+      "marks_page_1": "same as clean.pdf"
+    },
+    "mixed.pdf": {
+      "kind": "mixed",
+      "pages": 2
+    },
+    "skewed.pdf": {
+      "kind": "scanned",
+      "pages": 1,
+      "skew_degrees": 5.0
+    },
+    "low_contrast.pdf": {
+      "kind": "digital",
+      "pages": 1,
+      "note": "light-grey text (0.78)"
+    },
+    "noisy.pdf": {
+      "kind": "scanned",
+      "pages": 1,
+      "noise_sigma": 18.0
+    },
+    "blank.pdf": {
+      "kind": "blank",
+      "pages": 1
+    }
+  }
+}

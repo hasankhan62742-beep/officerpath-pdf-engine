@@ -74,6 +74,25 @@ class Settings(BaseSettings):
     # this cap bounds the sniffing pass, not the file itself.
     sniff_max_bytes: int = 8 * 1024 * 1024
 
+    # --- M2: PDF rendering + preprocessing (prompt §6/§7, ADR-004) ---
+    # Render DPI: 200 is the OCR sweet spot for print (300 gains little
+    # and doubles memory). A4 at 200 DPI = 1654x2339 px (~3.9 MP,
+    # ~12 MB RGB); at 300 DPI = ~8.7 MP (~26 MB RGB). Pages are rendered
+    # ONE AT A TIME and buffers are released per page (streaming), so
+    # peak render memory stays far under Render free's 512 MB (ADR-001).
+    # max_render_pixels is the hard guard: a page whose render at the
+    # requested DPI would exceed it is rendered at a lower DPI instead.
+    render_dpi: int = 200
+    render_max_dpi: int = 300
+    max_render_pixels: int = 12_000_000
+    # Preprocessing profile selection: "auto" picks a profile from
+    # measured page quality (see app/pipeline/preprocess/profiles.py).
+    # An explicit profile name forces that profile on every page.
+    preprocess_profile: str = "auto"
+    # Low-quality pages get a second profile run for comparison
+    # (recorded, never silently picked). Disable to save CPU on Render.
+    preprocess_compare_second_profile: bool = True
+
     @property
     def supabase_configured(self) -> bool:
         return bool(self.supabase_url and self.supabase_anon_key)

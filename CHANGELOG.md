@@ -2,6 +2,59 @@
 
 All notable changes to this project. Dates in PKT (Asia/Karachi).
 
+## [0.3.0] — 2026-11-21 — Phase 1 M2: PDF analysis, rendering, adaptive preprocessing
+
+### Added
+- PDF analysis with PyMuPDF 1.26.3 (`app/pipeline/pdf/analysis.py`):
+  per-page text chars/spans, image count + coverage, fonts, rotation,
+  embedded-image DPIs; encrypted files raise (never bypassed).
+- Real per-page classification from PyMuPDF evidence
+  (`app/pipeline/pdf/classifier.py`): digital / scanned / mixed /
+  blank / unreadable / unknown. The M1 byte heuristic remains only as
+  the fallback when no PDF bytes are available. Ingestion now passes
+  the raw bytes, so uploads get exact classification.
+- Bounded-DPI rendering (`app/pipeline/pdf/renderer.py`): one page at
+  a time, colour PNG, DPI lowered automatically to fit
+  `max_render_pixels` (default 12 MP); image files normalised via Pillow.
+- Per-page quality metrics (`app/pipeline/pdf/quality.py`): blur
+  (Laplacian variance), contrast, background-noise sigma (MAD estimate),
+  skew (Hough lines, with an agreement guard), brightness, ink coverage.
+  Bleed-through is recorded as not measured (no reference page).
+- Adaptive preprocessing (`app/pipeline/preprocess/`): six versioned
+  profiles (`m2-v1`) selected from measured quality; operations are
+  deskew, denoise, CLAHE, sharpen, upscale, Otsu/adaptive threshold,
+  border crop. Low-quality pages get a recorded second-profile
+  comparison. Colour copies are kept byte-identical; mark preservation
+  (tick/star/circle/underline) is checked on fixtures and gates the build.
+- PDF pipeline stage (`app/pipeline/pdf/service.py`): analysis ->
+  classification -> rendering -> preprocessing, page by page, with
+  state-machine transitions, per-page failures recorded as
+  `processing_errors` (the document continues), metrics + render paths
+  persisted to `document_pages`. Deliberately NOT wired into the upload
+  request path — the M7 worker calls it; `scripts/run_m2_pipeline.py`
+  runs it from the CLI. `scripts/benchmark_m2.py` prints the measured table.
+- ADR-004 (library evaluation + PyMuPDF AGPLv3 licence flag +
+  pdfplumber deferred to M3 + Render memory measurements).
+- Test fixtures: generated synthetic PDFs (clean/scanned/mixed/skewed/
+  low-contrast/noisy/blank) with a mark manifest, plus PPSC-66 page
+  copies with provenance (`app/tests/fixtures/`).
+
+### Changed
+- `requirements.txt`: PyMuPDF 1.26.3, opencv-python-headless 4.11.0.86,
+  Pillow 13.0.0 (upgraded from 11.3.0 — pip-audit found 59
+  vulnerabilities in 11.3.0, fixed in 13.0.0), NumPy 2.3.2.
+- `StageRecorder` protocol extended with `update_page` + `record_error`
+  (both recorders implement them).
+- `low_quality` profile: upscaling removed after calibration (peak RSS
+  ~457 MB -> ~285–325 MB; Render free is 512 MB). The upscale operation
+  still exists for per-page use, pending M3 OCR evidence.
+
+### Verified
+- 113 tests pass (69 M1 + 44 new), ruff + mypy clean, pip-audit 0
+  vulnerabilities. M2 gate: quality metrics per page on all fixtures +
+  PPSC-66 (see `docs/milestones/MILESTONE_2_REPORT.md`); marks
+  preserved (retention 0.997–1.076) on all six profiles.
+
 ## [0.2.0] — 2026-11-21 — Phase 1 M1: structure, schema, ingestion, storage
 
 ### Added
