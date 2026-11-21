@@ -1,0 +1,48 @@
+{
+ "buckets": [
+  {
+   "bucket": "0.0-0.5",
+   "n": 0,
+   "mean_confidence": 0.0,
+   "accuracy": null,
+   "calibrated_confidence": null
+  },
+  {
+   "bucket": "0.5-0.7",
+   "n": 1,
+   "mean_confidence": 0.6,
+   "accuracy": 1.0,
+   "calibrated_confidence": null
+  },
+  {
+   "bucket": "0.7-0.9",
+   "n": 0,
+   "mean_confidence": 0.0,
+   "accuracy": null,
+   "calibrated_confidence": null
+  },
+  {
+   "bucket": "0.9-1.0",
+   "n": 0,
+   "mean_confidence": 0.0,
+   "accuracy": null,
+   "calibrated_confidence": null
+  },
+  {
+   "bucket": "1.0",
+   "n": 1558,
+   "mean_confidence": 1.0,
+   "accuracy": 1.0,
+   "calibrated_confidence": 1.0
+  }
+ ],
+ "ece_before": 0.0003,
+ "ece_after": 0.0003,
+ "total_pairs": 1559,
+ "notes": [
+  "bucket 0.0-0.5: no samples",
+  "bucket 0.5-0.7: only 1 samples (below 5) — raw confidence kept",
+  "bucket 0.7-0.9: no samples",
+  "bucket 0.9-1.0: no samples"
+ ]
+}

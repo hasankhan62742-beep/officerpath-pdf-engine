@@ -13,6 +13,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 from app.api import health as health_api
+from app.api.v1 import review as review_routes
 from app.api.v1 import routes as v1_routes
 from app.config import settings
 from app.core.errors import (
@@ -105,3 +106,4 @@ async def _unhandled_error_handler(request: Request, exc: Exception):
 
 app.include_router(health_api.router)
 app.include_router(v1_routes.router)
+app.include_router(review_routes.router)

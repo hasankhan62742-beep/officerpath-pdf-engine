@@ -23,6 +23,7 @@
 
 from __future__ import annotations
 
+from collections import deque
 from dataclasses import dataclass, field
 
 from app.pipeline.answers.models import AnswerEvidence, ResolvedAnswer
@@ -142,14 +143,24 @@ def apply_resolution(result: ParseResult, resolution: AnswerResolution) -> int:
     UNKNOWN verdict never clears an existing answer; a changed
     answer always carries its conflicts on the question."""
     changed = 0
-    by_number: dict[int | None, list[ResolvedAnswer]] = {}
+    # Verdicts join to questions by number AND occurrence order.
+    # Question numbers repeat across sections (TestPoint Sr#
+    # restarts per section: 1375 rows, 476 unique numbers), so
+    # "first verdict for number N" gave every Q5 the first
+    # section's answer and clobbered the others' correct M4
+    # answers (measured M6: end-to-end TestPoint answer accuracy
+    # 0.5084 with the old join). The resolution list is in
+    # document order, so the k-th question with number N takes
+    # the k-th verdict for N. Unique numbers behave exactly as
+    # before.
+    by_number: dict[int | None, deque[ResolvedAnswer]] = {}
     for resolved in resolution.resolved:
-        by_number.setdefault(resolved.question_number, []).append(resolved)
+        by_number.setdefault(resolved.question_number, deque()).append(resolved)
     for question in result.questions:
-        candidates = by_number.get(question.number, [])
-        if not candidates:
+        queue = by_number.get(question.number)
+        if not queue:
             continue
-        verdict = candidates[0]
+        verdict = queue.popleft()
         if verdict.correct_index == -1 and verdict.answer_text is None:
             continue  # UNKNOWN never clears an existing answer
         # A "change" is an answer change (index or text). A pure

@@ -50,6 +50,28 @@ def test_m4_inline_answer_survives_with_no_new_evidence() -> None:
     assert resolution.resolved[0].source == "inline"
 
 
+def test_duplicate_numbers_keep_their_own_answers() -> None:
+    # M6 regression: question numbers repeat across sections
+    # (TestPoint Sr# restarts per section: 1375 rows, 476 unique
+    # numbers). The old apply_resolution joined by number and took
+    # the FIRST verdict for that number, so every Q5 got the first
+    # section's answer and the others' correct M4 answers were
+    # clobbered (measured M6 end-to-end TestPoint answer accuracy
+    # 0.5084). Occurrence pairing keeps each question's own answer.
+    result = ParseResult(
+        questions=[
+            _question(5, 1, "answer-line", 1.0),
+            _question(5, 3, "answer-line", 1.0),
+        ]
+    )
+    resolution = resolve_document_answers(result)
+    assert resolution.resolved[0].correct_index == 1
+    assert resolution.resolved[1].correct_index == 3
+    assert apply_resolution(result, resolution) == 0
+    assert result.questions[0].correct_index == 1
+    assert result.questions[1].correct_index == 3
+
+
 def test_trailing_key_overturns_m4_style_answer() -> None:
     # M4 said bold -> (B); the trailing key says (D). Key outranks
     # style, so the answer changes and the conflict is logged.
