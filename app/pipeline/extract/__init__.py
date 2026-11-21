@@ -45,6 +45,7 @@ from app.pipeline.extract.service import (
 )
 from app.pipeline.extract.signals import confidence_for_source
 from app.pipeline.extract.tables import (
+    consume_leftover_option_lines,
     parse_pipe_delimiter_lines,
     parse_sr_delimiter_lines,
     parse_sr_pdfplumber_tables,
@@ -67,6 +68,7 @@ __all__ = [
     "compute_number_duplicates",
     "compute_number_gaps",
     "confidence_for_source",
+    "consume_leftover_option_lines",
     "decode_ocr_number",
     "decode_ocr_option_letter",
     "decide_key_match",

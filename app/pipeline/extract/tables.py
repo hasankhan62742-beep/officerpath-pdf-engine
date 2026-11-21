@@ -387,6 +387,234 @@ def match_pdfplumber_rows_to_lines(rows: list[dict], lines: list[dict]) -> set[i
     return consumed
 
 
+def _nospace(text: str) -> str:
+    """Comparison form with all whitespace removed: the line stream
+    splits words mid-word across lines ("Retrospectiv" / "ely"),
+    so a space-joined accumulation can never equal the cell value.
+    Space-removed comparison is strictly more permissive — the
+    marker-position and anchored-row guards carry the safety."""
+    return "".join(_norm_text(text).split())
+
+
+def _longest_common_substring(a: str, b: str) -> int:
+    """Length of the longest common substring (difflib). Used for
+    the garbage-cell case: pdfplumber merges adjacent cells, so a
+    row's option value can be corrupted ("morning. B. She will be
+    praised...") while still containing the true option text."""
+    import difflib
+
+    if not a or not b:
+        return 0
+    return difflib.SequenceMatcher(None, a, b).find_longest_match().size
+
+
+def _option_run_matches(assembled: str, value: str) -> bool:
+    """Does an assembled option run (marker line + continuations,
+    joined) match a row's option value? True on any of:
+    exact, prefix either way (truncated cell value), substring
+    either way, longest common substring >= 15 chars (merged /
+    garbage cells), or difflib ratio >= 0.6. ``assembled`` and
+    ``value`` are space-removed normalised text."""
+    import difflib
+
+    if not assembled or not value:
+        return False
+    if assembled == value:
+        return True
+    if value.startswith(assembled) or assembled.startswith(value):
+        return True
+    if assembled in value or value in assembled:
+        return True
+    if _longest_common_substring(assembled, value) >= 15:
+        return True
+    return difflib.SequenceMatcher(None, assembled, value).ratio() >= 0.6
+
+
+def _is_promo_line(text: str, stems: list[str]) -> bool:
+    """Page furniture: a line carrying a domain token ("testpoint.pk",
+    "example.com") and no question mark, that is not part of any
+    row's stem. The TestPoint promo footer ("TestPoint.pk <Urdu:
+    search Google for past papers>") is the measured case: 93 such
+    lines, all unconsumed, each seeding a phantom question."""
+    if "?" in text:
+        return False
+    # No trailing \b: the domain is often glued to Urdu text
+    # ("testpoint.pkاپٹس..."), and Urdu letters are \w in Python
+    # re, so "pk" + Urdu has no word boundary after it.
+    if not re.search(r"\b[a-z0-9-]+\.(pk|com|org|net|edu)", text):
+        return False
+    compact = _nospace(text)
+    return not any(compact in _nospace(stem) for stem in stems)
+
+
+def consume_leftover_option_lines(
+    rows: list[dict], lines: list[dict], consumed: set[int]
+) -> set[int]:
+    """Second pass (M5, positional — NOT adjacent): consume
+    option lines that ``match_pdfplumber_rows_to_lines`` left free
+    because the line stream does not follow table row order.
+
+    Measured case (TestPoint p8, Active/Passive Voice): the line
+    stream is COLUMN-ordered — all 5 stems, then all A-options,
+    then all B-options... — while pdfplumber rows are ROW-ordered.
+    The adjacency walk anchors on a stem and finds the NEXT stem,
+    not its options, so every option line stays free and the
+    grid/block passes reassemble them into numberless phantoms
+    ("cheerfully by them every morning", 248 FPs in M4).
+
+    How it works, per page:
+    - Furniture first: promo (domain) lines and "Ans"/"Key" footer
+      lines are consumed — they are never question content.
+    - Only rows whose stem was consumed in pass 1 ("anchored")
+      contribute option values. A row pdfplumber found but pass 1
+      could not anchor keeps ALL its lines free for the grid/block
+      passes — this pass never hides an unparsed question.
+    - Free lines are scanned in stream order. A marker line (or a
+      bare option-start line) opens a RUN: itself plus the following
+      free bare lines, stopping early as soon as the run completes
+      an option value, and never past the next marker line. The
+      run is consumed only when its assembled text fuzzy-matches
+      an option value of an anchored row on the same page — and,
+      for marker lines, at the marker's own position (A=0..D=3).
+      A run that matches nothing is left entirely free.
+    - Garbage cells are handled by the fuzzy match: a merged cell
+      ("morning. B. She will be praised...") still contains the
+      true option as a substring, and a corrupted cell ("eCv.
+      eSrhye will being praised...") still shares a >= 15-char
+      substring with it.
+    """
+    extra: set[int] = set()
+    by_page: dict[int, list[dict]] = {}
+    for entry in lines:
+        by_page.setdefault(entry["page"], []).append(entry)
+    for page, page_lines in by_page.items():
+        page_rows = [r for r in rows if r.get("page") == page]
+        if not page_rows:
+            continue
+        stems = [_norm_text(r.get("text", "")) for r in page_rows]
+        # --- furniture -------------------------------------------
+        for entry in page_lines:
+            if entry["index"] in consumed or entry["index"] in extra:
+                continue
+            text = _norm_text(entry["text"])
+            if _is_promo_line(text, stems):
+                extra.add(entry["index"])
+                continue
+            if text.replace(" ", "") in {"ans", "key", "anskey"}:
+                extra.add(entry["index"])
+        # --- anchored rows only ----------------------------------
+        anchored: list[dict] = []
+        for row in page_rows:
+            question_norm = _norm_text(row.get("text", ""))
+            q_head = question_norm[:40]
+            for entry in page_lines:
+                if entry["index"] not in consumed:
+                    continue
+                text = _norm_text(entry["text"])
+                text = re.sub(r"^\d+\s+", "", text)
+                if q_head in text or (len(text) >= 10 and question_norm.startswith(text)):
+                    anchored.append(row)
+                    break
+        if not anchored:
+            continue
+        # Option values per anchored row, space-removed, by position.
+        # values[position] = list of (row, value_nospace).
+        values: dict[int, list[str]] = {0: [], 1: [], 2: [], 3: []}
+        all_values: list[str] = []
+        for row in anchored:
+            for pos, option in enumerate(row.get("options", [])[:4]):
+                value = _nospace(_option_value(option))
+                if len(value) >= 2:
+                    values[pos].append(value)
+                    all_values.append(value)
+        if not all_values:
+            continue
+        free = [e for e in page_lines if e["index"] not in consumed and e["index"] not in extra]
+        i = 0
+        while i < len(free):
+            entry = free[i]
+            matched = option_line_match(entry["text"])
+            if matched is not None:
+                letter = matched[0].upper()
+                position = ord(letter) - ord("A") if letter in "ABCD" else None
+                candidates = values.get(position, []) if position is not None else []
+                run, end = _assemble_run(free, i, candidates)
+                if position is not None and _run_matches(run, candidates):
+                    extra.update(e["index"] for e in run)
+                    i = end
+                    continue
+                i += 1
+                continue
+            # Bare line: an option start only when it is a >= 6-char
+            # prefix of an anchored row's option value (a lone word
+            # like "every" is too weak — it stays free).
+            text_nospace = _nospace(entry["text"])
+            if len(text_nospace) >= 6 and any(v.startswith(text_nospace) for v in all_values):
+                run, end = _assemble_run(free, i, all_values)
+                if _run_matches(run, all_values):
+                    extra.update(e["index"] for e in run)
+                    i = end
+                    continue
+            i += 1
+    return extra
+
+
+def _assemble_run(free: list[dict], start: int, candidates: list[str]) -> tuple[list[dict], int]:
+    """Assemble an option run: the line at ``start`` plus the
+    following free BARE lines, stopping before the next marker line
+    or key-letter line, and stopping EARLY as soon as the run's
+    text already completes a candidate option value (the value is
+    a prefix of the assembled text — the cell value may be
+    truncated, so the run is done). The early stop is what keeps a
+    stem line that follows an option out of the run: the option
+    completes first, so the stem is never appended. The run is
+    bounded to 8 lines: a real option wraps at most a few lines,
+    and an unbounded run would swallow the next question."""
+    run = [free[start]]
+    j = start + 1
+    while j < len(free) and len(run) < 8:
+        nxt = free[j]
+        if option_line_match(nxt["text"]) is not None:
+            break
+        if TABLE_KEY_LETTER_RE.match(nxt["text"].strip()):
+            break
+        run.append(nxt)
+        j += 1
+        # Stop as soon as the run completes a candidate value
+        # (assembled == value, or the value is a prefix of the
+        # assembled text because the cell value was truncated).
+        # A stem line that follows a complete option is therefore
+        # never appended.
+        if any(_run_text(run).startswith(v) for v in candidates):
+            break
+    return run, j
+
+
+def _run_text(run: list[dict]) -> str:
+    """A run's assembled text, space-removed: the first line's
+    option rest (or whole text for a bare first line) plus the
+    continuation lines."""
+    if not run:
+        return ""
+    first = run[0]
+    matched = option_line_match(first["text"])
+    parts = [_nospace(matched[1])] if matched is not None else [_nospace(first["text"])]
+    for entry in run[1:]:
+        parts.append(_nospace(entry["text"]))
+    return "".join(parts)
+
+
+def _run_matches(run: list[dict], candidates: list[str]) -> bool:
+    """Fuzzy-match a run's assembled text against the candidate
+    option values (see ``_option_run_matches``)."""
+    if not run or not candidates:
+        return False
+    assembled = _run_text(run)
+    if len(assembled) < 2:
+        return False
+    return any(_option_run_matches(assembled, value) for value in candidates)
+
+
 def parse_pipe_delimiter_lines(lines: list[dict]) -> tuple[list[dict], set[int]]:
     """D8 (M4 addition). OCR-text ``|``-delimited rows: a line with
     >= 6 ``|``-separated segments whose first segment is numeric

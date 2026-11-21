@@ -74,9 +74,14 @@ def test_testpoint_pdfplumber_rows_consumed_once():
     # passes re-parse the same rows as phantoms (run 5: 2,545
     # detected vs 1,375 ground truth). Every ground-truth (page, Sr#)
     # pair must appear exactly once as a numbered question with
-    # matching text; the known residual is numberless phantoms from
-    # long-option sections whose line order does not follow the table
-    # (documented in the M4 report), bounded here, not asserted exact.
+    # matching text.
+    #
+    # M5 update: the positional (non-adjacent) consumption pass
+    # (consume_leftover_option_lines) removes the residual
+    # phantoms from column-ordered long-option sections: 1,593
+    # questions / 30 pending (M4, 248 FPs) -> 1,403 questions /
+    # 0 pending (M5, 28 FPs). The per-row assertions below are the
+    # real regression guards; the totals pin the M5 improvement.
     import difflib
 
     data = (PPSC66 / "English_1000_Most_Repeated_MCQs_by_TestPoint.pk.pdf").read_bytes()
@@ -86,8 +91,8 @@ def test_testpoint_pdfplumber_rows_consumed_once():
     for q in result.questions:
         if q.number is not None:
             by_key.setdefault((q.page, q.number), []).append(q)
-    assert len(result.questions) == 1593
-    assert len(result.pending) == 30
+    assert len(result.questions) == 1403
+    assert len(result.pending) == 0
     for row in gt:
         key = (row["page"], row["sr"])
         assert key in by_key, f"ground-truth row missing: {key}"

@@ -1,0 +1,637 @@
+{
+ "milestone": "M5",
+ "date": "2026-11-21",
+ "vm": "VM numbers — NOT Render numbers",
+ "peak_rss_mb": 656.05078125,
+ "testpoint_after": {
+  "seconds": 17.22,
+  "metrics": {
+   "question_detection": {
+    "precision": 0.98,
+    "recall": 1.0,
+    "f1": 0.9899,
+    "tp": 1375,
+    "fp": 28,
+    "fn": 0
+   },
+   "option_extraction": {
+    "precision": 1.0,
+    "recall": 0.9987,
+    "f1": 0.9994,
+    "tp": 5493,
+    "fp": 0,
+    "fn": 7
+   },
+   "answer_correctness": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "tp": 1375,
+    "fp": 0,
+    "fn": 0,
+    "accuracy_on_matched_with_answer": 1.0
+   },
+   "detected_total": 1403,
+   "ground_truth_total": 1375,
+   "matched": 1375
+  },
+  "parse_counts": {
+   "questions": 1403,
+   "pending": 0,
+   "skipped": 0
+  },
+  "m4_baseline": {
+   "question_detection": {
+    "precision": 0.8472,
+    "recall": 1.0,
+    "f1": 0.9173,
+    "tp": 1375,
+    "fp": 248,
+    "fn": 0
+   },
+   "option_extraction": {
+    "precision": 1.0,
+    "recall": 0.9987,
+    "f1": 0.9994,
+    "tp": 5493,
+    "fp": 0,
+    "fn": 7
+   },
+   "answer_correctness": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "tp": 1375,
+    "fp": 0,
+    "fn": 0,
+    "accuracy_on_matched_with_answer": 1.0
+   },
+   "detected_total": 1623,
+   "ground_truth_total": 1375,
+   "matched": 1375
+  }
+ },
+ "detectors": {
+  "trailing_key": {
+   "ground_truth_entries": 100,
+   "ideal_text": {
+    "entries_parsed": 100,
+    "applied": 100,
+    "filtered": 0,
+    "unmatched": [],
+    "decision": {
+     "confidence": "verified",
+     "reason": "paper number + title/year/exam agree",
+     "evidence": [
+      "title agrees",
+      "paper number agrees"
+     ],
+     "may_auto_assign": true
+    },
+    "prf": {
+     "precision": 1.0,
+     "recall": 1.0,
+     "f1": 1.0,
+     "tp": 100,
+     "fp": 0,
+     "fn": 0
+    }
+   }
+  },
+  "inline": {
+   "testpoint_ans_column": {
+    "prf": {
+     "precision": 1.0,
+     "recall": 1.0,
+     "f1": 1.0,
+     "tp": 1375,
+     "fp": 0,
+     "fn": 0
+    },
+    "rows_scored": 1375
+   },
+   "computer_qa_text": {
+    "prf": {
+     "precision": 1.0,
+     "recall": 1.0,
+     "f1": 1.0,
+     "tp": 956,
+     "fp": 0,
+     "fn": 0
+    },
+    "gt_answer_empty_excluded": 4
+   },
+   "monthly_ca": {
+    "Current-Affairs-March-2025-in-PDF.pdf": {
+     "verdict": "unknown",
+     "reason": "no marking mechanism: 100 option spans, 0 bold, 0 coloured, 0 'Correct Answer' lines, 0/4 sampled images carry answer text; explanation matches exactly one option in 12/83 — too noisy to be an answer source.",
+     "option_spans_checked": 100,
+     "bold_option_spans": 0,
+     "coloured_option_spans": 0,
+     "correct_answer_lines": 0,
+     "images_ocr_sampled": 4,
+     "images_with_answer_text": 0,
+     "explanation_matches_exactly_one": 12,
+     "questions": 83
+    },
+    "Current-Affairs-April-2025-in-PDF-Free-Version.pdf": {
+     "verdict": "unknown",
+     "reason": "no marking mechanism: 108 option spans, 0 bold, 0 coloured, 0 'Correct Answer' lines, 0/4 sampled images carry answer text; explanation matches exactly one option in 21/81 — too noisy to be an answer source.",
+     "option_spans_checked": 108,
+     "bold_option_spans": 0,
+     "coloured_option_spans": 0,
+     "correct_answer_lines": 0,
+     "images_ocr_sampled": 4,
+     "images_with_answer_text": 0,
+     "explanation_matches_exactly_one": 21,
+     "questions": 81
+    },
+    "Current-Affairs-June-2025-in-PDF__1.pdf": {
+     "verdict": "unknown",
+     "reason": "no marking mechanism: 120 option spans, 0 bold, 0 coloured, 0 'Correct Answer' lines, 0/4 sampled images carry answer text; explanation matches exactly one option in 8/102 — too noisy to be an answer source.",
+     "option_spans_checked": 120,
+     "bold_option_spans": 0,
+     "coloured_option_spans": 0,
+     "correct_answer_lines": 0,
+     "images_ocr_sampled": 4,
+     "images_with_answer_text": 0,
+     "explanation_matches_exactly_one": 8,
+     "questions": 102
+    },
+    "Current-Affairs-July-2025-in-PDF.pdf": {
+     "verdict": "unknown",
+     "reason": "no marking mechanism: 100 option spans, 0 bold, 0 coloured, 0 'Correct Answer' lines, 0/4 sampled images carry answer text; explanation matches exactly one option in 9/74 — too noisy to be an answer source.",
+     "option_spans_checked": 100,
+     "bold_option_spans": 0,
+     "coloured_option_spans": 0,
+     "correct_answer_lines": 0,
+     "images_ocr_sampled": 4,
+     "images_with_answer_text": 0,
+     "explanation_matches_exactly_one": 9,
+     "questions": 74
+    },
+    "Pakistan-Current-Affairs-August-2025-in-PDF.pdf": {
+     "verdict": "unknown",
+     "reason": "no marking mechanism: 72 option spans, 0 bold, 0 coloured, 0 'Correct Answer' lines, 0/4 sampled images carry answer text; explanation matches exactly one option in 11/58 — too noisy to be an answer source.",
+     "option_spans_checked": 72,
+     "bold_option_spans": 0,
+     "coloured_option_spans": 0,
+     "correct_answer_lines": 0,
+     "images_ocr_sampled": 4,
+     "images_with_answer_text": 0,
+     "explanation_matches_exactly_one": 11,
+     "questions": 58
+    }
+   }
+  },
+  "style_star": {
+   "ideal_gemini_text": {
+    "prf": {
+     "precision": 1.0,
+     "recall": 1.0,
+     "f1": 1.0,
+     "tp": 20,
+     "fp": 0,
+     "fn": 0
+    },
+    "questions": 20,
+    "gt_starred": 20
+   },
+   "live_tesseract_photo": {
+    "stars_preserved_in_live_ocr": 7,
+    "correctly_attributed_tp": 5,
+    "wrongly_attributed_fp": 1,
+    "unattributed": 1,
+    "prf": {
+     "precision": 0.8333,
+     "recall": 0.25,
+     "f1": 0.3846,
+     "tp": 5,
+     "fp": 1,
+     "fn": 15
+    },
+    "gt_starred": 20,
+    "note": "live OCR preserves only 7/20 stars and merges the columns, so most GT stars are simply absent from the text (FN). The detector cannot fix OCR; it reads what OCR gives it."
+   }
+  },
+  "style_bold": {
+   "prf": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "tp": 2,
+    "fp": 0,
+    "fn": 0
+   },
+   "detail": [
+    {
+     "q": 1,
+     "detected": 1,
+     "expected": 1
+    },
+    {
+     "q": 2,
+     "detected": 1,
+     "expected": 1
+    },
+    {
+     "q": 3,
+     "detected": null,
+     "expected": -1
+    }
+   ],
+   "questions": 3,
+   "raw_lines": 15
+  },
+  "visual_handwriting": {
+   "visual_synthetic": {
+    "expected_marks": 4,
+    "detected": 4,
+    "true_positives": 4,
+    "false_positives": 0,
+    "false_negatives": 0,
+    "prf": {
+     "precision": 1.0,
+     "recall": 1.0,
+     "f1": 1.0,
+     "tp": 4,
+     "fp": 0,
+     "fn": 0
+    },
+    "clean_page_false_positives": 0
+   },
+   "visual_photo_negative_control": {
+    "option_boxes": 43,
+    "detections": 1,
+    "by_kind": {
+     "underline": 1
+    },
+    "note": "negative control: the photo has printed stars and one handwritten note, but no pen tick/circle/underline — every detection here is a false positive."
+   },
+   "handwriting_synthetic": {
+    "regions": 1,
+    "marginalia": 1,
+    "answer_mark": 0,
+    "unknown": 0
+   },
+   "handwriting_photo": {
+    "regions": 79,
+    "bottom_regions": 6,
+    "bottom_classifications": {
+     "unknown": 2,
+     "marginalia": 4
+    },
+    "all_classifications": {
+     "marginalia": 19,
+     "unknown": 51,
+     "answer-mark": 9
+    },
+    "note": "the handwritten note ('Dot Matrix printer / impact printer', y 0.88-0.91) must classify as marginalia, never as an answer mark. The 9 answer-mark regions elsewhere are consistent with the printed stars (ink near options Tesseract did not box as words) — UNVERIFIED as handwriting, since no fixture has a verified handwritten answer mark."
+   }
+  }
+ },
+ "ppsc66_live": {
+  "seconds": 119.0,
+  "questions": 14,
+  "pending": 54,
+  "recovered_of_100": 41,
+  "key_detector_live": {
+   "entries_parsed": 93,
+   "applied": 39,
+   "filtered": [
+    {
+     "number": 97,
+     "reason": "token resolves to no option of the matched question"
+    },
+    {
+     "number": 99,
+     "reason": "token resolves to no option of the matched question"
+    },
+    {
+     "number": 1088,
+     "reason": "outside paper range 1..99 (OCR noise)"
+    },
+    {
+     "number": 1258,
+     "reason": "outside paper range 1..99 (OCR noise)"
+    },
+    {
+     "number": 1335,
+     "reason": "outside paper range 1..99 (OCR noise)"
+    },
+    {
+     "number": 2021,
+     "reason": "outside paper range 1..99 (OCR noise)"
+    }
+   ],
+   "unmatched": [
+    2,
+    5,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    48,
+    50,
+    53,
+    55,
+    59,
+    60,
+    62,
+    63,
+    64,
+    65,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    86,
+    87,
+    88,
+    89,
+    90,
+    91,
+    92,
+    93,
+    94,
+    95,
+    96,
+    98
+   ],
+   "decision": {
+    "confidence": "verified",
+    "reason": "paper number + title/year/exam agree",
+    "evidence": [
+     "title agrees",
+     "paper number agrees"
+    ],
+    "may_auto_assign": true
+   },
+   "prf_vs_gt_key": {
+    "precision": 0.9744,
+    "recall": 0.38,
+    "f1": 0.5468,
+    "tp": 38,
+    "fp": 1,
+    "fn": 62
+   }
+  },
+  "m5_resolution": {
+   "answered_questions_after": 14,
+   "changed_by_resolution": 0,
+   "conflicts": 0,
+   "unknown": 26
+  }
+ },
+ "ppsc66_psm_variants": {
+  "psm3-raw": {
+   "recovered_of_100": 34,
+   "questions": 23,
+   "pending": 43,
+   "key_entries_applied": 23,
+   "options_complete_4_of_4": 23,
+   "unmatched_key_entries": [
+    "Paper 66 key entry 19 — token 'tn Warlike' resolves to no option",
+    "Paper 66 key entry 2 — no matching question",
+    "Paper 66 key entry 5 — no matching question",
+    "Paper 66 key entry 7 — no matching question",
+    "Paper 66 key entry 8 — no matching question",
+    "Paper 66 key entry 9 — no matching question",
+    "Paper 66 key entry 10 — no matching question",
+    "Paper 66 key entry 11 — no matching question",
+    "Paper 66 key entry 12 — no matching question",
+    "Paper 66 key entry 29 — no matching question",
+    "Paper 66 key entry 30 — no matching question",
+    "Paper 66 key entry 31 — no matching question",
+    "Paper 66 key entry 32 — no matching question",
+    "Paper 66 key entry 33 — no matching question",
+    "Paper 66 key entry 34 — no matching question",
+    "Paper 66 key entry 35 — no matching question",
+    "Paper 66 key entry 36 — no matching question",
+    "Paper 66 key entry 37 — no matching question",
+    "Paper 66 key entry 38 — no matching question",
+    "Paper 66 key entry 39 — no matching question",
+    "Paper 66 key entry 40 — no matching question",
+    "Paper 66 key entry 41 — no matching question",
+    "Paper 66 key entry 48 — no matching question",
+    "Paper 66 key entry 49 — no matching question",
+    "Paper 66 key entry 50 — no matching question",
+    "Paper 66 key entry 51 — no matching question",
+    "Paper 66 key entry 52 — no matching question",
+    "Paper 66 key entry 53 — no matching question",
+    "Paper 66 key entry 54 — no matching question",
+    "Paper 66 key entry 55 — no matching question",
+    "Paper 66 key entry 56 — no matching question",
+    "Paper 66 key entry 57 — no matching question",
+    "Paper 66 key entry 58 — no matching question",
+    "Paper 66 key entry 59 — no matching question",
+    "Paper 66 key entry 60 — no matching question",
+    "Paper 66 key entry 61 — no matching question",
+    "Paper 66 key entry 62 — no matching question",
+    "Paper 66 key entry 63 — no matching question",
+    "Paper 66 key entry 64 — no matching question",
+    "Paper 66 key entry 65 — no matching question",
+    "Paper 66 key entry 67 — no matching question",
+    "Paper 66 key entry 68 — no matching question",
+    "Paper 66 key entry 69 — no matching question",
+    "Paper 66 key entry 70 — no matching question",
+    "Paper 66 key entry 71 — no matching question",
+    "Paper 66 key entry 72 — no matching question",
+    "Paper 66 key entry 73 — no matching question",
+    "Paper 66 key entry 74 — no matching question",
+    "Paper 66 key entry 75 — no matching question",
+    "Paper 66 key entry 76 — no matching question",
+    "Paper 66 key entry 77 — no matching question",
+    "Paper 66 key entry 78 — no matching question",
+    "Paper 66 key entry 86 — no matching question",
+    "Paper 66 key entry 87 — no matching question",
+    "Paper 66 key entry 88 — no matching question",
+    "Paper 66 key entry 89 — no matching question"
+   ],
+   "total_seconds": 113.4
+  },
+  "psm3-layout": {
+   "recovered_of_100": 41,
+   "questions": 14,
+   "pending": 54,
+   "key_entries_applied": 13,
+   "options_complete_4_of_4": 14,
+   "unmatched_key_entries": [
+    "Paper 66 key entry 21 — no matching question",
+    "Paper 66 key entry 22 — no matching question",
+    "Paper 66 key entry 23 — no matching question",
+    "Paper 66 key entry 24 — no matching question",
+    "Paper 66 key entry 29 — no matching question",
+    "Paper 66 key entry 30 — no matching question",
+    "Paper 66 key entry 31 — no matching question"
+   ],
+   "total_seconds": 121.0
+  },
+  "psm4-raw": {
+   "recovered_of_100": 15,
+   "questions": 8,
+   "pending": 29,
+   "key_entries_applied": 8,
+   "options_complete_4_of_4": 8,
+   "unmatched_key_entries": [
+    "Paper 66 key entry 19 — token 'tn Warlike' resolves to no option",
+    "Paper 66 key entry 1 — no matching question",
+    "Paper 66 key entry 2 — no matching question",
+    "Paper 66 key entry 3 — no matching question",
+    "Paper 66 key entry 4 — no matching question",
+    "Paper 66 key entry 5 — no matching question",
+    "Paper 66 key entry 6 — no matching question",
+    "Paper 66 key entry 7 — no matching question",
+    "Paper 66 key entry 8 — no matching question",
+    "Paper 66 key entry 9 — no matching question",
+    "Paper 66 key entry 10 — no matching question",
+    "Paper 66 key entry 11 — no matching question",
+    "Paper 66 key entry 12 — no matching question",
+    "Paper 66 key entry 13 — no matching question",
+    "Paper 66 key entry 14 — no matching question",
+    "Paper 66 key entry 15 — no matching question",
+    "Paper 66 key entry 16 — no matching question",
+    "Paper 66 key entry 17 — no matching question",
+    "Paper 66 key entry 20 — no matching question",
+    "Paper 66 key entry 22 — no matching question",
+    "Paper 66 key entry 23 — no matching question",
+    "Paper 66 key entry 25 — no matching question",
+    "Paper 66 key entry 26 — no matching question",
+    "Paper 66 key entry 28 — no matching question",
+    "Paper 66 key entry 29 — no matching question",
+    "Paper 66 key entry 30 — no matching question",
+    "Paper 66 key entry 31 — no matching question",
+    "Paper 66 key entry 32 — no matching question",
+    "Paper 66 key entry 33 — no matching question",
+    "Paper 66 key entry 34 — no matching question",
+    "Paper 66 key entry 35 — no matching question",
+    "Paper 66 key entry 36 — no matching question",
+    "Paper 66 key entry 37 — no matching question",
+    "Paper 66 key entry 38 — no matching question",
+    "Paper 66 key entry 39 — no matching question",
+    "Paper 66 key entry 40 — no matching question",
+    "Paper 66 key entry 41 — no matching question",
+    "Paper 66 key entry 42 — no matching question",
+    "Paper 66 key entry 43 — no matching question",
+    "Paper 66 key entry 45 — no matching question",
+    "Paper 66 key entry 46 — no matching question",
+    "Paper 66 key entry 47 — no matching question",
+    "Paper 66 key entry 48 — no matching question",
+    "Paper 66 key entry 49 — no matching question",
+    "Paper 66 key entry 50 — no matching question",
+    "Paper 66 key entry 51 — no matching question",
+    "Paper 66 key entry 52 — no matching question",
+    "Paper 66 key entry 53 — no matching question",
+    "Paper 66 key entry 54 — no matching question",
+    "Paper 66 key entry 55 — no matching question",
+    "Paper 66 key entry 56 — no matching question",
+    "Paper 66 key entry 59 — no matching question",
+    "Paper 66 key entry 62 — no matching question",
+    "Paper 66 key entry 63 — no matching question",
+    "Paper 66 key entry 64 — no matching question",
+    "Paper 66 key entry 65 — no matching question",
+    "Paper 66 key entry 67 — no matching question",
+    "Paper 66 key entry 68 — no matching question",
+    "Paper 66 key entry 69 — no matching question",
+    "Paper 66 key entry 70 — no matching question",
+    "Paper 66 key entry 71 — no matching question",
+    "Paper 66 key entry 72 — no matching question",
+    "Paper 66 key entry 73 — no matching question",
+    "Paper 66 key entry 74 — no matching question",
+    "Paper 66 key entry 75 — no matching question",
+    "Paper 66 key entry 76 — no matching question",
+    "Paper 66 key entry 77 — no matching question",
+    "Paper 66 key entry 78 — no matching question"
+   ],
+   "total_seconds": 180.1
+  }
+ },
+ "ppsc66_psm_page_experiment": {
+  "p3_psm3": {
+   "recovered_of_expected": 16,
+   "cer_vs_gemini": 0.0623,
+   "seconds": 14.61
+  },
+  "p3_psm6": {
+   "recovered_of_expected": 0,
+   "cer_vs_gemini": 0.7408,
+   "seconds": 16.71
+  },
+  "p3_psm4": {
+   "recovered_of_expected": 7,
+   "cer_vs_gemini": 0.7006,
+   "seconds": 14.52
+  },
+  "p3_psm11": {
+   "recovered_of_expected": 9,
+   "cer_vs_gemini": 0.7145,
+   "seconds": 14.08
+  },
+  "p3_preprocessed-default-psm3": {
+   "recovered_of_expected": 16,
+   "cer_vs_gemini": 0.0853,
+   "seconds": 17.84
+  },
+  "p3_psm3-300dpi": {
+   "recovered_of_expected": 9,
+   "cer_vs_gemini": 0.0938,
+   "seconds": 17.08
+  },
+  "p3_gutter-crop-psm6": {
+   "recovered_of_expected": 7,
+   "cer_vs_gemini": null,
+   "seconds": 2.89
+  },
+  "p5_psm3": {
+   "recovered_of_expected": 4,
+   "cer_vs_gemini": 0.7149,
+   "seconds": 17.4
+  },
+  "p5_psm6": {
+   "recovered_of_expected": 1,
+   "cer_vs_gemini": 0.6917,
+   "seconds": 24.94
+  },
+  "p5_psm4": {
+   "recovered_of_expected": 9,
+   "cer_vs_gemini": 0.1397,
+   "seconds": 17.9
+  },
+  "p5_psm11": {
+   "recovered_of_expected": 3,
+   "cer_vs_gemini": 0.7069,
+   "seconds": 21.79
+  },
+  "p5_preprocessed-default-psm3": {
+   "recovered_of_expected": 3,
+   "cer_vs_gemini": 0.2018,
+   "seconds": 29.11
+  },
+  "p5_psm3-300dpi": {
+   "recovered_of_expected": 3,
+   "cer_vs_gemini": 0.7164,
+   "seconds": 21.9
+  },
+  "p5_gutter-crop-psm6": {
+   "recovered_of_expected": 4,
+   "cer_vs_gemini": null,
+   "seconds": 3.83
+  }
+ }
+}

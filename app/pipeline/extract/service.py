@@ -73,6 +73,7 @@ from app.pipeline.extract.signals import (
     verification_status,
 )
 from app.pipeline.extract.tables import (
+    consume_leftover_option_lines,
     match_pdfplumber_rows_to_lines,
     parse_pipe_delimiter_lines,
     parse_sr_delimiter_lines,
@@ -497,6 +498,13 @@ def extract_document(
         # grid/block passes re-parse the same rows as phantoms
         # (TestPoint in M4: 580 grid + 364 block duplicates).
         consumed |= match_pdfplumber_rows_to_lines(pdf_rows, question_lines)
+        # M5: positional (non-adjacent) consumption — in
+        # column-ordered sections the line stream does not follow
+        # row order, so the adjacency walk leaves option lines
+        # free (TestPoint M4 residual: 248 FPs). Only anchored
+        # rows contribute option values; unanchored rows keep
+        # their lines for the grid/block passes.
+        consumed |= consume_leftover_option_lines(pdf_rows, question_lines, consumed)
     pipe_questions, pipe_consumed = parse_pipe_delimiter_lines(question_lines)
     table_questions.extend(pipe_questions)
     consumed |= pipe_consumed
