@@ -1,0 +1,384 @@
+{
+  "source": "ppsc66/Current-Affairs-April-2025-in-PDF-Free-Version.pdf",
+  "extraction": "PyMuPDF span dict; question = bold spans, options = 'A. '...'D. ' spans, explanation = following plain spans.",
+  "answer_mechanism": "UNKNOWN — verified span-by-span: no option span is bold or coloured and no 'Correct Answer' line exists; the explanation is prose that may or may not contain the answer text, so no answer is recorded. 'explanation_option_matches' is a noisy statistic only.",
+  "count": 27,
+  "option_spans_checked": 108,
+  "bold_or_coloured_option_spans": 0,
+  "explanation_option_match_histogram": {
+    "0": 5,
+    "1": 21,
+    ">1": 1
+  },
+  "questions": [
+    {
+      "index": 1,
+      "page": 5,
+      "question": "In April 2025, Pakistan’s IT exports reached a record:",
+      "a": "$3 billion",
+      "b": "$4 billion",
+      "c": "$5.2 billion",
+      "d": "$6 billion",
+      "explanation": "In April 2025, Pakistan’s IT exports reached a record US$317 million, marking a 2% year-on- year increase. This figure was above the 12-month average of $314 million. The growth was fueled by factors like an expanded client base in the GCC region and favorable SBP policies. April 2025 saw Pakistan’s IT exports reach a new high of $317 million.",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 2,
+      "page": 6,
+      "question": "Which city recorded the highest temperature in April 2025?",
+      "a": "Lahore",
+      "b": "Karachi",
+      "c": "Sibi",
+      "d": "Multan",
+      "explanation": "Sibi, located in Balochistan, often records the highest temperatures in Pakistan due to its arid desert climate. In April 2025, Sibi hit a scorching 48°C, raising concerns over heatwaves, water scarcity, and climate resilience strategies in Pakistan’s vulnerable regions.",
+      "answer": null,
+      "explanation_option_matches": [
+        "C"
+      ]
+    },
+    {
+      "index": 3,
+      "page": 7,
+      "question": "2025?",
+      "a": "Earthquake",
+      "b": "Fuel Tanker Explosion",
+      "c": "Road Accident",
+      "d": "Terrorist Attack",
+      "explanation": "A catastrophic fuel tanker explosion in Nushki killed 28 people and injured dozens. Initial reports suggested negligence in safety protocols. The incident highlighted Balochistan’s infrastructural challenges and the urgent need for stricter transport safety regulations.",
+      "answer": null,
+      "explanation_option_matches": [
+        "B"
+      ]
+    },
+    {
+      "index": 4,
+      "page": 8,
+      "question": "on April 27, 2025?",
+      "a": "30",
+      "b": "40",
+      "c": "54",
+      "d": "60",
+      "explanation": "A major counter-terrorism operation in North Waziristan led to the elimination of 54 TTP militants. The successful strike was part of ongoing efforts to dismantle terrorist networks in Pakistan’s tribal belt.",
+      "answer": null,
+      "explanation_option_matches": [
+        "C"
+      ]
+    },
+    {
+      "index": 5,
+      "page": 9,
+      "question": "Which major flood prevention project was inaugurated in April 2025?",
+      "a": "Indus Flood Barrier",
+      "b": "Sindh Flood Channel",
+      "c": "Ravi Urban Flood Mitigation Project",
+      "d": "Chenab Flood Control Plan",
+      "explanation": "The Ravi Urban Flood Mitigation Project was designed to protect Lahore from frequent flash floods by improving drainage systems, creating flood storage zones, and enhancing early warning mechanisms.",
+      "answer": null,
+      "explanation_option_matches": [
+        "C"
+      ]
+    },
+    {
+      "index": 6,
+      "page": 10,
+      "question": "United Nations in New York?",
+      "a": "Munir Akram",
+      "b": "Asim Iftikhar Ahmad",
+      "c": "Dr. Shahzad Waseem",
+      "d": "Mohammad Sadiq",
+      "explanation": "Asim Iftikhar Ahmad, a seasoned diplomat and former Foreign Office spokesperson, was appointed as Pakistan’s UN envoy. His appointment was strategic, focusing on presenting Pakistan’s stance on Kashmir, Palestine, and global climate change forums.",
+      "answer": null,
+      "explanation_option_matches": [
+        "B"
+      ]
+    },
+    {
+      "index": 7,
+      "page": 11,
+      "question": "Pakistan suspended visas for which country’s nationals in April 2025?",
+      "a": "Afghanistan",
+      "b": "Iran",
+      "c": "India",
+      "d": "Bangladesh",
+      "explanation": "Amid escalating border tensions and diplomatic standoffs, Pakistan temporarily suspended visa issuance for Indian nationals. The move came after provocative statements by Indian officials regarding Kashmir and alleged cross-border violations.",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 8,
+      "page": 12,
+      "question": "Which scheme was launched by Sindh for women in April 2025?",
+      "a": "Women Employment Program",
+      "b": "Pink Electric Scooty Scheme",
+      "c": "Safe Transport for Women",
+      "d": "Women Entrepreneurship Fund",
+      "explanation": "Yes, a defense cooperation deal was signed between Pakistan and Saudi Arabia in April 2025. According to the Ministry of External Affairs, the agreement was part of the Strategic Partnership Council, a high-level council to steer relations between the two countries. The agreement was signed during the Prime Minister’s visit to Saudi Arabia on April 22nd and 23rd.",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 9,
+      "page": 13,
+      "question": "inaugurated in April 2025 in:",
+      "a": "Lahore",
+      "b": "Faisalabad",
+      "c": "Port Qasim, Karachi",
+      "d": "Sialkot",
+      "explanation": "The EV manufacturing plant at Port Qasim, Karachi, marked a significant milestone toward green mobility. The plant, a joint venture with Chinese firms, is expected to produce electric cars and buses, reducing reliance on fuel imports and combating urban pollution.",
+      "answer": null,
+      "explanation_option_matches": [
+        "C"
+      ]
+    },
+    {
+      "index": 10,
+      "page": 14,
+      "question": "2025?",
+      "a": "Punjab University",
+      "b": "Karachi University",
+      "c": "NUST",
+      "d": "Quaid-e-Azam University",
+      "explanation": "NUST was ranked in the QS World University Rankings Top 500, recognized for its research output, international collaborations, and focus on STEM education. This achievement boosted Pakistan’s academic reputation globally.",
+      "answer": null,
+      "explanation_option_matches": [
+        "C"
+      ]
+    },
+    {
+      "index": 11,
+      "page": 15,
+      "question": "The Babarlai protest in April 2025 was against which project?",
+      "a": "Kalabagh Dam",
+      "b": "Thar Coal Project",
+      "c": "Cholistan Canal Project",
+      "d": "Gwadar Port Expansion",
+      "explanation": "Residents of Babarlai protested against the Cholistan Canal Project, arguing that it would divert water resources from Sindh to Punjab. Environmental activists also raised concerns over desert ecosystem damage. The issue reignited debates over inter-provincial water distribution.",
+      "answer": null,
+      "explanation_option_matches": [
+        "C"
+      ]
+    },
+    {
+      "index": 12,
+      "page": 16,
+      "question": "The KP Mines & Minerals Bill 2025 faced criticism over what issue?",
+      "a": "Foreign Investment Rules",
+      "b": "Provincial Autonomy",
+      "c": "Environmental Impact",
+      "d": "Tax Evasion",
+      "explanation": "The bill sparked controversy as it was perceived to centralize mineral resource control, limiting KP’s provincial rights. Political leaders and civil society accused the federal government of undermining the spirit of the 18th Amendment, which grants provinces resource ownership.",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 13,
+      "page": 17,
+      "question": "Where was the opening ceremony of PSL 2025 held?",
+      "a": "National Stadium Karachi",
+      "b": "Rawalpindi Cricket Stadium",
+      "c": "Gaddafi Stadium Lahore",
+      "d": "Multan Cricket Stadium",
+      "explanation": "PSL 2025’s opening ceremony was held in Rawalpindi, a city with a rapidly growing cricket fan base. The choice aimed to promote sports in northern Pakistan and expand PSL’s outreach beyond traditional venues like Lahore and Karachi.",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 14,
+      "page": 19,
+      "question": "Response Fund” in April 2025?",
+      "a": "United Nations",
+      "b": "World Bank",
+      "c": "International Monetary Fund",
+      "d": "World Health Organization",
+      "explanation": "In April 2025, the World Bank established a $25 billion fund to address global water scarcity, focusing on infrastructure, technology, and policy support for water-stressed nations.",
+      "answer": null,
+      "explanation_option_matches": [
+        "B"
+      ]
+    },
+    {
+      "index": 15,
+      "page": 20,
+      "question": "(SVD) outbreak in April 2025?",
+      "a": "Botswana",
+      "b": "Ethiopia",
+      "c": "Kenya",
+      "d": "Uganda",
+      "explanation": "Uganda recently declared the end of the Ebola Sudan Virus Disease (SVD) outbreak after completing a 42-day mandatory countdown without new confirmed cases. The declaration came less than three months after the virus was detected in Kampala, the capital. The World Health Organisation (WHO) guidelines require 42 days without new cases for a country to be declared Ebola-free. Uganda first declared the SVD outbreak on January 30, following the death of a nurse.",
+      "answer": null,
+      "explanation_option_matches": [
+        "D"
+      ]
+    },
+    {
+      "index": 16,
+      "page": 21,
+      "question": "Which country hosted the Dubai AI Festival from April 23 to 25, 2025?",
+      "a": "Saudi Arabia",
+      "b": "United Arab Emirates",
+      "c": "Qatar",
+      "d": "Bahrain",
+      "explanation": "The United Arab Emirates hosted the Dubai AI Festival, bringing together global leaders to discuss the transformative power of artificial intelligence across industries.",
+      "answer": null,
+      "explanation_option_matches": [
+        "B"
+      ]
+    },
+    {
+      "index": 17,
+      "page": 22,
+      "question": "broadband network?",
+      "a": "Venezuela",
+      "b": "Russia",
+      "c": "Iran",
+      "d": "China",
+      "explanation": "China has officially launched the world’s first commercial 10 Gigabit per second (10G) broadband network, setting a new global standard for high-speed wired internet. This new 10G broadband offers speeds over 10 times faster than current fiber-optic networks used around the world. It allows ultra-fast downloads and uploads, very low latency, and high bandwidth capacity. It supports advanced applications like 8K video streaming, cloud gaming, smart cities powered by Artificial Intelligence (AI), and virtual reality.",
+      "answer": null,
+      "explanation_option_matches": [
+        "D"
+      ]
+    },
+    {
+      "index": 18,
+      "page": 23,
+      "question": "24, 2025?",
+      "a": "World Health Day",
+      "b": "Global Vaccination Drive",
+      "c": "World Immunization Week",
+      "d": "International Health Summit",
+      "explanation": "The World Health Organization initiated World Immunization Week on April 24, 2025, under the theme “Immunization for All is Humanly Possible,” emphasizing universal vaccine access.",
+      "answer": null,
+      "explanation_option_matches": [
+        "C"
+      ]
+    },
+    {
+      "index": 19,
+      "page": 24,
+      "question": "following the Pahalgam attack?",
+      "a": "21 April 2025",
+      "b": "23 April 2025",
+      "c": "25 April 2025",
+      "d": "None of these",
+      "explanation": "The Indus Water Treaty (IWT) was a water-distribution treaty between India and Pakistan, arranged and negotiated by the World Bank, to use the water available in the Indus River and its tributaries. It was signed in Karachi on 19 September 1960 by Indian prime minister Jawaharlal Nehru and Pakistani president Ayub Khan. On 23 April 2025, following the Pahalgam terrorist attack, the Government of India suspended the treaty, citing national security concerns and alleging Pakistan’s support of state-sponsored terrorism.",
+      "answer": null,
+      "explanation_option_matches": [
+        "B"
+      ]
+    },
+    {
+      "index": 20,
+      "page": 25,
+      "question": "celebrated on April 23?",
+      "a": "World Literacy Day",
+      "b": "International Authors’ Day",
+      "c": "World Book and Copyright Day",
+      "d": "Global Reading Day",
+      "explanation": "UNESCO designates April 23 as World Book and Copyright Day to promote reading, publishing, and the protection of intellectual property.",
+      "answer": null,
+      "explanation_option_matches": [
+        "C"
+      ]
+    },
+    {
+      "index": 21,
+      "page": 26,
+      "question": "On which date did the 2025 Pahalgam attack take place?",
+      "a": "15 March 2025",
+      "b": "10 April 2025",
+      "c": "22 April 2025",
+      "d": "5 May 2025",
+      "explanation": "The tragic attack took place on 22 April 2025, when five armed terrorists ambushed tourists near Pahalgam, resulting in heavy civilian casualties.",
+      "answer": null,
+      "explanation_option_matches": [
+        "C"
+      ]
+    },
+    {
+      "index": 22,
+      "page": 27,
+      "question": "energy and environmental protection?",
+      "a": "World Environment Day",
+      "b": "Earth Day",
+      "c": "World Sustainability Day",
+      "d": "Global Green Day",
+      "explanation": "Earth Day 2025, observed on April 22, emphasized the theme “Our Power, Our Planet,” advocating for a transition to renewable energy sources.",
+      "answer": null,
+      "explanation_option_matches": [
+        "B"
+      ]
+    },
+    {
+      "index": 23,
+      "page": 28,
+      "question": "theme of which international Day?",
+      "a": "World Garden Day",
+      "b": "World Art Day",
+      "c": "World Environment Day",
+      "d": "None of these",
+      "explanation": "World Art Day is celebrated every year on April 15 to honour the power of art, its role in cultural diversity, and the contributions of artists worldwide. The date marks the birth anniversary of Leonardo da Vinci, a symbol of creativity, freedom, and peace. World Art Day was first started in 2012 by the International Association of Art (IAA) during a conference in Guadalajara, Mexico.",
+      "answer": null,
+      "explanation_option_matches": [
+        "B"
+      ]
+    },
+    {
+      "index": 24,
+      "page": 29,
+      "question": "Which global event commenced in Osaka, Japan, on April 13, 2025?",
+      "a": "G20 Summit",
+      "b": "Expo 2025",
+      "c": "Tokyo Olympics",
+      "d": "World Economic Forum",
+      "explanation": "Expo 2025, themed “Designing Future Society for Our Lives,” began on April 13, 2025, in Osaka, Japan, aiming to showcase innovations in health, technology, and sustainability.",
+      "answer": null,
+      "explanation_option_matches": [
+        "B"
+      ]
+    },
+    {
+      "index": 25,
+      "page": 30,
+      "question": "Technologies’ Index?",
+      "a": "United States",
+      "b": "China",
+      "c": "Germany",
+      "d": "India",
+      "explanation": "The United States consistently ranks at the top of the UNCTAD Frontier Technologies Index due to its advanced ICT infrastructure, strong R&D base, high innovation, and financial capabilities.",
+      "answer": null,
+      "explanation_option_matches": [
+        "A"
+      ]
+    },
+    {
+      "index": 26,
+      "page": 31,
+      "question": "Antimony, that was recently seen in news?",
+      "a": "China",
+      "b": "Uzbekistan",
+      "c": "Ukraine",
+      "d": "Russia",
+      "explanation": "Pakistan has reportedly found a huge deposit of antimony in Balochistan, a region troubled by conflict. Antimony is a chemical element with the symbol Sb and atomic number 51, and it is a metalloid that is solid at room temperature. It has poor conductivity of heat and electricity and comes in forms like ingots, granules, or cast pieces. Its main ore is stibnite, and it is also found as a byproduct in lead-zinc- silver mines. China is the world’s largest producer of the chemical element antimony. China produces 88% of the world’s antimony, followed by Bolivia, Russia, and Tajikistan. It is used in electronics, batteries, bullets, flame-retardants, and glassware.",
+      "answer": null,
+      "explanation_option_matches": [
+        "A",
+        "D"
+      ]
+    },
+    {
+      "index": 27,
+      "page": 32,
+      "question": "The theme for the World Health Day 2025 is:",
+      "a": "New Start, New Health",
+      "b": "New Beginnings, Bright Futures",
+      "c": "Healthy Beginnings, Hopeful Futures",
+      "d": "None of these",
+      "explanation": "World Health Day is observed every year on April 7th to promote global health awareness and mark the founding of the World Health Organization (WHO), a specialized agency of the United Nations (UN), established in 1950. The theme for World Health Day 2025 is “Healthy Beginnings, Hopeful Futures”, focusing on improving health from the start of life.",
+      "answer": null,
+      "explanation_option_matches": [
+        "C"
+      ]
+    }
+  ]
+}

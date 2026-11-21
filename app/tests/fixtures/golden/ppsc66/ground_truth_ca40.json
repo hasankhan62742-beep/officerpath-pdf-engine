@@ -1,0 +1,410 @@
+{
+  "source": "ppsc66/ppsc-current-affairs-40-mcqs.pdf",
+  "extraction": "PyMuPDF text layer; answer from the bold 'Correct Answer: X) ...' line after each question's four options.",
+  "count": 40,
+  "number_min": 1,
+  "number_max": 40,
+  "answer_text_mismatches": [],
+  "questions": [
+    {
+      "number": 1,
+      "question": "Who is the current President of Pakistan?",
+      "a": "Arif Alvi",
+      "b": "Asif Ali Zardari",
+      "c": "Mamnoon Hussain",
+      "d": "Shehbaz Sharif",
+      "answer": "B",
+      "answer_text": "Asif Ali Zardari"
+    },
+    {
+      "number": 2,
+      "question": "Who is the current Prime Minister of Pakistan?",
+      "a": "Imran Khan",
+      "b": "Nawaz Sharif",
+      "c": "Shehbaz Sharif",
+      "d": "Bilawal Bhutto Zardari",
+      "answer": "C",
+      "answer_text": "Shehbaz Sharif"
+    },
+    {
+      "number": 3,
+      "question": "Who is the current Finance Minister of Pakistan?",
+      "a": "Ishaq Dar",
+      "b": "Muhammad Aurangzeb",
+      "c": "Miftah Ismail",
+      "d": "Shaukat Tarin",
+      "answer": "B",
+      "answer_text": "Muhammad Aurangzeb"
+    },
+    {
+      "number": 4,
+      "question": "Who is the current Foreign Minister of Pakistan?",
+      "a": "Khawaja Asif",
+      "b": "Bilawal Bhutto Zardari",
+      "c": "Ishaq Dar",
+      "d": "Ahsan Iqbal",
+      "answer": "C",
+      "answer_text": "Ishaq Dar"
+    },
+    {
+      "number": 5,
+      "question": "Which country is hosting COP31 in 2026?",
+      "a": "Brazil",
+      "b": "UAE",
+      "c": "Türkiye",
+      "d": "France",
+      "answer": "C",
+      "answer_text": "Türkiye"
+    },
+    {
+      "number": 6,
+      "question": "In which city will COP31 be held?",
+      "a": "Istanbul",
+      "b": "Antalya",
+      "c": "Ankara",
+      "d": "Izmir",
+      "answer": "B",
+      "answer_text": "Antalya"
+    },
+    {
+      "number": 7,
+      "question": "What does CPEC stand for?",
+      "a": "China-Pakistan Economic Corridor",
+      "b": "China-Pacific Economic Council",
+      "c": "Central Pakistan Economic Corridor",
+      "d": "China-Pakistan Energy Cooperation",
+      "answer": "A",
+      "answer_text": "China-Pakistan Economic Corridor"
+    },
+    {
+      "number": 8,
+      "question": "Which country is Pakistan's major partner in CPEC?",
+      "a": "Russia",
+      "b": "China",
+      "c": "Turkey",
+      "d": "Saudi Arabia",
+      "answer": "B",
+      "answer_text": "China"
+    },
+    {
+      "number": 9,
+      "question": "What is the name of Pakistan's central bank?",
+      "a": "National Bank of Pakistan",
+      "b": "Bank of Punjab",
+      "c": "State Bank of Pakistan",
+      "d": "Federal Reserve Bank",
+      "answer": "C",
+      "answer_text": "State Bank of Pakistan"
+    },
+    {
+      "number": 10,
+      "question": "Which city is the headquarters of the State Bank of Pakistan?",
+      "a": "Islamabad",
+      "b": "Lahore",
+      "c": "Karachi",
+      "d": "Peshawar",
+      "answer": "C",
+      "answer_text": "Karachi"
+    },
+    {
+      "number": 11,
+      "question": "Which countries are jointly hosting the 2026 FIFA World Cup?",
+      "a": "USA, Canada and Mexico",
+      "b": "Brazil, Argentina and Chile",
+      "c": "Spain, Portugal and Morocco",
+      "d": "Germany, France and Italy",
+      "answer": "A",
+      "answer_text": "USA, Canada and Mexico"
+    },
+    {
+      "number": 12,
+      "question": "How many teams are participating in the 2026 FIFA World Cup?",
+      "a": "32",
+      "b": "36",
+      "c": "40",
+      "d": "48",
+      "answer": "D",
+      "answer_text": "48"
+    },
+    {
+      "number": 13,
+      "question": "Which country hosted the 2026 Winter Olympics?",
+      "a": "France",
+      "b": "Italy",
+      "c": "Switzerland",
+      "d": "Japan",
+      "answer": "B",
+      "answer_text": "Italy"
+    },
+    {
+      "number": 14,
+      "question": "Which countries hosted the 2026 ICC Men's T20 World Cup?",
+      "a": "Pakistan and UAE",
+      "b": "Australia and New Zealand",
+      "c": "India and Sri Lanka",
+      "d": "England and Ireland",
+      "answer": "C",
+      "answer_text": "India and Sri Lanka"
+    },
+    {
+      "number": 15,
+      "question": "Which city hosted the 2026 Commonwealth Games?",
+      "a": "London",
+      "b": "Glasgow",
+      "c": "Birmingham",
+      "d": "Manchester",
+      "answer": "B",
+      "answer_text": "Glasgow"
+    },
+    {
+      "number": 16,
+      "question": "Which country is hosting the 2026 G20 Summit?",
+      "a": "India",
+      "b": "South Africa",
+      "c": "United States",
+      "d": "Japan",
+      "answer": "C",
+      "answer_text": "United States"
+    },
+    {
+      "number": 17,
+      "question": "In which city is the 2026 G20 Summit scheduled to take place?",
+      "a": "New York",
+      "b": "Washington, D.C.",
+      "c": "Miami",
+      "d": "Los Angeles",
+      "answer": "C",
+      "answer_text": "Miami"
+    },
+    {
+      "number": 18,
+      "question": "What does COP stand for in climate conferences?",
+      "a": "Council of Presidents",
+      "b": "Conference of the Parties",
+      "c": "Climate Organization Programme",
+      "d": "Committee of Parliament",
+      "answer": "B",
+      "answer_text": "Conference of the Parties"
+    },
+    {
+      "number": 19,
+      "question": "Which organization organizes international COP climate conferences?",
+      "a": "WHO",
+      "b": "UNESCO",
+      "c": "UNFCCC",
+      "d": "WTO",
+      "answer": "C",
+      "answer_text": "UNFCCC"
+    },
+    {
+      "number": 20,
+      "question": "Where is the headquarters of the United Nations located?",
+      "a": "Geneva",
+      "b": "New York",
+      "c": "Paris",
+      "d": "London",
+      "answer": "B",
+      "answer_text": "New York"
+    },
+    {
+      "number": 21,
+      "question": "Where is the headquarters of the World Health Organization?",
+      "a": "New York",
+      "b": "Geneva",
+      "c": "Rome",
+      "d": "Vienna",
+      "answer": "B",
+      "answer_text": "Geneva"
+    },
+    {
+      "number": 22,
+      "question": "Where is the headquarters of the International Monetary Fund?",
+      "a": "London",
+      "b": "Washington, D.C.",
+      "c": "Paris",
+      "d": "Brussels",
+      "answer": "B",
+      "answer_text": "Washington, D.C."
+    },
+    {
+      "number": 23,
+      "question": "Where is the headquarters of the Asian Development Bank?",
+      "a": "Beijing",
+      "b": "Manila",
+      "c": "Tokyo",
+      "d": "Singapore",
+      "answer": "B",
+      "answer_text": "Manila"
+    },
+    {
+      "number": 24,
+      "question": "Where is the International Court of Justice located?",
+      "a": "Geneva",
+      "b": "New York",
+      "c": "The Hague",
+      "d": "Brussels",
+      "answer": "C",
+      "answer_text": "The Hague"
+    },
+    {
+      "number": 25,
+      "question": "Which organization is responsible for international trade regulations?",
+      "a": "WTO",
+      "b": "WHO",
+      "c": "IMF",
+      "d": "UNESCO",
+      "answer": "A",
+      "answer_text": "WTO"
+    },
+    {
+      "number": 26,
+      "question": "What is the currency of Japan?",
+      "a": "Yuan",
+      "b": "Yen",
+      "c": "Won",
+      "d": "Ringgit",
+      "answer": "B",
+      "answer_text": "Yen"
+    },
+    {
+      "number": 27,
+      "question": "Which country uses the currency called the Riyal?",
+      "a": "Japan",
+      "b": "Saudi Arabia",
+      "c": "China",
+      "d": "Turkey",
+      "answer": "B",
+      "answer_text": "Saudi Arabia"
+    },
+    {
+      "number": 28,
+      "question": "Which country is known as the Land of the Rising Sun?",
+      "a": "China",
+      "b": "South Korea",
+      "c": "Japan",
+      "d": "Thailand",
+      "answer": "C",
+      "answer_text": "Japan"
+    },
+    {
+      "number": 29,
+      "question": "Which is the largest ocean in the world?",
+      "a": "Atlantic Ocean",
+      "b": "Indian Ocean",
+      "c": "Arctic Ocean",
+      "d": "Pacific Ocean",
+      "answer": "D",
+      "answer_text": "Pacific Ocean"
+    },
+    {
+      "number": 30,
+      "question": "Which is the largest continent by area?",
+      "a": "Africa",
+      "b": "Asia",
+      "c": "Europe",
+      "d": "North America",
+      "answer": "B",
+      "answer_text": "Asia"
+    },
+    {
+      "number": 31,
+      "question": "Who is the Secretary-General of the United Nations?",
+      "a": "Ban Ki-moon",
+      "b": "António Guterres",
+      "c": "Kofi Annan",
+      "d": "Tedros Adhanom",
+      "answer": "B",
+      "answer_text": "António Guterres"
+    },
+    {
+      "number": 32,
+      "question": "Who is the Director-General of the World Health Organization?",
+      "a": "Tedros Adhanom Ghebreyesus",
+      "b": "António Guterres",
+      "c": "Ajay Banga",
+      "d": "Kristalina Georgieva",
+      "answer": "A",
+      "answer_text": "Tedros Adhanom Ghebreyesus"
+    },
+    {
+      "number": 33,
+      "question": "Who is the President of the World Bank Group?",
+      "a": "Jim Yong Kim",
+      "b": "David Malpass",
+      "c": "Ajay Banga",
+      "d": "António Guterres",
+      "answer": "C",
+      "answer_text": "Ajay Banga"
+    },
+    {
+      "number": 34,
+      "question": "Which organization awards the Nobel Peace Prize?",
+      "a": "United Nations",
+      "b": "Norwegian Nobel Committee",
+      "c": "European Union",
+      "d": "UNESCO",
+      "answer": "B",
+      "answer_text": "Norwegian Nobel Committee"
+    },
+    {
+      "number": 35,
+      "question": "Which country has the largest population in the world?",
+      "a": "China",
+      "b": "United States",
+      "c": "India",
+      "d": "Indonesia",
+      "answer": "C",
+      "answer_text": "India"
+    },
+    {
+      "number": 36,
+      "question": "Which country is the largest by land area?",
+      "a": "Canada",
+      "b": "China",
+      "c": "United States",
+      "d": "Russia",
+      "answer": "D",
+      "answer_text": "Russia"
+    },
+    {
+      "number": 37,
+      "question": "Which organization publishes the Human Development Report?",
+      "a": "World Bank",
+      "b": "UNDP",
+      "c": "IMF",
+      "d": "WHO",
+      "answer": "B",
+      "answer_text": "UNDP"
+    },
+    {
+      "number": 38,
+      "question": "What does OPEC stand for?",
+      "a": "Organization of Petroleum Exporting Countries",
+      "b": "Organization of Petroleum Economic Cooperation",
+      "c": "Oil Producing Economic Council",
+      "d": "Organization for Petroleum and Energy Cooperation",
+      "answer": "A",
+      "answer_text": "Organization of Petroleum Exporting Countries"
+    },
+    {
+      "number": 39,
+      "question": "Which country hosted the 2024 Summer Olympic Games?",
+      "a": "Japan",
+      "b": "France",
+      "c": "Brazil",
+      "d": "China",
+      "answer": "B",
+      "answer_text": "France"
+    },
+    {
+      "number": 40,
+      "question": "Which city hosted the 2024 Summer Olympic Games?",
+      "a": "Tokyo",
+      "b": "Paris",
+      "c": "Rome",
+      "d": "Los Angeles",
+      "answer": "B",
+      "answer_text": "Paris"
+    }
+  ]
+}

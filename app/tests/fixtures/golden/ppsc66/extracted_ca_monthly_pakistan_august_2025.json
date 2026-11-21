@@ -1,0 +1,258 @@
+{
+  "source": "ppsc66/Pakistan-Current-Affairs-August-2025-in-PDF.pdf",
+  "extraction": "PyMuPDF span dict; question = bold spans, options = 'A. '...'D. ' spans, explanation = following plain spans.",
+  "answer_mechanism": "UNKNOWN — verified span-by-span: no option span is bold or coloured and no 'Correct Answer' line exists; the explanation is prose that may or may not contain the answer text, so no answer is recorded. 'explanation_option_matches' is a noisy statistic only.",
+  "count": 18,
+  "option_spans_checked": 72,
+  "bold_or_coloured_option_spans": 0,
+  "explanation_option_match_histogram": {
+    "0": 5,
+    "1": 12,
+    ">1": 1
+  },
+  "questions": [
+    {
+      "index": 1,
+      "page": 3,
+      "question": "establishment of which new regulatory authority?",
+      "a": "Food Standards Authority",
+      "b": "National Digital Authority",
+      "c": "Renewable Energy Authority",
+      "d": "E-Commerce Authority",
+      "explanation": "On 24 August 2025, the government approved the creation of a National Digital Authority to regulate cybersecurity, data protection, and digital economy laws in Pakistan.",
+      "answer": null,
+      "explanation_option_matches": [
+        "B"
+      ]
+    },
+    {
+      "index": 2,
+      "page": 4,
+      "question": "The Punjab floods of 2025 destroyed how much cultivated land?",
+      "a": "1 million hectares",
+      "b": "2.2 million hectares",
+      "c": "3 million hectares",
+      "d": "0.5 million hectares",
+      "explanation": "According to official data, Punjab floods submerged 2.2 million hectares of crops, causing huge economic losses to the agriculture sector.",
+      "answer": null,
+      "explanation_option_matches": [
+        "B"
+      ]
+    },
+    {
+      "index": 3,
+      "page": 5,
+      "question": "mainly in which province?",
+      "a": "Punjab",
+      "b": "Sindh",
+      "c": "Balochistan",
+      "d": "Khyber Pakhtunkhwa",
+      "explanation": "With Afghanistan reducing opium production, cultivation spread to Balochistan, where Pakistan initiated a major anti-narcotics crackdown in August 2025.",
+      "answer": null,
+      "explanation_option_matches": [
+        "C"
+      ]
+    },
+    {
+      "index": 4,
+      "page": 6,
+      "question": "The Punjab floods of August 2025 displaced how many people?",
+      "a": "1 million",
+      "b": "2 million",
+      "c": "5.1 million",
+      "d": "10 million",
+      "explanation": "The Punjab floods (August 2025) affected 8,400 villages, displacing over 5.1 million people. It was one of the province’s worst climate disasters in decades.",
+      "answer": null,
+      "explanation_option_matches": [
+        "A",
+        "C"
+      ]
+    },
+    {
+      "index": 5,
+      "page": 7,
+      "question": "How many villages in Punjab were affected by the August 2025 floods?",
+      "a": "3,000",
+      "b": "5,000",
+      "c": "8,400",
+      "d": "10,000",
+      "explanation": "The Punjab floods of August 2025 submerged around 8,400 villages, damaging 2.2 million hectares of crops and killing around 300 people. Over 5 million residents were displaced.",
+      "answer": null,
+      "explanation_option_matches": [
+        "C"
+      ]
+    },
+    {
+      "index": 6,
+      "page": 8,
+      "question": "floods causing more than 320 deaths?",
+      "a": "Sindh",
+      "b": "Punjab",
+      "c": "KP",
+      "d": "Balochistan",
+      "explanation": "The 2025 Khyber Pakhtunkhwa flash floods (mid-August) caused over 320 deaths, destroying infrastructure and displacing thousands. It was one of the deadliest natural disasters in KP’s history.",
+      "answer": null,
+      "explanation_option_matches": [
+        "C"
+      ]
+    },
+    {
+      "index": 7,
+      "page": 9,
+      "question": "which neighboring country?",
+      "a": "China",
+      "b": "India",
+      "c": "Afghanistan",
+      "d": "Iran",
+      "explanation": "For the first time in decades, India shared a flood advisory with Pakistan on 15 August 2025. This cooperation was notable as it came despite strained diplomatic relations, showing the urgency of cross-border climate threats.",
+      "answer": null,
+      "explanation_option_matches": [
+        "B"
+      ]
+    },
+    {
+      "index": 8,
+      "page": 10,
+      "question": "command. What is its name?",
+      "a": "Missile Command",
+      "b": "Army Rocket Force Command (ARFC)",
+      "c": "Strategic Strike Wing",
+      "d": "Army Missile Division",
+      "explanation": "On Independence Day 2025, the Army unveiled the Army Rocket Force Command (ARFC) to strengthen missile capabilities for conventional warfare.",
+      "answer": null,
+      "explanation_option_matches": [
+        "B"
+      ]
+    },
+    {
+      "index": 9,
+      "page": 11,
+      "question": "The creation of ARFC was influenced by which recent conflict?",
+      "a": "TTP insurgency",
+      "b": "India–Pakistan conflict (Marka-i-Haq) in May 2025",
+      "c": "BLA attacks",
+      "d": "China border tensions",
+      "explanation": "Pakistan launched the ARFC after the May 2025 India–Pakistan conflict, which exposed the need for organized rocket and missile forces.",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 10,
+      "page": 12,
+      "question": "the first time in history?",
+      "a": "$1 billion per month",
+      "b": "$5 billion annually",
+      "c": "$7 billion annually",
+      "d": "$10 billion annually",
+      "explanation": "According to Ministry of IT data released on 11 August 2025, Pakistan’s annual IT exports exceeded $5 billion for the first time. This highlighted the rising contribution of freelancers and software companies.",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 11,
+      "page": 13,
+      "question": "attempting to scale which mountain?",
+      "a": "Nanga Parbat",
+      "b": "Broad Peak",
+      "c": "K2",
+      "d": "Rakaposhi",
+      "explanation": "A Chinese mountaineer Gung Jing was killed on 12 August 2025 while climbing K2, the world’s second-highest peak, after being struck by falling rocks.",
+      "answer": null,
+      "explanation_option_matches": [
+        "C"
+      ]
+    },
+    {
+      "index": 12,
+      "page": 14,
+      "question": "separatist group as a Foreign Terrorist Organization (FTO)?",
+      "a": "TTP",
+      "b": "BLA (Majeed Brigade)",
+      "c": "IS-KP",
+      "d": "LeJ",
+      "explanation": "On 12 August 2025, the U.S. declared the Balochistan Liberation Army (BLA) and its Majeed Brigade wing as terrorist organizations. The decision came after multiple BLA attacks on Chinese projects and Pakistani security forces.",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 13,
+      "page": 15,
+      "question": "to which outcome?",
+      "a": "Nationwide curfew",
+      "b": "Mosque reconstruction agreement",
+      "c": "CDA chairman resignation",
+      "d": "New religious law passed",
+      "explanation": "After protests erupted following the demolition of Madni Masjid in Islamabad, the government agreed on 9 August 2025 to rebuild the mosque. The event raised questions over capital development authority actions and religious sensitivities.",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 14,
+      "page": 16,
+      "question": "renewable energy cooperation?",
+      "a": "China",
+      "b": "Saudi Arabia",
+      "c": "Germany",
+      "d": "UAE",
+      "explanation": "On 6 August 2025, Pakistan signed a Memorandum of Understanding with Germany to enhance cooperation in renewable energy, especially solar and wind projects, in line with Pakistan’s 2030 green energy targets.",
+      "answer": null,
+      "explanation_option_matches": [
+        "C"
+      ]
+    },
+    {
+      "index": 15,
+      "page": 17,
+      "question": "how many metric tons of wheat to control domestic shortages?",
+      "a": "0.5 million MT",
+      "b": "1 million MT",
+      "c": "1.5 million MT",
+      "d": "2 million MT",
+      "explanation": "Pakistan’s government approved 1 million metric tons wheat import on 4 August 2025 after food inflation rose sharply. This was aimed at stabilizing flour prices nationwide.",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 16,
+      "page": 18,
+      "question": "traffic management system?",
+      "a": "Lahore",
+      "b": "Karachi",
+      "c": "Islamabad",
+      "d": "Peshawar",
+      "explanation": "On 3 August 2025, Lahore introduced Pakistan’s first AI-powered traffic management system to reduce congestion and road accidents.",
+      "answer": null,
+      "explanation_option_matches": [
+        "A"
+      ]
+    },
+    {
+      "index": 17,
+      "page": 19,
+      "question": "desecration of the Holy Quran in which European country?",
+      "a": "Norway",
+      "b": "Denmark",
+      "c": "Sweden",
+      "d": "Netherlands",
+      "explanation": "On 2 August 2025, Pakistan condemned the desecration of the Holy Quran in Netherlands, calling it a deliberate act of Islamophobia. The statement urged international organizations to take action to protect religious harmony.",
+      "answer": null,
+      "explanation_option_matches": [
+        "D"
+      ]
+    },
+    {
+      "index": 18,
+      "page": 20,
+      "question": "exports?",
+      "a": "1 July 2025",
+      "b": "1 August 2025",
+      "c": "15 August 2025",
+      "d": "1 September 2025",
+      "explanation": "Starting 1 August 2025, Pakistan imposed a 19% reciprocal tariff on U.S. retail and industrial exports in response to American trade measures.",
+      "answer": null,
+      "explanation_option_matches": [
+        "B"
+      ]
+    }
+  ]
+}

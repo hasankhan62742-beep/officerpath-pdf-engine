@@ -1,0 +1,6754 @@
+{
+  "source": "ppsc66/Computer_Past_Papers_2019-2025.pdf",
+  "extraction": "PyMuPDF text layer, split on line-start 'N. ' markers; answer = text after '?' (fallback: ':' with a space before it, ';', last '.'); each split accepted only with a non-empty answer. No options exist in this file; the answer sits right after the question. Duplicate numbers 643/644 are IN THE SOURCE (two different questions share each number); numbers 670 and 860 do not occur in the text layer.",
+  "count": 960,
+  "number_min": 1,
+  "number_max": 960,
+  "gaps": [
+    670,
+    860
+  ],
+  "duplicates": [
+    643,
+    644
+  ],
+  "pairs_with_empty_answer": [
+    8,
+    61,
+    396,
+    869
+  ],
+  "flagged_pairs": [
+    10,
+    67,
+    469,
+    630
+  ],
+  "pairs_with_very_short_question": [
+    390,
+    837,
+    900
+  ],
+  "pairs": [
+    {
+      "number": 1,
+      "question": "Physical Part Of Computer Is Called?",
+      "answer": "Hardware",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 2,
+      "question": "File Extension Of MS Word Is?",
+      "answer": ".Docx",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 3,
+      "question": "In Microsoft Office The Options 'Portrait\" And 'Landscape' Comes Under?",
+      "answer": "Page Orientation",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 4,
+      "question": "Which Language Is Primarily Used In Computers?",
+      "answer": "Machine Language",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 5,
+      "question": "If You Want To Calculate Maximum Value In Excel Sheet Which Command You Select?",
+      "answer": "Max",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 6,
+      "question": "Which Key Is Used For Help in PowerPoint",
+      "answer": "F1",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 7,
+      "question": "One Byte Equals To________ Bits.",
+      "answer": "8",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 8,
+      "question": "In a Computer Processed Data Is Known As Information",
+      "answer": "",
+      "answer_rule": "unknown",
+      "flag": null
+    },
+    {
+      "number": 9,
+      "question": "1gigabyte Is Equal To",
+      "answer": "1024 Megabyte",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 10,
+      "question": "15 How Many Relations May Exist Between Tables In Databases?",
+      "answer": "Three",
+      "answer_rule": "question_mark",
+      "flag": "question_starts_with_number"
+    },
+    {
+      "number": 11,
+      "question": "Default Name Of A Newly Created MS Word File Is",
+      "answer": "Document 1",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 12,
+      "question": "Which Of The Following Keyboard Shortcut Is Used To Switch Between Open Apps In Windows 10",
+      "answer": "Alt + Tab",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 13,
+      "question": "When A Peripheral Device Needs Immediate Attention From The Operating System, It Generates A(N)",
+      "answer": "Interrupt",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 14,
+      "question": "A Character That Is Raised And Smaller Above The Baseline Is Known As",
+      "answer": "Superscript",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 15,
+      "question": "Which Of The Following Is Not A Valid Data Type In Excel",
+      "answer": "Character",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 16,
+      "question": "Which Software Is Used To Convert Doc File Into Pdf",
+      "answer": "Adobe, Export, Save As",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 17,
+      "question": "The F7 Key Is Commonly Used For",
+      "answer": "Checking Spelling And Grammar",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 18,
+      "question": "What Power Point Feature Will You Use To Apply Motion Effects To Different Objects Of A Slide",
+      "answer": "Animation Scheme",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 19,
+      "question": "Which Type Of Malware Is A Program Or Piece Of Code That Is Loaded Onto A Person's Computer Without His Knowledge And Runs Against His Wishes",
+      "answer": "Virus",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 20,
+      "question": "Which Key Is Used For Toggles The Display Of The Ribbon",
+      "answer": "Ctrl + F1",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 21,
+      "question": "The Term DNS Stands For",
+      "answer": "Domain Name System",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 22,
+      "question": "The Header And Footer Command Are Located On Tab In MS Word.",
+      "answer": "Insert",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 23,
+      "question": "Time Taken By A Computer To Process A Job Or Instruction Is Called",
+      "answer": "Execution Time",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 24,
+      "question": "A Set Of Possible Data Values Is Called",
+      "answer": "Domain",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 25,
+      "question": "Which Of The Following Is Not An Operating System?",
+      "answer": "Oracle",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 26,
+      "question": "Button Is Used To Go To Different Slide, A File, A Website And Sound",
+      "answer": "Action",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 27,
+      "question": "Where As A Computer Mouse Moves Over The Table Surface, The Trackball Is",
+      "answer": "Stationary",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 28,
+      "question": "To Get Connected To The Internet The Computer Has To Be Connected To A/An",
+      "answer": "Internet Service Provider",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 29,
+      "question": "Cell Entry \"July 16, 1982\" Will Be Considered A By Excel Sheet.",
+      "answer": "Value",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 30,
+      "question": "Which Key On The Keyboard Can Be Used To Slide Show?",
+      "answer": "F5",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 31,
+      "question": "Which One Is Hypertext Language?",
+      "answer": "Html",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 32,
+      "question": "MS Word And MS Excel Are",
+      "answer": "Applications Software",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 33,
+      "question": "The Graph Used To Show Data On A Nominal Scale Is Called",
+      "answer": "Pie Graph, Bar Chart",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 34,
+      "question": "A Set Of Instructions That Directs A Computer's Hardware To Perform A Task Is Called A",
+      "answer": "Program Or Software",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 35,
+      "question": "What Does CPU Stand For?",
+      "answer": "Central Processing Unit",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 36,
+      "question": "In MS Excel 2016, We Can Go To Cell A1 By Pressing",
+      "answer": "Ctrl + Home",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 37,
+      "question": "Which Is A Volatile Memory?",
+      "answer": "Ram",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 38,
+      "question": "Which Of The Following Shortcut Keys Is Used To Align The Selected Text To The Left, In MS Word?",
+      "answer": "Ctrl + L",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 39,
+      "question": "\"Add New Hardware\" Option Exist In",
+      "answer": "Control Panel",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 40,
+      "question": "In Windows Operating System, Is Known As A File Manager.",
+      "answer": "Windows Explorer",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 41,
+      "question": "Slide Are The Effects That Determine How A Slide Moves In And Out Of The View In The Slideshow",
+      "answer": "Transition",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 42,
+      "question": "Which One Is Not Belong To Class Size Of Computer?",
+      "answer": "Digital Computer",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 43,
+      "question": "Total Number Of Column In MS Excel?",
+      "answer": "16384",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 44,
+      "question": "All Peripheral Devices Connected On?",
+      "answer": "Motherboard",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 45,
+      "question": "Which Device Is Used To Enter Data Into Computer?",
+      "answer": "Input Device",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 46,
+      "question": "Storage Capacity Of Floppy Disc",
+      "answer": "1.4mb",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 47,
+      "question": "Single Page Of A Power Point Presentation Is Called",
+      "answer": "Slide",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 48,
+      "question": "How Many Bits Are Equivalent To 4 Bytes",
+      "answer": "32 Bits",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 49,
+      "question": "In C And C++ Programming Languages, Which Symbol Is Used To Access The Value Stored At A Memory Address",
+      "answer": "Asterisk Symbol *",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 50,
+      "question": "A Is A Software Program Used To View Webpages",
+      "answer": "Web Browser",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 51,
+      "question": "Which Tab Is Not Available On Left Panel When You Open A Presentation In Powerpoint?",
+      "answer": "Notes",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 52,
+      "question": "What Type Of Software Is Windows 10?",
+      "answer": "System Software",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 53,
+      "question": "What In Another Term For Free Software?",
+      "answer": "Public Domain Software",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 54,
+      "question": "Which Option Converts A Word File Into Pdf In MS Word?",
+      "answer": "Save As",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 55,
+      "question": "Which Of The Following Is Called Low Level Language?",
+      "answer": "Assembly Language",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 56,
+      "question": "From Which Of The Following Can The User Account Be Changed?",
+      "answer": "Control Panel",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 57,
+      "question": "\"Add Or Remove Programs\" Is A (An)",
+      "answer": "Utility Program",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 58,
+      "question": "The Output That Is Displayed On The Computer's Monitor Is Considered",
+      "answer": "Soft Copy",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 59,
+      "question": "The Different Generation Of Computers Are Classified On The Basis Of",
+      "answer": "Memory And Microprocessor",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 60,
+      "question": "Short Term Memory In A Computer Is",
+      "answer": "Ram",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 61,
+      "question": "Home Key Moves The Cursor To The . Beginning Of The Line.",
+      "answer": "",
+      "answer_rule": "unknown",
+      "flag": null
+    },
+    {
+      "number": 62,
+      "question": "Ctrl + 5 Is Used For Spacing",
+      "answer": "1.5",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 63,
+      "question": "A Database That Contains Tables Linked By Common Fields Is Called A",
+      "answer": "Relational Database",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 64,
+      "question": "Which Of The Following Does Not Exists In A Slide Layout?",
+      "answer": "Animations",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 65,
+      "question": "Maximum Font Size By Default In MS Word?",
+      "answer": "72",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 66,
+      "question": "Is Processed By The Computer Into Information",
+      "answer": "Data",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 67,
+      "question": "1024 Kilobytes Is Equal To",
+      "answer": "1 Mb",
+      "answer_rule": "colon",
+      "flag": "question_starts_with_number"
+    },
+    {
+      "number": 68,
+      "question": "Which Of The Following Is The Default Page Setup Orientation?",
+      "answer": "Portrait",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 69,
+      "question": "Which Among The Following Is Smallest Heading Style By Default {H1, H2, H3 & H4}?",
+      "answer": "H4",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 70,
+      "question": "What Is The Shortcut Key For \"Clear All Formatting\" The Selected Text?",
+      "answer": "Ctrl + Spacebar",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 71,
+      "question": "When You Open A New Worksheet In MS Excel, Which Of The Following Appears On The Top?",
+      "answer": "Menu Bar",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 72,
+      "question": "Which Application Is Used For Checking Grammar And Spelling?",
+      "answer": "Word Processor",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 73,
+      "question": "MS-Power Point Is Used For",
+      "answer": "Create Presentation",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 74,
+      "question": "What Happens When You Insert A New Row In Excel?",
+      "answer": "Previous Row Moves To The Bottom Of Sheet",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 75,
+      "question": "What Does The \"Proper (Text) Function Do In MS Excel?",
+      "answer": "First Letter Of Each Word Is Capitalized",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 76,
+      "question": "The Power Point View That Displays Only Text (Title And Bullets) Is",
+      "answer": "Outline View",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 77,
+      "question": "The Smallest Unit In A Digital System Is A.",
+      "answer": "Bit",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 78,
+      "question": "Multiple Use Can Accesses The Mainframe Connected Through.",
+      "answer": "Terminals",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 79,
+      "question": "Enter Key Is Used To Start",
+      "answer": "Paragraph",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 80,
+      "question": "Cropping Is Removing The Unwanted Part Of",
+      "answer": "Image",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 81,
+      "question": "Which Of The Following Is Used To Create A Power Point Presentation Fastest?",
+      "answer": "Auto Content Wizard",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 82,
+      "question": "Which Of The Following Methods Cannot Be Used To Edit The Contents Of A Cell?",
+      "answer": "Press The Alt Key",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 83,
+      "question": "Shortcut Key For Print Preview?",
+      "answer": "Ctrl + F2",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 84,
+      "question": "A Webpage Has A Unique Address Called?",
+      "answer": "URL",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 85,
+      "question": "To Create Chart Is Excel Which Key Is Used",
+      "answer": "F11",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 86,
+      "question": "Transition Option Used In PowerPoint For",
+      "answer": "To Move Slide In And Out",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 87,
+      "question": "Symbol Used In An Email Address To Separate The Username From The Domain Name",
+      "answer": "@",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 88,
+      "question": "Docx Is Symbol Of",
+      "answer": "File Extension",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 89,
+      "question": "By Which Tab We Can Insert Picture In PowerPoint",
+      "answer": "Insert",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 90,
+      "question": "Who Is Considered The Father Of The Computer",
+      "answer": "Charles Babbage",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 91,
+      "question": "View Display Slide Thumbnail On The Left, A Large Window Showing The Current Slide.",
+      "answer": "Normal View",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 92,
+      "question": "Arrows Key Are Called?",
+      "answer": "Navigation Keys",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 93,
+      "question": "Which Option Allows To Print Multiple Slide In One Page?",
+      "answer": "Handout",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 94,
+      "question": "Cc Stand For",
+      "answer": "Carbon Copy",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 95,
+      "question": "Digital Computer Was Invented By",
+      "answer": "John Vincent Atanasoff",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 96,
+      "question": "Which Is Used To Enter Current Date And Time In Excel",
+      "answer": "=Now ()",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 97,
+      "question": "To Copy The Picture Of Whole Screen",
+      "answer": "Print Screen",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 98,
+      "question": "Themes In A Presentation Are Inserted From Which Tab Of MS PowerPoint",
+      "answer": "Design Tab",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 99,
+      "question": "Through Which Tab You Can Insert Slide In PowerPoint?",
+      "answer": "Insert",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 100,
+      "question": "What Is The Purpose Of A Slideshow In A PowerPoint Presentation",
+      "answer": "To Show Slides In Order",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 101,
+      "question": "What Is A Another Name Of Junk Email?",
+      "answer": "Spam Email",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 102,
+      "question": "Shortcut Key For Superscript",
+      "answer": "Ctrl+ Shift + +",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 103,
+      "question": "Technique By Which Passwords And Usernames Can Be Stolen",
+      "answer": "Phishing",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 104,
+      "question": "Which Coding Language Uses Binary Only?",
+      "answer": "Machine Language",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 105,
+      "question": "How To Save Presentation In Power Point",
+      "answer": "Ctrl S",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 106,
+      "question": "Short Key For Center Alignment",
+      "answer": "Ctrl E",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 107,
+      "question": "Which Key Is Used To Open Font And Replace Dialog Box",
+      "answer": "Ctrl+H",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 108,
+      "question": "Which Alignment Is Used To Make Balance From Left And Right Side",
+      "answer": "Justify",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 109,
+      "question": "Purpose Of Match Function In Excel",
+      "answer": "Returns The Relative Position Of An Item In An Array That Matches A Specified Value",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 110,
+      "question": "Father Of Microprocessor",
+      "answer": "Marican Hoff, Federico Faggin, Stanley Mazor",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 111,
+      "question": "Father Of Email",
+      "answer": "Roy Tomlinson",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 112,
+      "question": "Which Semi Conductor Device Is Used To Increase The Power Of Incoming Signal By Preserving The Shape Of Original Signal",
+      "answer": "Transistors",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 113,
+      "question": "Who Invented First Compiler",
+      "answer": "Grace Hopper (1951)",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 114,
+      "question": "If You Want To Change The Orientation Of Document From Portrait To Landscape Which Tab Will Be Used",
+      "answer": "Page Layout",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 115,
+      "question": "By Default, Document Is Saved In",
+      "answer": "My Document",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 116,
+      "question": "In Email, How One Can Move The Mail From Inbox Without Permanent Deleting It",
+      "answer": "Archive",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 117,
+      "question": "Google Drive Is Used For",
+      "answer": "Storage",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 118,
+      "question": "Is The Process Of Converting Information Or Data Into A Code To Prevent Unauthorized Access",
+      "answer": "Encryption",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 119,
+      "question": "Which Allow To Add Address And Name In Document",
+      "answer": "Mail Merge",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 120,
+      "question": "To Add Value In Excel We Use Formula",
+      "answer": "Auto Sum",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 121,
+      "question": "Purpose Of Citation And Bibliography In MS Word",
+      "answer": "To Add Reference As Citation And Bibliography",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 122,
+      "question": "The Word Attachment Email Is Used To Attach",
+      "answer": "To Attach Video, Images And Documents",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 123,
+      "question": "The Chart That Is Shape Like Pie Chart And Used To Arrange Data Intuitively Is Called",
+      "answer": "Bar Chart",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 124,
+      "question": "Drop Down List In A Cell Option",
+      "answer": "Data Validation",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 125,
+      "question": "Who Invented Mouse?",
+      "answer": "Douglas Engelbart",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 126,
+      "question": "Bios Is Stored In",
+      "answer": "Rom/Flash",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 127,
+      "question": "Amazon Founded In Which Year",
+      "answer": "1994 (By Jeff Bezos)",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 128,
+      "question": "We Can Insert A Page Number In Microsoft Word From.",
+      "answer": "Insert",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 129,
+      "question": "Optical Fiber Works On The Principle Of.",
+      "answer": "Total Internal Reflection",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 130,
+      "question": "Which Product Of Microsoft Is Not Available In Linux Operating System?",
+      "answer": "MS Access",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 131,
+      "question": "The Correct Form Of The Email Address Is",
+      "answer": "Name@Website.Com",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 132,
+      "question": "SQL Stands For In Computer",
+      "answer": "Structured Query Language",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 133,
+      "question": "Slide Design Option Is Available On",
+      "answer": "Formatting Toolbar",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 134,
+      "question": "Which Of The Following Is Not A Change Text Case In Word",
+      "answer": "Indent Case",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 135,
+      "question": "Electronic Devices After Vacuum Tubes Are",
+      "answer": "Transistors",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 136,
+      "question": "Errors From Computer Hardware And Software Can Be Identified And Removed By Process",
+      "answer": "Debugging",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 137,
+      "question": "Computer Hard Disk Was First Introduced In",
+      "answer": "IBM (1956)",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 138,
+      "question": "Ctrl, Shift, And Alt Are Called Keys.",
+      "answer": "Modifier Keys",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 139,
+      "question": "Which Of The Following Is Not A Nomenclature Of MS Excel",
+      "answer": "Document",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 140,
+      "question": "What Is The Largest Font Size Available In Drop Down Menu Of MS Ord",
+      "answer": "72",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 141,
+      "question": "The Process Of Removing Unwanted Part Of An Image Is Called",
+      "answer": "Cropping",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 142,
+      "question": "Who Among The Following Is The Founder Of Microsoft",
+      "answer": "Bill Gates",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 143,
+      "question": "Cursor Is A.",
+      "answer": "Thin Blinking Line",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 144,
+      "question": "Which Symbol Is Used To Execute Formulas In MS Excel",
+      "answer": "=",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 145,
+      "question": "Excel Is A Program That Is Used To Prepare",
+      "answer": "Spreadsheet",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 146,
+      "question": "The Intersection Of A Column And Row In A Spreadsheet Is Called",
+      "answer": "Cell",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 147,
+      "question": "Graphical Representation Of Data Is Called",
+      "answer": "Pie Chart",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 148,
+      "question": "Which Shortcut Key Is Used To Spell Check In Microsoft Word",
+      "answer": "F7",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 149,
+      "question": "How Can You Apply Exactly The Same Formatting You Did To Another Text?",
+      "answer": "Select The Text Then Click On Format Painter And Select The New Text",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 150,
+      "question": "A Feature Of MS Office That Saves The Document Automatically After Certain Interval Is Called",
+      "answer": "Auto Save",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 151,
+      "question": "Which Key Deletes The Character To The Right Of The Cursor In MS Word",
+      "answer": "Delete",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 152,
+      "question": "Which Is Not An Input Device",
+      "answer": "Plotter",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 153,
+      "question": "Which Is The Largest Hardware Company Of The World",
+      "answer": "Apple",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 154,
+      "question": "Which Tab Of MS Word Contains The Shapes Option",
+      "answer": "Insert",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 155,
+      "question": "What Is The Shortcut Key To \"Subscript\" The Selected Text?",
+      "answer": "Ctrl+=",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 156,
+      "question": "Which Shortcut Key Is Used For Undo In MS Word",
+      "answer": "Ctrl+Z",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 157,
+      "question": "What Is The Shortcut Key For \"Decrease Font Size\" The Selected Text",
+      "answer": "Ctrl+Shift+<",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 158,
+      "question": "Which Is An Example Of A Formula?",
+      "answer": "=A1+A2",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 159,
+      "question": "Which Command Is Used To Add Data In Excel",
+      "answer": "Sum",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 160,
+      "question": "Shortcut Key For Page Break In MS Word",
+      "answer": "Ctrl+Enter",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 161,
+      "question": "The First Network That Initiated Internet Was",
+      "answer": "Arpanet",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 162,
+      "question": "Which Type Of Chart Is Best For Categorical Data",
+      "answer": "Vertical Bar Chart",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 163,
+      "question": "Which Of The Following Is Used To Create Web Pages",
+      "answer": "Html",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 164,
+      "question": "Which Of The Following Is Output Device",
+      "answer": "Printer",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 165,
+      "question": "The Graph Used To Show Data On Nominal Scale Is Called",
+      "answer": "Pie Graph",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 166,
+      "question": "What Is The Function Of The F4 Key In A Spreadsheet?",
+      "answer": "Repeat The Last Action",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 167,
+      "question": "Http Stands For?",
+      "answer": "Hypertext Transfer Protocol",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 168,
+      "question": "Mb Stands For",
+      "answer": "Megabyte",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 169,
+      "question": "Which Of The Following Types Of Table Constraints Will Prevent The Entry Of Duplicate Rows",
+      "answer": "Primary-Key",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 170,
+      "question": "In Excel From Which Tab You Can Write Date Of Birth Like This Yyyy/Mm/Dd",
+      "answer": "Format Menu",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 171,
+      "question": "Which Of The Following Is Not The Characteristics Of Computer",
+      "answer": "Intelligence",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 172,
+      "question": "Who Is The Father Of Internet",
+      "answer": "Vint Cerf",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 173,
+      "question": "Ms Excel Is Used",
+      "answer": "To Organize Data",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 174,
+      "question": "Which Shortcut Key Is Used To Select Whole Document",
+      "answer": "Ctrl+A",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 175,
+      "question": "Which Technology Is Used In Compact Disks To Store Data?",
+      "answer": "Laser",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 176,
+      "question": "Www Stands For",
+      "answer": "World Wide Web",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 177,
+      "question": "Ctrl+5 Is Used To Add Line Spacing To How Many Points",
+      "answer": "1.5",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 178,
+      "question": "The Autosome Feature",
+      "answer": "Automatically Adds Range Of Cell Values",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 179,
+      "question": "Which Of The Following Is Not Paper Size",
+      "answer": "Landscape",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 180,
+      "question": "The Accuracy Of The Floating Point Numbers Representable In Two 16 Bit Words Of A Computer Is Approximately",
+      "answer": "6 Digits",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 181,
+      "question": "Which Among Following Is Not Associated With Spelling Dialogue Box?",
+      "answer": "Edit",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 182,
+      "question": "Which Shortcut Is Used To Save The Document?",
+      "answer": "Ctrl+S",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 183,
+      "question": "What Is A Light Pen?",
+      "answer": "Optical Input Device",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 184,
+      "question": "What Is The Alternative Computer Jargon For Bug?",
+      "answer": "Glitch",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 185,
+      "question": "We Can Remover Hide Border Of A Shape By Selecting",
+      "answer": "No Outline",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 186,
+      "question": "The Best Way To Insert A New Slide In A Presentation Is To Use The",
+      "answer": "Silde Sorter View",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 187,
+      "question": "Which Of The Following Pane Is Not Available In Task Pane?",
+      "answer": "`Word Art",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 188,
+      "question": "What Is The Short -Cut Key For Manual Line Break In MS Word",
+      "answer": "Shift+Enter",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 189,
+      "question": "What Does 5*2 In Word?",
+      "answer": "5 Rows 2 Columns",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 190,
+      "question": "What Happens If You Select First And Second Slide And Then Click On New Slide Button On Toolbar",
+      "answer": "A New Slide Is Inserted As Third Slide In Presentation",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 191,
+      "question": "Where Is Ram Located?",
+      "answer": "Motherboard",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 192,
+      "question": "Which Of Following Is Not An Element Of Computer Spreadsheet Interface?",
+      "answer": "Pencil Work",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 193,
+      "question": "Which Of The Following Is An Absolute Cell Reference",
+      "answer": "$A$1",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 194,
+      "question": "The Slide That Is Used To Introduce A Topic And Set The Tone For The Presentation Is Called The",
+      "answer": "Title Slide",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 195,
+      "question": "The Primary Purpose Of An Operating System Is",
+      "answer": "To Make The Most Efficient Use Of The Computer Hardware",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 196,
+      "question": "Is A Type Of Computer Memory That Can Retain Stored Information Even After Power Is Removed.",
+      "answer": "Non-Volatile Memory",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 197,
+      "question": "The First Network Was Called",
+      "answer": "Arpanet (Advanced Research Projects Agency Network)",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 198,
+      "question": "Unsystematic Risk Is Also Known As",
+      "answer": "Specific Risk",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 199,
+      "question": "The Shortcut To Add New Slide In Power Point Is",
+      "answer": "Ctrl+M",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 200,
+      "question": "World Wide Web Is",
+      "answer": "A Collection Of Linked Information Residing On Computers Connected By The Internet",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 201,
+      "question": "Which Keyword Is Used To Find The Number Of Values In A Column?",
+      "answer": "Count",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 202,
+      "question": "Which Is The Following Is Not A Portable Device?",
+      "answer": "Desktop Computer",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 203,
+      "question": "The Printed Output From A Computer Is Called",
+      "answer": "Hardcopy",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 204,
+      "question": "Edit> Delete Command",
+      "answer": "Deletes Selected Cells",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 205,
+      "question": "Which One Of The Following Page Orientation By Default Is Used In MS Word",
+      "answer": "Portrait",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 206,
+      "question": "What Is Gutter Margin In MS Word",
+      "answer": "Margin That Is Added To The Binding Side Of Page When Printing",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 207,
+      "question": "Refers To A Pre-Made Images Ready For Use In MS-Word Documents",
+      "answer": "Clipart",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 208,
+      "question": "In Slide Layout Panel How Many Layouts Are Available For Text Layout By Default",
+      "answer": "4",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 209,
+      "question": "The Only Difference Between Memory And Storage Is",
+      "answer": "Temporary,Permanent",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 210,
+      "question": "Cad Stands For",
+      "answer": "Computer Aided Design",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 211,
+      "question": "In Power Point, The Dotted Areas In An Empty Slide Are Called",
+      "answer": "Placeholders",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 212,
+      "question": "In MS PowerPoint, On Mouse Click Option Can Be Used By",
+      "answer": "Transition & On Mouse Click",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 213,
+      "question": "The Valid Data Type In MS Excel Is",
+      "answer": "Boolean",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 214,
+      "question": "Which Of The Following Can Be Used To Open Your Account",
+      "answer": "Log In",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 215,
+      "question": "You Can Use A Function To Combine Text From Two Cells Into One Cell. But You Can Use An Operator To Do The Same Thing. Which Operator Is That?",
+      "answer": "Ampersand",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 216,
+      "question": "The Circular Device Used For Storage Is",
+      "answer": "Disk",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 217,
+      "question": "In CPU, All Devices Are Attached With",
+      "answer": "Motherboard",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 218,
+      "question": "How Many Bytes Are In One-Kilo Byte",
+      "answer": "1024",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 219,
+      "question": "Two Cells Are Mixed With A",
+      "answer": "Merge Cell",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 220,
+      "question": "The Authors Of Reviewer Add Annotation As",
+      "answer": "Comment",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 221,
+      "question": "Dot-Matrix Is A Type Of",
+      "answer": "Printer",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 222,
+      "question": "Primary Storage Is As Compared To Secondary Storage.",
+      "answer": "Fast And Expensive",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 223,
+      "question": "What Is Meant By A Dedicated Computer?",
+      "answer": "Which Is Assigned One And Ony One Task",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 224,
+      "question": "What Is Internet",
+      "answer": "Interconnection Of Wide Area Networks",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 225,
+      "question": "Which Shortcut Key Is Used To Open An Existing File In MS Word",
+      "answer": "Ctrl +O",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 226,
+      "question": "Which Key Used To Delete A Character To Its Left Side Of The Cursor",
+      "answer": "Backspace",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 227,
+      "question": "Bios Stands For",
+      "answer": "Basic Input Output System",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 228,
+      "question": "B2:B6 In MS Excel Represents The.",
+      "answer": "Range Of Cell",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 229,
+      "question": "Which Key Is Used To Move From One Cell To Another In MS Excel",
+      "answer": "Tab",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 230,
+      "question": "ICT Stands For",
+      "answer": "Information And Communication Technology",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 231,
+      "question": "EBCDIC Stands For",
+      "answer": "Extended Binary Coded Decimal Interchange Code",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 232,
+      "question": "Ram Stands For",
+      "answer": "Radom Access Memory",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 233,
+      "question": "Name The Type Of Mouse Which Uses Later Technology To Detect The Motion Of The Ball",
+      "answer": "Optical Mouse",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 234,
+      "question": "What Type Of Connection Would Be Used To Connect A Printer Directly To A Network?",
+      "answer": "Ethernet Cable",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 235,
+      "question": "Which Is The Keyboard Shortcut To Increase Font Size In Microsoft Word",
+      "answer": "Ctrl +]",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 236,
+      "question": "Which Of The Following Stores Data Permanently In A Computer?",
+      "answer": "Rom",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 237,
+      "question": "In MS Word, By Default, On Which Page The Header Or The Footer Is Printed?",
+      "answer": "Every Page",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 238,
+      "question": "Shortcut Key For Page Break In MS Word Is",
+      "answer": "Ctrl +Enter",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 239,
+      "question": "What Does DMA Stand For",
+      "answer": "Direct Memory Access",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 240,
+      "question": "And, Or , Xor , Not , Nand, Nor Are Which Type Of Gate",
+      "answer": "Logic Gate",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 241,
+      "question": "Which Shortcut Key Is Used To Center Align The Selected Text",
+      "answer": "Ctrl +E",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 242,
+      "question": "Which Key On The Keyboard Can Be Used To View Slide Show In MS PowerPoint?",
+      "answer": "F5",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 243,
+      "question": "What Displays The Content Of The Active Cell In Excel",
+      "answer": "Formula Bar",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 244,
+      "question": "A Light Sensitive Device That Converts Drawing, Printed Text Or Other Images Into Digital Form Is",
+      "answer": "Scanner",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 245,
+      "question": "Ram Is Also Known As.",
+      "answer": "Read -Write Memory",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 246,
+      "question": "The Output Shown On The Computer Monitor Is Called",
+      "answer": "Soft Copy",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 247,
+      "question": "Internet Access By Transmitting Digital Data Over The Wires Of A Local Telephone Network Is Provided By.",
+      "answer": "Digital Subscriber Line",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 248,
+      "question": "Microsoft Word Is Software.",
+      "answer": "Application",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 249,
+      "question": "Which Of The Following Is Not An Output Device Of A Computer?",
+      "answer": "Keyboard",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 250,
+      "question": "What Type Of Operating System Ms-Dos Is",
+      "answer": "Command Line Interface",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 251,
+      "question": "Which Of The Following Is A Single User Operating System",
+      "answer": "Ms-Dos",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 252,
+      "question": "A Is Dynamic Mathematical Calculation That Displays A Single Value For A Specific Field",
+      "answer": "Aggregate Function",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 253,
+      "question": "Presentation Pages In PowerPoint Is Called",
+      "answer": "Slide",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 254,
+      "question": "The Ability To Read Or Write Each Piece Of Information In A Storage Device In Approximately The Same Length Of Time Regardless Of Its Location Is.",
+      "answer": "Random Access",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 255,
+      "question": "Procedural Language Used In Which Generation Of Computers",
+      "answer": "Third Generation",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 256,
+      "question": "The \"Ctrl+ Page down\" Shortcut Key Is Used In MS Word To",
+      "answer": "Move The Cursor One-Page Down",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 257,
+      "question": "The Button Is Used To Reload A Page In The Internet Browser.",
+      "answer": "Reload",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 258,
+      "question": "Which Of The Following Software Is Used To Prepare A Presentation",
+      "answer": "MS PowerPoint",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 259,
+      "question": "Provides a Path to Transfer Data between CPU and Memory",
+      "answer": "Data Bus",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 260,
+      "question": "Which Shortcut Key Is Used To Undo The Last Action In A Document?",
+      "answer": "Ctrl+Z",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 261,
+      "question": "To Delete The Selected Text Press",
+      "answer": "Delete",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 262,
+      "question": "To Send Audio, Video, And Text We Use",
+      "answer": "Email",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 263,
+      "question": "Which Program Is Run By Bios To Check Hardware Components Are Working Properly While The Computer Is Turned On?",
+      "answer": "Post (Power-On Self-Test)",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 264,
+      "question": "Which One Is Not A Function In MS Excel",
+      "answer": "Avg",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 265,
+      "question": "What Is The Name Given To The Organized Collection Of Software That Controls The Overall Operation Of A Computer",
+      "answer": "Operating System",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 266,
+      "question": "Crimes Committed Using Computers And Internet Are Called",
+      "answer": "Cybercrime",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 267,
+      "question": "The Process Of Starting An Operating System When The User Turns On A Computer Is Known As",
+      "answer": "Booting",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 268,
+      "question": "If The Company Wants To Check The Customer Preferences, Then It Will Use The Option",
+      "answer": "Data Sorting",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 269,
+      "question": "Which One Of The Following Converts Printed Documents Into Digital Images",
+      "answer": "Scanner",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 270,
+      "question": "Binary Coded Are In The Form Of",
+      "answer": "0 & 1",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 271,
+      "question": "Which Key Is Used For Rename",
+      "answer": "F2",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 272,
+      "question": "What Is Defined By The Handout Master",
+      "answer": "Layout Of Handout",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 273,
+      "question": "The Basic Unit Of A Worksheet Into Which You Enter Data In Excel Is Called A",
+      "answer": "Cell",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 274,
+      "question": "From Which Menu You Can Access Picture, Test Box, Chart",
+      "answer": "Insert",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 275,
+      "question": "No Computer Can Do Anything Without A",
+      "answer": "Program",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 276,
+      "question": "Which Protocol Provides an E-Mail Facility among Different Hosts",
+      "answer": "SMTP",
+      "answer_rule": "colon_before_question_mark",
+      "flag": null
+    },
+    {
+      "number": 277,
+      "question": "Are Used To Identify A User Who Returns To A Website.",
+      "answer": "Cookies",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 278,
+      "question": "The Operating System Is The Most Common Type Of",
+      "answer": "System Software",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 279,
+      "question": "If The Displayed System Time And Date Is Wrong, You Can Reset It Using",
+      "answer": "Control Panel",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 280,
+      "question": "A User Interface That Is Easy To Use Is Considered To Be",
+      "answer": "User Friendly",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 281,
+      "question": "Which Of The Following Pane Is Not Available In Task Pane",
+      "answer": "Word Art",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 282,
+      "question": "Which Menu Bar Selection Would You Access To Open The File?",
+      "answer": "File Icon",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 283,
+      "question": "The Common Name For The Crime Of Stealing Passwords Is",
+      "answer": "Spoofing",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 284,
+      "question": "Another Term For Main Memory Is",
+      "answer": "Ram",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 285,
+      "question": "A Wireless Technology Built-In Electronic Gadgets Used For Exchanging Data Over Short Distances Is",
+      "answer": "Bluetooth",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 286,
+      "question": "Which Shortcut Key Is Used For Justifying The Text Of A Microsoft Document?",
+      "answer": "Ctrl +J",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 287,
+      "question": "Wan Stands For",
+      "answer": "Wide Area Network",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 288,
+      "question": "Microprocessor Is The Of The Computer And It Perform All The Computational Tasks",
+      "answer": "Heart",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 289,
+      "question": "MS Word Offers The Different Views Of A Document?",
+      "answer": "5",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 290,
+      "question": "Which Type Of Memory Holds The Computer Startup Routine?",
+      "answer": "Rom",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 291,
+      "question": "Work Laid The Foundations For The Building Of Computers, And The Creation Of Encryption In The 20th Century.",
+      "answer": "Al-Khwarizmi",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 292,
+      "question": "Which Of The Following Holds Data And Processing Instructions Temporarily Until The CPU Needs It?",
+      "answer": "Main Memory",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 293,
+      "question": "A Computer Program That Translates One Program Instructions At A Time Into Machine Language Is Called A/An",
+      "answer": "Interpreter",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 294,
+      "question": "If You Press The Cell Accepts Your Typing As Its Contents.",
+      "answer": "Enter",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 295,
+      "question": "In MS Excel We Added Before Fraction For Not To Enter Date.",
+      "answer": "Space",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 296,
+      "question": "Shortcut Key To Insert A New Worksheet In Excel Is.",
+      "answer": "Shift+F11",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 297,
+      "question": "Which Of These Key Is Used In MS Excel To Insert Current Time In Workbook.",
+      "answer": "Ctrl+Shift+;",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 298,
+      "question": "Which Key Is Used For One Screen Down In MS Word",
+      "answer": "Page Down Key",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 299,
+      "question": "In MS Excel 2016= Now () Is Used",
+      "answer": "To Show Both Time& Date",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 300,
+      "question": "A Word Processor Would Most Likely Be Used To Do Type A",
+      "answer": "Biography",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 301,
+      "question": "An Optical Disk Is An Electronic Data Storage Medium That Can Be Written To And Read From Using A",
+      "answer": "Low Powered Laser Beam",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 302,
+      "question": "Which Of The Following Is Not A Valid Data Type In MS Access?",
+      "answer": "Picture",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 303,
+      "question": "To Restore Last Action We Use Which Option",
+      "answer": "Redo",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 304,
+      "question": "The Processed Output Given By Computer Is Also Called",
+      "answer": "Information",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 305,
+      "question": "A Feature That Automatically Corrects Common Spelling Errors Is Called",
+      "answer": "Auto Correct",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 306,
+      "question": "In MS Excel, What Is Function Inside Another Function Called",
+      "answer": "Nested",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 307,
+      "question": "Which Of The Following Do Not Belong To Queues For Processes.",
+      "answer": "Pcb Queue",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 308,
+      "question": "Which Key Is Used To Help In MS Word",
+      "answer": "F1",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 309,
+      "question": "You Can Organize Files By Storing Them In",
+      "answer": "Folder",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 310,
+      "question": "What Kind Of Memory Is Both Static And Non-Volatile?",
+      "answer": "Rom",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 311,
+      "question": "Which Of The Following Controls The Process Of Interaction Between The User And The Operation System?",
+      "answer": "User Interface",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 312,
+      "question": "Any Data Or Instruction Entered Into The Memory Of A Computer Is Considered As",
+      "answer": "Input",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 313,
+      "question": "What Should Be Done, After Fixing A Problem Or Installing A New Application Or Making Configuration In A Computer?",
+      "answer": "Restart",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 314,
+      "question": "Circular Division Of Disk To Store And Retrieve Data Are Known As",
+      "answer": "Track",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 315,
+      "question": "Which Of The Following Is The File Extension Of The PowerPoint Application?",
+      "answer": ".Ppt",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 316,
+      "question": "Which Of The Following Shortcut Key Is Used To Close A Tab On A Browser",
+      "answer": "Ctrl+W",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 317,
+      "question": "Which Of The Following Is The Most Power Full Type Of Computer",
+      "answer": "Super Computer",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 318,
+      "question": "A List Of Instructions Used By Computer Is Called",
+      "answer": "Program",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 319,
+      "question": "A Common Use Of Computer In Office Is For",
+      "answer": "Word Processing",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 320,
+      "question": "Instructions And Memory Addresses Are Represented By",
+      "answer": "Binary Codes",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 321,
+      "question": "By Default, The Orientation Of A Document Is When Printing.",
+      "answer": "Portrait",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 322,
+      "question": "The Most Commonly Used Type Of Software In Industry, Offices And Wan Is",
+      "answer": "Horizontal Market Software",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 323,
+      "question": "After Creating The Tabel Which Of The Following Is Correct",
+      "answer": "Fields Can Add And Deleted As Needed",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 324,
+      "question": "Ctrl+S Is Used As",
+      "answer": "Save The Documents With Same Name",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 325,
+      "question": "The Process Of Verifying The Identity Of User Is Termed As",
+      "answer": "Authentication",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 326,
+      "question": "Pin Stand For",
+      "answer": "Personal Identification Number",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 327,
+      "question": "For Hearing And Playing Which Device Is Required",
+      "answer": "Sound Card And Speakers",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 328,
+      "question": "Which Command Is Used To Generate A Series Of Data Directly From The Values Of The Selected Cells",
+      "answer": "Fill",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 329,
+      "question": "The Formula Used To Perform Calculations In The Worksheet Can Be Inserted With The Help Of",
+      "answer": "Insert Formula Icon",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 330,
+      "question": "Where Is A List Of All Functions Displayed",
+      "answer": "Function Box",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 331,
+      "question": "Main Window In A Computer Spread Sheet Is Called",
+      "answer": "Workbook",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 332,
+      "question": "In Ms-Excel Two Common Wildcard Characters That MS Excel Recognizes Are",
+      "answer": "* (Asterisk) And (Question Mark)",
+      "answer_rule": "colon_before_question_mark",
+      "flag": null
+    },
+    {
+      "number": 333,
+      "question": "In MS Excel The Command Used To Combine/ Merge The Consecutively Selected Cells And Center Aligned Is",
+      "answer": "Merge & Center",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 334,
+      "question": "In MS Excel Function To Return One Value If A Condition Is True And Another Value If It's False",
+      "answer": "If Function",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 335,
+      "question": "The Cell Referencing That Does Not Change When Copied Is",
+      "answer": "Absolute Reference",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 336,
+      "question": "Which Of The Following Function Is Used To Get The Current Data?",
+      "answer": "Today ()",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 337,
+      "question": "To Add Two Cells (A1 And A2) Together In MS Excel",
+      "answer": "=A1+A2",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 338,
+      "question": "Which One Is The Spreadsheet Application That Comes With MS Office Software Group",
+      "answer": "MS Excel",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 339,
+      "question": "Microsoft Excel Functions Arguments Are Always Written In",
+      "answer": "Parentheses ()",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 340,
+      "question": "What Is Shortcut Key Of Mark Citation In MS Word",
+      "answer": "Alt+Shift+I",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 341,
+      "question": "Which Of The Following Is Not Essential Component To Perform A Mail Merge Operation",
+      "answer": "Word Fields",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 342,
+      "question": "Which Menu/Group Will We Use If We Want To Change The Typeface Of Selected Text",
+      "answer": "Format Menu",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 343,
+      "question": "In Microsoft Word, When The User Is Reading A Document On The Screen And Want To Hide All The Elements Except For The Document, He Chooses",
+      "answer": "Full Screen Reading View",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 344,
+      "question": "Suppose There Is A Text In A Document That Is Bold, Red In Color With Green Background We Want To----- Of These Formatting To Another Paragraph In One Go, Which Option Will We Use",
+      "answer": "Format Painter",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 345,
+      "question": "Which Of Following Keyboard Shortcut Is Used To Change The Case",
+      "answer": "Shift+F3",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 346,
+      "question": "In MS Word Adding A Ghost Text, Such As \"Confidential\" Behind The Text Applied Using",
+      "answer": "Watermark",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 347,
+      "question": "The Top Most Bar Of A Document File Is Called Bar?",
+      "answer": "Title",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 348,
+      "question": "By Default Footers Are Printed On",
+      "answer": "All Page",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 349,
+      "question": "An Application Program That Allows A User To Set Page Number And Spell Check Of A Document Is Known As",
+      "answer": "Word Processor",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 350,
+      "question": "In MS Word Ctrl+U Is Used As An Alternate Of",
+      "answer": "Underlined The Selected Text",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 351,
+      "question": "The Date And Time Display On",
+      "answer": "System Tray",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 352,
+      "question": "Word Wrap Means",
+      "answer": "Moving Text Automatically To The Next Line",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 353,
+      "question": "Ctrl+N Is Used To",
+      "answer": "New Document",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 354,
+      "question": "Eights Bits Make Up A",
+      "answer": "Byte",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 355,
+      "question": "What Is The Shortcut Key For Manual Line Break",
+      "answer": "Shift+Enter",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 356,
+      "question": "Ctrl+I Is Used For",
+      "answer": "Italic",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 357,
+      "question": "End Key Is Used For",
+      "answer": "Moves The Cursor End Of The Line",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 358,
+      "question": "A Feature Of MS Office That Saves The Documents Automatically After Certain Interval Is Called",
+      "answer": "Auto Save",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 359,
+      "question": "Which Of The Following Is Not A Type Of Software",
+      "answer": "Entertainment Software",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 360,
+      "question": "You Can Use The Format Painter Multiple Times Before You Turn If Off By",
+      "answer": "Double Clicking The Format Painter Button",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 361,
+      "question": "The Greater Than Sign Is An Example Of Operation",
+      "answer": "Logical",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 362,
+      "question": "In Microsoft Word, Superscript, Subscript, Strikethrough Is Known As",
+      "answer": "Font Effect",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 363,
+      "question": "Operating System, Editors, And Debuggers Comes Under?",
+      "answer": "System Software",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 364,
+      "question": "In MS Word The Name Of Default Paper Size Is",
+      "answer": "Letter",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 365,
+      "question": "The Default Name Of The Newly Created MS Word File Is",
+      "answer": "Document1",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 366,
+      "question": "Whereas A Computer Mouse Moves Over The Table Surface., The Trackball Is",
+      "answer": "Stationary",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 367,
+      "question": "And Are The Smallest And Largest Font Size Available In Font Size Tool On Formatting Toolbar In MS-Office.",
+      "answer": "8 & 72",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 368,
+      "question": "Which Of The Following Menu Item Is Used To Create A Chart In Ms Excel- 2016",
+      "answer": "Insert",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 369,
+      "question": "You Cannot Close MS Word Application By.",
+      "answer": "From File Menu Choose Close Submenu",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 370,
+      "question": "Which Of The Following Is Not Anti-Virus Software",
+      "answer": "Oracle",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 371,
+      "question": "You Can Auto Fit The Width Of Column By",
+      "answer": "Double Clicking On Column Right Border On Column Header",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 372,
+      "question": "What Are Inserted As Cross-Reference In Word",
+      "answer": "Word Fields",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 373,
+      "question": "By Default, MS-Word Automatically Saves Any Document After Every",
+      "answer": "10 Mints",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 374,
+      "question": "Which Of The Following Is Used To Capitalize The Start Word Of Paragraph",
+      "answer": "Drop Cap",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 375,
+      "question": "Rj45 Utp Cable Has Cables.",
+      "answer": "4 Pair",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 376,
+      "question": "Which Sign Is Used In The Formula To Use Absolute Reference",
+      "answer": "$",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 377,
+      "question": "How To Insert Row In A Table Quickly In MS Word",
+      "answer": "Press Tab",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 378,
+      "question": "Which Shortcut Key Is Used To Change The Font In MS Word",
+      "answer": "Ctrl+Shift+F",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 379,
+      "question": "Which Type Of Computers Are Used In Small Organization For Specific Tasks",
+      "answer": "Minicomputer",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 380,
+      "question": "Which Shortcut Key Is Used For Print Preview",
+      "answer": "Ctrl+F2",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 381,
+      "question": "What Is The Shortcut Key For '' Clear All Formatting'' The Selected Text",
+      "answer": "Ctrl+Spacebar",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 382,
+      "question": "Turn On/Off Power Button Is Typically Located At",
+      "answer": "Back Of The Device",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 383,
+      "question": "Ctrl+Space Is Commonly Used To Open",
+      "answer": "Format Menu",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 384,
+      "question": "Is MS Word, What Is Added To The Right Of Paragraph",
+      "answer": "Comment",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 385,
+      "question": "Is MS Word 2016 To Extend A Selection To One Line Up, Press Key From The Keyboard?",
+      "answer": "Shift +Up Arrow",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 386,
+      "question": "In MS-Word To Highlight Text , Line Or Any Particular Informative Paragraph , We Use",
+      "answer": "Shade",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 387,
+      "question": "The Smallest Unit Of Information About A Record In A Database Is Called A",
+      "answer": "Field",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 388,
+      "question": "A Computer Cannot Boot If It Does Not Have",
+      "answer": "Operating System",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 389,
+      "question": "In MS-Excel To Open An Existing Workbook, You Can Click The Open Button On The Toolbar.",
+      "answer": "Standard Toolbar",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 390,
+      "question": "A Pixel Is.",
+      "answer": "The Smallest Unit Of A Digital Image",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 391,
+      "question": "A Value Used In A Formula That Does Not Change Is Called A",
+      "answer": "Constant",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 392,
+      "question": "What Does A Vlookup Function Do",
+      "answer": "Searches For A Value In The Column",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 393,
+      "question": "What Is The Primary Feature Of Auto Correct In MS Word",
+      "answer": "Spelling Correction",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 394,
+      "question": "In MS Excel 2016 , A Window Can Be Split Into Two Parts By Which Of The Following Options?",
+      "answer": "View > Window > Split",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 395,
+      "question": "The Option Is Used To Show A Specific Row Or Column On Every Printed Page?",
+      "answer": "Print Title",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 396,
+      "question": "Which Excel Feature Is Associated With A Line Appearing Around A Cell When Selected Active Cell Highlighting",
+      "answer": "",
+      "answer_rule": "unknown",
+      "flag": null
+    },
+    {
+      "number": 397,
+      "question": "All The Modern Computers Operate On",
+      "answer": "Digital Data",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 398,
+      "question": "Which Type Of Indent Is Typically Used In Gutter Margin",
+      "answer": "Left Indent",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 399,
+      "question": "First Calculator Was Invented By",
+      "answer": "Blaise Pascal",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 400,
+      "question": "The Address Of The Cell At 26th Column And 30th Row Is",
+      "answer": "Z30",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 401,
+      "question": "Basic Is Language.",
+      "answer": "Procedural",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 402,
+      "question": "In Excel To Create A Formula, You First.",
+      "answer": "Select The Cell You Want To Place The Formula Into",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 403,
+      "question": "What Is The Main Purpose Of Format Painter In Microsoft Applications",
+      "answer": "To Copy Formatting From One Place And Paste It To Another Place",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 404,
+      "question": "Which Of The Following Is The Valid Font Style",
+      "answer": "Regular",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 405,
+      "question": "How To Delete Selected Text In Word",
+      "answer": "Press Delete",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 406,
+      "question": "If A Formula Referencing A Cell That Contains Text Instead Of A Numerical Value Then What Error Does Excel Display",
+      "answer": "#Value!",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 407,
+      "question": "Which Type Of Computers Are Of Large Size",
+      "answer": "Main Frame Computer",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 408,
+      "question": "F12 Key In MS Word Is Uséd For",
+      "answer": "Open Save As Dialogue Box",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 409,
+      "question": "Compiler Is A",
+      "answer": "System Program That Converts Instructions To Machine Language",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 410,
+      "question": "Which Excel Tool Allows You To Set Specific Conditions For Data Entry Ensuring Accuracy And Consistency In Your Analysis",
+      "answer": "Data Validation",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 411,
+      "question": "The Space Between The Margin And Start Of Paragraph Is Called",
+      "answer": "Indentation",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 412,
+      "question": "In MS Excel Ready Made Templates Are Available Under Tab.",
+      "answer": "File",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 413,
+      "question": "MS Excel Is Generally Used For",
+      "answer": "Organize Data",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 414,
+      "question": "Which Of The Following Is Valid Cell Address",
+      "answer": "A5",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 415,
+      "question": "Is A Predefined Set Of Colors, Fonts, And Visual Effects That You Apply To Your Slides In PowerPoint For A Unified, Professional Look.",
+      "answer": "Theme",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 416,
+      "question": "Which Of The Following Class Of Computer Can Not Support Multiple Users Simultaneously",
+      "answer": "Microcomputer",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 417,
+      "question": "What Feature Enables Drawing Decorative Text With Graphical. Effects Such As Skewing, Shadowing. Rotating And Stretching In A Variety Of Shapes And Colors With Three-Dimensional Effects In An MS Word Document",
+      "answer": "Word Art",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 418,
+      "question": "The Only Language Which The Computer Understands Is",
+      "answer": "Machine Level Language",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 419,
+      "question": "Which Shortcut Is Key Used For Print The Document",
+      "answer": "Ctrl+P",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 420,
+      "question": "Which Key Is Used To Copy The Formula From The Above Cell",
+      "answer": "Ctrl+'",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 421,
+      "question": "Which Type Of Data Is Used For Inserting Or Placing Content From Clipboard Into A Document",
+      "answer": "Deleted Data",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 422,
+      "question": "In MS Word Superscript Subscript Strike Through Are Known As",
+      "answer": "Font Effect",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 423,
+      "question": "The Extension Of MS Excel Is",
+      "answer": ".Xls",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 424,
+      "question": "To What Temporary Area Can You Store Text And Other Data, And Later Paste Them To Another Location?",
+      "answer": "Clipboard",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 425,
+      "question": "In Excel , Columns Are Labelled As",
+      "answer": "A,B,C",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 426,
+      "question": "Which Tool In MS Office Is Used To Copy And Paste Character And Paragraph Formats To Existing Text",
+      "answer": "Format Painter",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 427,
+      "question": "Which Of The Following Print Command Should Be Selected To View The Whole Document",
+      "answer": "Print Preview",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 428,
+      "question": "What Do You Mean By Vertical Separation Between Columns",
+      "answer": "Margin",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 429,
+      "question": "What Is The Function Of Recycle Bin?",
+      "answer": "Store Deleted File",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 430,
+      "question": "Which Shortcut Is Used To Decrease The Text Font Size",
+      "answer": "Ctrl+Shift+<",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 431,
+      "question": "Which Of The Following Will Happen When Data Is Entered Into A Memory Location?",
+      "answer": "It Overwrites The Previous Content At That Location",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 432,
+      "question": "Which Option In File Menu Is Used To Close A File In MS Word",
+      "answer": "Close",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 433,
+      "question": "By Default, The Page Size Of A New Document Is Inches By Inches",
+      "answer": "8.5 And 11",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 434,
+      "question": "\"Ctrl + End\" Is Used To",
+      "answer": "Moves The Cursor To The End Of Document",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 435,
+      "question": "In MS Word Go To Is Part Of",
+      "answer": "Replace",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 436,
+      "question": "What Is Placed To The Left Of Horizontal Scroll Bar",
+      "answer": "View Buttons",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 437,
+      "question": "What Is Maximum Zoom Percentage In MS-Word",
+      "answer": "500%",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 438,
+      "question": "To View The Left Side Of The Page We Use In A Document In MS Word , Which Scroll Bar Should Be Utilized",
+      "answer": "Horizontal Scroll Bar",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 439,
+      "question": "Which Panes Keeps Specific Rows Or Columns Visible When You Scroll In The Worksheet.",
+      "answer": "Freezing Pane",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 440,
+      "question": "When Working With Formulas In Excel, How Can You See The Intermediate Results Of A Calculation Before The Final Answer Is Displayed",
+      "answer": "Evaluation Cannot Be Done In Between The Calculation",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 441,
+      "question": "Which Key Do You Press While Clicking To Select More Than One File Or Folder?",
+      "answer": "Ctrl",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 442,
+      "question": "The Group Of Cells In MS Excel Is Known As",
+      "answer": "Range",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 443,
+      "question": "Is A Set Of Commands Grouped Together That We Can Run.",
+      "answer": "Macros",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 444,
+      "question": "Which Function Is Used To Find String Length In Ppsc And Give The Answer",
+      "answer": "Len (Ppsc)",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 445,
+      "question": "Along Computer Works On The Supply Of",
+      "answer": "Continuous Electrical Pulses",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 446,
+      "question": "We Can Open The MS Word File By Typing In The Run Dialogue Box.Winword.",
+      "answer": "Exe",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 447,
+      "question": "How Many Different Positions Can You Set For Drop Cap In MS Word",
+      "answer": "2(Dropped & In Margin)",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 448,
+      "question": "The Title Of Page Of Microsoft Word Document Is Called",
+      "answer": "Cover Page",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 449,
+      "question": "What Is The Maximum Angle You Can Rotate Text Within A Cell In MS Excel",
+      "answer": "180",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 450,
+      "question": "In MS Excel Which Bar Is Used For Formula And Data Writing",
+      "answer": "Formula Bar",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 451,
+      "question": "The Brain Of Computer Is Called",
+      "answer": "CPU",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 452,
+      "question": "The Crime That Involves And Uses Of Is Known As Cybercrime.",
+      "answer": "Computer Devices",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 453,
+      "question": "World Wide Web (Www) Is A Which Allows The User To Access A Vast Variety Of Documents By Hypermedia Links.",
+      "answer": "Hypertext-Based Information System",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 454,
+      "question": "Https Provides A Communication Over Computer Network.",
+      "answer": "Encrypted And Authenticated (Secure)",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 455,
+      "question": "Name The Function Which Is Used To Find The Length Of String",
+      "answer": "Strlen ()",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 456,
+      "question": "Which Key Is Used For Paste In MS Word?",
+      "answer": "Ctrl+V",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 457,
+      "question": "Go To Command In Excel Is Located In",
+      "answer": "Find",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 458,
+      "question": "Which Type Of View Is Not Present In MS PowerPoint?",
+      "answer": "Slide Show",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 459,
+      "question": "The PowerPoint View That Displays Only Text (Title And Bullets) Is",
+      "answer": "Outline View",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 460,
+      "question": "Is A Predefined Set Of Colors, Fonts And Visual Effects That You Apply To Your Slides",
+      "answer": "Theme",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 461,
+      "question": "The First Page Of Any Website Is Called",
+      "answer": "Home Page",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 462,
+      "question": "Which Items Are Placed At The End Of A Document?",
+      "answer": "End Note",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 463,
+      "question": "To Select A Group Of Worksheet We Press And Hold Key And Select The Sheet We Want To Add.",
+      "answer": "Ctrl",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 464,
+      "question": "Website Use Information Called.",
+      "answer": "Tracker",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 465,
+      "question": "We Set The Page Numbers In A Type Of Document",
+      "answer": "Note Pad & Word Processor",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 466,
+      "question": "Which Of The Following Is Used To Display The List Of All Subjects.",
+      "answer": "Selection Pane",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 467,
+      "question": "Web Browser Stores Previous Information For Web Pages Is Termed As",
+      "answer": "Auto Complete",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 468,
+      "question": "Ctrl+Shift+< Is Used For",
+      "answer": "Decrease Font Size",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 469,
+      "question": "8/9 Write In Excel Without The Formula Then It Shows.",
+      "answer": "Date",
+      "answer_rule": "final_period",
+      "flag": "question_starts_with_number"
+    },
+    {
+      "number": 470,
+      "question": "Is Used To Move The Cursor One Word Right At A Time In MS Word",
+      "answer": "Ctrl + Right Arrow",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 471,
+      "question": "Cyber Security Is Related To",
+      "answer": "Computer",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 472,
+      "question": "To Write 2 In X2 In The Word We Use The Key",
+      "answer": "Ctrl + Shift++",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 473,
+      "question": "Which One Is The Most Suitable Reason To Use Macro In MS Office?",
+      "answer": "To Automate Repetitive Tasks",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 474,
+      "question": "What Is To Be Used To Add Text In Slide?",
+      "answer": "Text Box",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 475,
+      "question": "Which Command Will You Use In PowerPoint If You Need To Change The Color Of Different Objects Without Changing Content?",
+      "answer": "Color Scheme",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 476,
+      "question": "In Excel, A Data Series Is Defined As What?",
+      "answer": "A Collection Of Related Data",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 477,
+      "question": "Which Of The Following Is Used To Move From One Page To Another?",
+      "answer": "Hyperlink",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 478,
+      "question": "Specific Information Added On The Top Of The Page Is Called",
+      "answer": "Header",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 479,
+      "question": "We Can Add It In MS Powerpoint",
+      "answer": "Animation",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 480,
+      "question": "In MS PowerPoint We Can Go To Next Slide By",
+      "answer": "Enter Button",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 481,
+      "question": "Which Of The Following Is Not A Font Style",
+      "answer": "Underline",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 482,
+      "question": "A Is A Unit Of Informational In A.",
+      "answer": "Field, Record",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 483,
+      "question": "Which Among The Following Is The Fastest Memory Component In A Computer?",
+      "answer": "Cache",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 484,
+      "question": "Which Of The Following Execute Instructions.",
+      "answer": "CPU",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 485,
+      "question": "Which Of The Following Is Used In Optical Fiber.",
+      "answer": "Glass Thread",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 486,
+      "question": "Which Can Be Used For Quick Access To Commonly Used Commands And Tools?",
+      "answer": "Tool Bar",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 487,
+      "question": "Http Stands For",
+      "answer": "Hypertext Transfer Protocol",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 488,
+      "question": "Which Part Of Computer Connects With Motherboard And Give Power To Different Parts",
+      "answer": "Power Supply",
+      "answer_rule": "semicolon",
+      "flag": null
+    },
+    {
+      "number": 489,
+      "question": "A Collection Of Interrelated File In Computer Is A",
+      "answer": "Database",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 490,
+      "question": "Developed The Idea For The Universal Turing Machine, Which Becomes The Basis For The First Computer.",
+      "answer": "Alan Turing",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 491,
+      "question": "Functional Dependencies Are The Types Of Constraints That Are Based On",
+      "answer": "Key",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 492,
+      "question": "Internet Explorer Is A Type Of",
+      "answer": "Web Browser",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 493,
+      "question": "MS Office Is A",
+      "answer": "Horizontal Market",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 494,
+      "question": "You Can Check The Conditions Against When Applying Conditional Formatting",
+      "answer": "Formula & Cell Value",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 495,
+      "question": "We Can Use_ To Convert Word In To Pdf",
+      "answer": "Save As",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 496,
+      "question": "Which Query Do You Use To Answer The Question \"Which Employees Earn More Than $5000 A Month\"?",
+      "answer": "Select Query",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 497,
+      "question": "Tape Speed Is Measured In",
+      "answer": "Inch Per Second",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 498,
+      "question": "IP Stands For",
+      "answer": "Internet Protocol",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 499,
+      "question": "A Program Represent Eight Symbols Is Called",
+      "answer": "Octal",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 500,
+      "question": "Fifth Generation Of Computer Is Referred To",
+      "answer": "Artificial Intelligence",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 501,
+      "question": "Animation Means",
+      "answer": "Accelerated Static Images",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 502,
+      "question": "How Many Worksheets Are There In Excel By Default",
+      "answer": "03",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 503,
+      "question": "To Direct Delete All Without Putting It In Recycle Bin We Use Which Option.",
+      "answer": "Permanent Delete",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 504,
+      "question": "In MS -Word What Does A Ruler Help?",
+      "answer": "To Set Tabs",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 505,
+      "question": "What Is The Shortcut Key For Hyperlink In MS Word?",
+      "answer": "Ctrl+K",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 506,
+      "question": "A High Quality Cad System Uses The Following For Printing Drawing And Graphs",
+      "answer": "Digital Plotter",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 507,
+      "question": "Why Headers And Footers Used In MS-Word To Allow Page Header And Footers To Appear On Document",
+      "answer": "When It Is Printed.",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 508,
+      "question": "Which Of The Following Is Not A Hardware",
+      "answer": "Windows Xp",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 509,
+      "question": "Memory Which Contain Information On Computer And Cannot Change",
+      "answer": "Rom",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 510,
+      "question": "Which File Stored In Computer That Perform Functions Quickly While Browsing",
+      "answer": "Cache",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 511,
+      "question": "Which Is Represented From High Level To Low Level In C++, Cobol, Java Etc.",
+      "answer": "Software",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 512,
+      "question": "Slide Sorter Menu Of PowerPoint Is Available On Menu",
+      "answer": "View",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 513,
+      "question": "A Search Engine Used Software Called To Search Documents On Internet.",
+      "answer": "Spider",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 514,
+      "question": "What Is The Name Of The Operating System That Reads And Reacts In Terms Of Actual Time",
+      "answer": "Real Time System",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 515,
+      "question": "The First Computer Mouse Was Built By",
+      "answer": "Douglas Engelbart",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 516,
+      "question": "You Protect A Computer From Virus,You Should Install In Your Computer.",
+      "answer": "Antivirus",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 517,
+      "question": "In MS Access Minimum Of Data Types Can Be Assigned To A Field.",
+      "answer": "10",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 518,
+      "question": "In MS Access, Which Data Type Is Appropriate To Storage Large Text And Numbers?",
+      "answer": "Memo",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 519,
+      "question": "Which Of The Following Is A Form Of Cyber Crime?",
+      "answer": "Hacking",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 520,
+      "question": "IBM We Use In Our Daily Life Was Invented By",
+      "answer": "Philip Donald",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 521,
+      "question": "The Basic Language Of Computer Consist Of",
+      "answer": "Opcode & Operand",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 522,
+      "question": "A Repository For Data, Usually Covering Specific Topic Is",
+      "answer": "Data Bank",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 523,
+      "question": "Png ,Jpg, and Gif Are The Formats Files",
+      "answer": "Image",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 524,
+      "question": "E-Mail Spam Is Message Sent In Bulk By Email",
+      "answer": "Unwanted",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 525,
+      "question": "Junk E-Mail Is Also Called",
+      "answer": "Spam",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 526,
+      "question": "Google Chrome ,Mozilla Firefox And Opera Are The Examples Of",
+      "answer": "Web Browser",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 527,
+      "question": "A Connection Between Two End Points Either Physical Or Logical, Over Which Data May Travel In Both Direction Simultaneously Is Called",
+      "answer": "Duplex",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 528,
+      "question": "A Chart Can Be Put As A Part Of The Presentation Using",
+      "answer": "Insert->Chart",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 529,
+      "question": "Which Tab Is Not Available On Left Panel When You Open A Presentation?",
+      "answer": "Notes",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 530,
+      "question": "An Email Account Consists Of Two Parts One Is User Name And Other Is",
+      "answer": "Domain Name",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 531,
+      "question": "What Is The Use Of Proper Text In MS Excel",
+      "answer": "Convert Your Input Text To Proper Case",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 532,
+      "question": "Which Of The Following Is Considered As The Unsolicited Commercial Email",
+      "answer": "Spam",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 533,
+      "question": "Electronic Record Keeping Is A Key To Create",
+      "answer": "Paperless Environment",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 534,
+      "question": "The Process Of Transferring Data From Computer To Internet Is Called",
+      "answer": "Uploading",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 535,
+      "question": "The Basic Architecture Of Computer Was Developed By",
+      "answer": "John Von Neumann (1945)",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 536,
+      "question": "Computer Virus Is A",
+      "answer": "Software",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 537,
+      "question": "GUI Stands For",
+      "answer": "Graphical User Inter Face",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 538,
+      "question": "When Was First Email Sent",
+      "answer": "1971",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 539,
+      "question": "The Process Of Putting Data Into A Storage Location Is Called",
+      "answer": "Writing",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 540,
+      "question": "In MS Excel Absolute Cell Reference Is Mentioned With Which Sign",
+      "answer": "$",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 541,
+      "question": "Where Is Computer Bios Stored",
+      "answer": "Flash",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 542,
+      "question": "How Many Option Does A Binary Choice Offer",
+      "answer": "Two",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 543,
+      "question": "MS Access Arranges The Data In The",
+      "answer": "Tables",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 544,
+      "question": "The Capability Of The Organization To Ensure High Quality Data Is Called",
+      "answer": "Data Governance",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 545,
+      "question": "Smart Card Is",
+      "answer": "Microprocessor Cards",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 546,
+      "question": "In MS PowerPoint Record Slide Show Can Record",
+      "answer": "Slide And Animation Timings",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 547,
+      "question": "The View That Displays The Slides Of A Presentation As Miniature Representations Of The Slides Is Called",
+      "answer": "Slide Sorter View",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 548,
+      "question": "In MS Excel We Can Add Chart From Tab.",
+      "answer": "Insert",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 549,
+      "question": "In MS Excel A Formula That Looks For A Value In Left-Most Column Of A Table And Then Returns A Value In The Same Row For Specific Column",
+      "answer": "Vertical Lookup",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 550,
+      "question": "In MS Excel Ready-Made Templates Are Available Under Tab In New Option.",
+      "answer": "File",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 551,
+      "question": "We Can Start MS Word by Typing In The Run Dialogue Box",
+      "answer": "Winword.Exe",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 552,
+      "question": "In Microsoft Word, When The User Is Reading A Document On The Screen And Want To Hide All Other Screen Elements We Choose",
+      "answer": "Full Screen Reading View",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 553,
+      "question": "Creating A New Email Account Is Called",
+      "answer": "Sign Up",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 554,
+      "question": "Personal Logs Or Journal Entries Posted On The Web Are Known As",
+      "answer": "Blogs",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 555,
+      "question": "Which Of The Following Cannot Be A Part Of An E-Mail Address",
+      "answer": "Space( )",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 556,
+      "question": "The Project Allows Access To The Universe Of Online Information Using Two Simple User Interface Operations",
+      "answer": "World-Wide Web",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 557,
+      "question": "Sending An E-Mail Is Similar To",
+      "answer": "Writing A Letter",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 558,
+      "question": "The Option Is Used To Refine The Search Result",
+      "answer": "Advance Search",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 559,
+      "question": "The Topic Of The Email Is Called",
+      "answer": "Subject",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 560,
+      "question": "Which Is The Default Alignment In MS Word",
+      "answer": "Left-Align",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 561,
+      "question": "Which Key Is Used For Left Alignment In MS Word",
+      "answer": "Ctrl+L",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 562,
+      "question": "In Ms_Excel To Add Two Cells (A1 And A2) Together You Use The Following Formula",
+      "answer": "=A1+A2",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 563,
+      "question": "How To Fill Long Texts In A Single Cell With Multiple Lines",
+      "answer": "Use The Wrap Text Option In The Format ->Alignment Menu",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 564,
+      "question": "Which Function Can Be Used To Calculate The Monthly Mortgage Payment",
+      "answer": "PMT",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 565,
+      "question": "Mod () Function Is Used In MS Excel To Get",
+      "answer": "Remainder",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 566,
+      "question": "You Can Use The Formula Palette In Spreadsheet Programs",
+      "answer": "To Create And Edit Formula Containing Functions",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 567,
+      "question": "Which Allow To Access From One Cell To Another",
+      "answer": "Address",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 568,
+      "question": "A Website Content Can Be Viewed In",
+      "answer": "Internet",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 569,
+      "question": "Margin That Is Added To The Binding Side Of Page When Printing",
+      "answer": "Gutter Margin",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 570,
+      "question": "In MS Excel Which Key Is Used To Add New Worksheet",
+      "answer": "Shift +F11",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 571,
+      "question": "Which Key Is Used For Right Alignment In MS Word",
+      "answer": "Ctrl+R",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 572,
+      "question": "To Begin A Paragraph With A Large Dropped Initial Capital Letter Is Called",
+      "answer": "Drop Cape",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 573,
+      "question": "Which Key Is Used To Open New Tab In Internet Explorer",
+      "answer": "Ctrl+T",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 574,
+      "question": "Is Collection Of Links Of Images, Sound, And Animation.",
+      "answer": "Hyperlink",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 575,
+      "question": "Which Key Is Use For Excel Colum Highlight",
+      "answer": "Crtl+Space",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 576,
+      "question": "Is Ued To Tell Excel To Include All Cell Between The Two End Point Cell Reference",
+      "answer": "Single Colon (:)",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 577,
+      "question": "Format Painter In PowerPoint Relates To",
+      "answer": "To Copy Formatting From One Object Or Piece Of Text And Then Apply It Elsewhere",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 578,
+      "question": "Business With The Help Of Internet Is Called",
+      "answer": "E-Commerce",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 579,
+      "question": "In MS Office Ctrl+W Is Used To The Current Window.",
+      "answer": "Close",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 580,
+      "question": "Which Key Is Used To Add Comment In Excel",
+      "answer": "Shift+F2",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 581,
+      "question": "In MS Excel, Name Box Is Used To Obtain Of The Current Cell",
+      "answer": "Address",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 582,
+      "question": "Allows To Prepare And Send Same Letter To Different Persons.",
+      "answer": "(Mail Merge)",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 583,
+      "question": "In MS Word Ctrl+E Is Used To Align The Text In Side Of A Paragraph.",
+      "answer": "Center",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 584,
+      "question": "The Default Orientation Of Printed Page Is",
+      "answer": "(Portrait)",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 585,
+      "question": "Is Storage Area For Email Account.",
+      "answer": "Mailbox",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 586,
+      "question": "Internet Is Which Enables Us To Share Information With Other People.",
+      "answer": "Network Of Network Around The World",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 587,
+      "question": "Is Used For Transferring From Internet To Your Computer.",
+      "answer": "Ftp (File Transfer Protocol)",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 588,
+      "question": "Is Used For Presenting One Own Work, Report Or Performance.",
+      "answer": "MS Power Point",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 589,
+      "question": "Is Used For Arranging Data In Ascending/Descending Order In MS Excel.",
+      "answer": "Data,Sort",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 590,
+      "question": "Which Shortcut Key Combination Reset Highlighted Text To Default Font In MS Word",
+      "answer": "Ctrl+Spacebar",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 591,
+      "question": "Is The Correct Format Of An Email Address",
+      "answer": "You@Website.Info",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 592,
+      "question": "Pane cannot Be Found In PowerPoint",
+      "answer": "Word Art",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 593,
+      "question": "In MS Word Is Used To Put An Item Little Below The Normal Text.",
+      "answer": "Ctrl+=",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 594,
+      "question": "Search Engine Used Software Called To Search Documents On Internet.",
+      "answer": "Spider (Web Crawler)",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 595,
+      "question": "Which Is Used For Open A Websites?",
+      "answer": "Browser",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 596,
+      "question": "Which Key Is Used For One Page Down In Word",
+      "answer": "Ctrl+ Pg. Dn",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 597,
+      "question": "Which Of The Following Is A Single User System",
+      "answer": "Ms-Dos",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 598,
+      "question": "Which Of The Following You Can Paste Using Paste Special Command",
+      "answer": "Values, Formulas, Formatting",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 599,
+      "question": "The Language That The Computer Can Understand And Execute Is Called",
+      "answer": "Machine Language",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 600,
+      "question": "Which Of The Following Tool Bar Used To Access Menu Bar And Tool Bar Quickly",
+      "answer": "Access Toolbar",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 601,
+      "question": "Which Device Is Used To Enter Data Into A Computer?",
+      "answer": "Input",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 602,
+      "question": "How To Copy Data From One Excel Sheet To Another Excel Sheet?",
+      "answer": "Paste Special",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 603,
+      "question": "The Slowest Response While Collecting Data Is",
+      "answer": "E Mail",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 604,
+      "question": "How To Open A Presentation In Power Point",
+      "answer": "Ctrl+O",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 605,
+      "question": "Which Software Is Used For Open Pages?",
+      "answer": "Web Browser",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 606,
+      "question": "Hybrid Computer Is",
+      "answer": "Digital & Analog Computer",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 607,
+      "question": "Microsoft Outlook Is A",
+      "answer": "Email Client",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 608,
+      "question": "In Data Base Each Row Is Called?",
+      "answer": "Record Or A Tuple",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 609,
+      "question": "In Data Base Each Column Is Called?",
+      "answer": "Fields.",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 610,
+      "question": "How Many Rows In MS Excel Sheet?",
+      "answer": "1048576",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 611,
+      "question": "In Ms-Dos Dos Stands For?",
+      "answer": "Disk Operating System",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 612,
+      "question": "G-Mail, Hotmail And Yahoo Are",
+      "answer": "Email Client",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 613,
+      "question": "Window 9 And Window 10 Are Known As",
+      "answer": "Operating System",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 614,
+      "question": "Which Of The Following Are Word Processing Software?",
+      "answer": "MS Word",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 615,
+      "question": "The First Computer Were Programmed Using",
+      "answer": "Machine Language",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 616,
+      "question": "The Computer Cannot Boot If It Cannot The",
+      "answer": "Operating System",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 617,
+      "question": "Bios Stands For",
+      "answer": "Basic Input Output System",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 618,
+      "question": "Which Function In Excel Returns A Remainder Of Division",
+      "answer": "Mod",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 619,
+      "question": "Which Template Provides Design Concept Fonts And Color Scheme?",
+      "answer": "Design Template",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 620,
+      "question": "Which Key Is Used To Minimize Excel Worksheet?",
+      "answer": "Ctrl+F9",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 621,
+      "question": "Videos, Documents And Files Can Be Shown In",
+      "answer": "WhatsApp",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 622,
+      "question": "In MS-Word Header And Footer Are Inserted In",
+      "answer": "On Every Page",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 623,
+      "question": "Which Button Do You Click To Add Up A Series Of Numbers",
+      "answer": "Auto sum Button",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 624,
+      "question": "When You Insert A Excel File To A Word Document. The Data Are",
+      "answer": "Linked",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 625,
+      "question": "A User Interface That Is Easy To Use Is Considered To Be",
+      "answer": "User Friendly",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 626,
+      "question": "When You Open A New Presentation, A Slide With The Default Layout Appears",
+      "answer": "Title",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 627,
+      "question": "Which Key Is Used To Insert Text In A Cell",
+      "answer": "F2",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 628,
+      "question": "What Is The Smallest Width Of A Column",
+      "answer": "0.5\"",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 629,
+      "question": "Which Of The Following Is Not A Part Of The Control Panel",
+      "answer": "My Documents",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 630,
+      "question": "1000 Million Bytes Is Equal To",
+      "answer": "1 Giga Byte",
+      "answer_rule": "colon",
+      "flag": "question_starts_with_number"
+    },
+    {
+      "number": 631,
+      "question": "Numeric Key Is A Key.",
+      "answer": "Primary",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 632,
+      "question": "What Do You Call A. Collection Of Records Matching Parameters Of Query?",
+      "answer": "(Dynaset)",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 633,
+      "question": "In Which Language Is Source Program Written?",
+      "answer": "High Level Programming Language",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 634,
+      "question": "Which Key Is Used To Open New Tab In Internet Explorer?",
+      "answer": "Ctrl+T",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 635,
+      "question": "Which Shortcut Key Is Used To Move To Next Page",
+      "answer": "Ctrl+Pg Dn",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 636,
+      "question": "Which Instrument Is Used To Convey Information Signal From Place To Another",
+      "answer": "Thermowell Transmitter Controller",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 637,
+      "question": "Binary Coded Decimal Is A Combination Of",
+      "answer": "Four Binary Digits",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 638,
+      "question": "What Is The Other Name Of Free Software?",
+      "answer": "Open Source Software Public Domain Software",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 639,
+      "question": "Laser Stands For",
+      "answer": "Light Amplification By Stimulated Emission Of Radiation",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 640,
+      "question": "Which Of The Following Is Not Included In MS Office Package?",
+      "answer": "MS Photo Editor",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 641,
+      "question": "Which Short Cut Key Is Used To Update Selected Field?",
+      "answer": "F9",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 642,
+      "question": "Thickness Of A Line Is Changed In",
+      "answer": "Shape Style",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 643,
+      "question": "ICS Were Used In",
+      "answer": "Third Generation",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 644,
+      "question": "Which Program Is Used To Convert High Level Programming To Low Level Machine Code",
+      "answer": "Compiler",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 643,
+      "question": "Is A High Speed Point To Point Channel For Attaching A Graphics Card To A Computer's Motherboard, Primarily To Assist In The Acceleration Of 3d Computer Graphics",
+      "answer": "AGP (Accelerator Graphics Port)",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 644,
+      "question": "The Purpose Of Is To Act As Holding Area Enabling The CPU To Manipulate Data Before Transferring It To A Device.",
+      "answer": "Buffer",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 645,
+      "question": "Nibble Contains",
+      "answer": "4 Bits",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 646,
+      "question": "Dpi Stands For",
+      "answer": "Dot Per Inch",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 647,
+      "question": "Excel Spacing In Column Is Called As?",
+      "answer": "Column Width",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 648,
+      "question": "A New Presentation Can Be Created From",
+      "answer": "Blank Presentation, From Existing Presentation, From Design Template",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 649,
+      "question": "Which Shortcut Key Is Used To Insert An Endnote In MS Word 2016?",
+      "answer": "Alt+Ctrl+D",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 650,
+      "question": "Statistical Calculations And Preparation Tables And Graphs Can Be Done Using",
+      "answer": "Excel",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 651,
+      "question": "In MS Word To Increase The Font Size By One Point",
+      "answer": "Ctrl +]",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 652,
+      "question": "Where Can You Change The Vertical Alignment In Microsoft Word?",
+      "answer": "Page Setup Dialog Box",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 653,
+      "question": "In Ms. Excel You Can Zoom From",
+      "answer": "10 To 400%",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 654,
+      "question": "Which Part Of Computer Used For Transfer Of Data?",
+      "answer": "(Physical Parts & Software Parts)",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 655,
+      "question": "Which Is Used For Web Page And Web Address?",
+      "answer": "(Search Engine & Software)",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 656,
+      "question": "Blank DVDs On Which Data Can Be Erased And Rewritten Are Identified As",
+      "answer": "DVD+Rw",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 657,
+      "question": "Who Gave The Idea To Combine The Internet With Hypertext Concept?",
+      "answer": "Tim Berners Lee",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 658,
+      "question": "There Are Two Different Ways To Insert Content From One Application Into Another",
+      "answer": "(Embedding And Linking)",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 659,
+      "question": "What Is The Name For A Webpage Address Select From Following?",
+      "answer": "URL",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 660,
+      "question": "The Function Is A Which Can Calculate The Values Given In A Specific Order",
+      "answer": "Predefined Formula",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 661,
+      "question": "Which One Is Not A Multitasking Operating System?",
+      "answer": "Dos",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 662,
+      "question": "What Type Of Printers Are Dot Matrix Printers?",
+      "answer": "Impact Printer",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 663,
+      "question": "\"Ctrl+D\" Shortcut Key Is Used In MS Word To",
+      "answer": "Open The Font Dialog Box",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 664,
+      "question": "Which Menu Provides You Options Like Animation Scheme, Custom Animation, Slide Transition?",
+      "answer": "Slide Show Menu",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 665,
+      "question": "Which Of The Following Is Not Used To Access The Web.",
+      "answer": "ISDN",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 666,
+      "question": "In MS Excel, To Create A Formula, You Can Use",
+      "answer": "Both Value And Cell References",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 667,
+      "question": "Which Program Is Generally Used In Architectural Design?",
+      "answer": "Auto Cad",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 668,
+      "question": "What Lets You Create A New Presentation By Selecting Ready-Made Font Color And Graphic Effects In PowerPoint?",
+      "answer": "Design Template",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 669,
+      "question": "When An Excel Workbook Is Linked To A Word Document",
+      "answer": "The Word Document Contains A Reference To The Original Source Application. 670_______ Users Can Open MS Excel 2016 File At The Same Time. 256",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 671,
+      "question": "In MS Word 2016, To Extend A Selection To Adjacent Cells Of The Table",
+      "answer": "Hold Down Shift And Press An Arrow Key Repeatedly",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 672,
+      "question": "When You Delete A Text Box Object From A Slide In PowerPoint Presentation",
+      "answer": "The Text Box And Text Both Are Deleted",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 673,
+      "question": "Which Of The Following Excel Feature Allows Users To Evaluate Values And Return A Result?",
+      "answer": "Formulas",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 674,
+      "question": "When Two People Collaborate On An Online Document At The Same Time, They Are Collaborating.",
+      "answer": "In Cloud Edit",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 675,
+      "question": "The Binary System Is Comprised Of The Values 1 & 0, Where 0 Means",
+      "answer": "Low",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 676,
+      "question": "Is A Silicon Chip That Carries Out A Set Of Instructions And Processes The Data Efficiently And Accurately.",
+      "answer": "Microprocessor",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 677,
+      "question": "The First Network Is Called",
+      "answer": "Arpanet",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 678,
+      "question": "Which Generation Did Computers Use Transistors?",
+      "answer": "Second Generation",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 679,
+      "question": "Paint Programs Keep Track Of Every Placed On The Screen.",
+      "answer": "Pixel",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 680,
+      "question": "Which Of The Following Is Not A Major Reason For An Email Bounce?",
+      "answer": "Domain Server Is Down",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 681,
+      "question": "Dos Cannot Retrieve Any Data From A Disk If A Computer Virus Corrupts Its",
+      "answer": "File Allocation Table (Fat)",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 682,
+      "question": "The Program Compresses Large Files Into A Smaller File",
+      "answer": "WinZip",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 683,
+      "question": "In Computer Science, Half A Byte Is Also Known As",
+      "answer": "Nibble",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 684,
+      "question": "Which One Of The Following Is Not A Search Engine?",
+      "answer": "Windows",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 685,
+      "question": "In PowerPoint, The Difference Between Slide Design And Auto Content Wizard Is",
+      "answer": "Slide Design Does Not Provide Sample Content But Auto Content Wizard Provides Sample Content Too",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 686,
+      "question": "Microsoft Office Is A Type Of?",
+      "answer": "Application Software",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 687,
+      "question": "The Arrangement Of Data In A Logical Sequence Is Known As",
+      "answer": "Sorting",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 688,
+      "question": "In MS Office Ctrl+ G Is A Shortcut To",
+      "answer": "Open Find And Replace Dialog Box With Activating Go To Tab",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 689,
+      "question": "A Red Wavy Line Under A Text Indicates",
+      "answer": "Spelling Mistakes",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 690,
+      "question": "Which Operation Will You Perform To Move A Block Of Text In MS Word?",
+      "answer": "Cut And Paste",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 691,
+      "question": "Power Point Is Called Software",
+      "answer": "Presentation",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 692,
+      "question": "All Of The Following Constitute Security Risks And Possible Violations Of Privacy Except",
+      "answer": "Spam",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 693,
+      "question": "In MS Word, To Combine Cells Of A Table's Row/Column You The Cells",
+      "answer": "Merge",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 694,
+      "question": "An E-Mail Address Consists Of Two Parts Username Or Id And.",
+      "answer": "Domain Name",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 695,
+      "question": "Which American Computer Company Is Called Big Blue?",
+      "answer": "IBM",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 696,
+      "question": "In A Windows Pc, The Shortcut Key For Restoring The Last Action In Microsoft PowerPoint Is",
+      "answer": "Ctrl+Y",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 697,
+      "question": "Related Personality Factor Deals With One's Ability To Manage Emotions.",
+      "answer": "Emotional Intelligence",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 698,
+      "question": "In MS Excel 2016 Mainly____Types Of \"Page Orientation Are Available",
+      "answer": "2",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 699,
+      "question": "An Email Cannot Be Sent Without",
+      "answer": "Receivers Email Address",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 700,
+      "question": "Microsoft Windows Is The Great Invention Of",
+      "answer": "Paul Allen & Bill Gates",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 701,
+      "question": "The First Cell In Excel Worksheet Is Labelled As",
+      "answer": "A1",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 702,
+      "question": "Which Of The Following Is Not An Operating System?",
+      "answer": "Oracle",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 703,
+      "question": "Integrated Circuits (IC) Chips Used In Computer Are Made With",
+      "answer": "Silicon",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 704,
+      "question": "What Is The Capacity Of A Two Sided DVD?",
+      "answer": "9.4 GB",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 705,
+      "question": "To Move To The Previous Cell In A Table Inserted In A Document Press",
+      "answer": "Shift+ Tab",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 706,
+      "question": "To Start Microsoft PowerPoint Application",
+      "answer": "Click Start >Run Then Type Power Point Then Press Enter",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 707,
+      "question": "To Get Connected With Internet What Is To Be Connected",
+      "answer": "Modem",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 708,
+      "question": "How To Duplicate Values In Cell Range In Excel 2016?",
+      "answer": "Select The Range Of Cell In The Work Sheet",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 709,
+      "question": "In MS Excel Comments Put In Cells Are Called",
+      "answer": "Cell Tip",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 710,
+      "question": "Which Act As Buffer Between CPU And The Main Memory",
+      "answer": "Cache Memory",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 711,
+      "question": "What Is The Name Of Programs, Which Control The Hardware Of Computer?",
+      "answer": "Drives",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 712,
+      "question": "In Which Menu You Find Slide Design Slide Layout In Power Point?",
+      "answer": "Format Menu",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 713,
+      "question": "To Prevent Invalid Data Computer Shows",
+      "answer": "Red Triangle",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 714,
+      "question": "In Which Type Of Operating System Time Intervals To Process And Respond To Inputs Is Very Small?",
+      "answer": "Real Time Operating System (RTOS)",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 715,
+      "question": "In A Computer What Does OS Stand For?",
+      "answer": "Operating System",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 716,
+      "question": "The Area That Generally Contains My Computer, My Document, And Recycles Bin Is Called",
+      "answer": "Desktop",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 717,
+      "question": "From Which Of The Following Can The User Account Be Changed?",
+      "answer": "Control Panel",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 718,
+      "question": "In MS Windows Which Of The Following Is Program Group?",
+      "answer": "Accessories",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 719,
+      "question": "A Common Name For Software Errors Is",
+      "answer": "Bugs",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 720,
+      "question": "Are Instructions That Tell A Computer What To Do",
+      "answer": "Software",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 721,
+      "question": "\"Add Or Remove Programs\" Is A (An)",
+      "answer": "Utility Program",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 722,
+      "question": "Shortcut Key To Switch To The Next Window Is",
+      "answer": "Alt+Tab",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 723,
+      "question": "In A Windows Pc Ctrl +K In Microsoft PowerPoint Is The Shortcut For",
+      "answer": "Inserting A Hyperlink",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 724,
+      "question": "In MS Word 2016, Which Shortcut Key Is Used To Replace Text Or Specific Formatting?",
+      "answer": "Ctrl+H",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 725,
+      "question": "A File That Contains Readymade Styles That Can Used For A Presentation Is Called?",
+      "answer": "Template",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 726,
+      "question": "In MS PowerPoint Slide Master Option Is Available In",
+      "answer": "View Tab",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 727,
+      "question": "What Are The Effects That Occur When You Move From One Slide To The Next During A PowerPoint Presentation Called?",
+      "answer": "Slide Transitions",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 728,
+      "question": "Word Art Option Exists In",
+      "answer": "Text",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 729,
+      "question": "The Contents Of Two Or Move Consecutive Cells Could Be Put Together Using",
+      "answer": "Merge Cells",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 730,
+      "question": "In MS Excel , On The Insert Tab Includes",
+      "answer": "Chart",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 731,
+      "question": "Readymade Templates Are Available Under Tab In Now Option",
+      "answer": "File",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 732,
+      "question": "The Distinguishing Feature Of A Spreadsheet Program Is That It Allows You To",
+      "answer": "Perform Calculations On Data",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 733,
+      "question": "This Allows To Enter New Data At The Current Position Of The Cursor",
+      "answer": "Insertion Mode",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 734,
+      "question": "This Displays The Positioning Of Text, Tabs, Margins, Indents And Other Elements On The Page",
+      "answer": "Ruler",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 735,
+      "question": "In MS Word, While Assigning A Shortcut Key To A Symbol, Try To Select A Key Combination That Is",
+      "answer": "Unassigned To Any Other Task",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 736,
+      "question": "Maintains (S) Database Of Webpage Containing Information On Variety Of Topics",
+      "answer": "Search Engines",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 737,
+      "question": "Alignment Is Used In Newspaper Magazines And Novels",
+      "answer": "Full Justification",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 738,
+      "question": "Which Of The Following Is Not A Binary Number?",
+      "answer": "102",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 739,
+      "question": "How Can The Risk Of Unauthorized Computer System Access Be Reduced When Connected To An Internet?",
+      "answer": "By Using A Firewall",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 740,
+      "question": "Which Is The Full Form Of Wi-Fi",
+      "answer": "Wireless Fidelity",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 741,
+      "question": "Common Methods Of Internet Access By Using Include",
+      "answer": "DSL",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 742,
+      "question": "Data That Changes Continuously And Cane Have Discrete Values Is Called",
+      "answer": "Continuous Data",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 743,
+      "question": "A/An Contains Information Like To Image Or Music",
+      "answer": "File",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 744,
+      "question": "IBM Stands For",
+      "answer": "International Business Machines",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 745,
+      "question": "In Banks, The Data On Cheques Is Read By In Following Device",
+      "answer": "MICR",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 746,
+      "question": "Uses Information Systems To Do An Activity Cheaper, Faster , Accurately And Consistently.",
+      "answer": "Automation",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 747,
+      "question": "Larry Page Is The Best Known For Being One Of The Co-Founder Of",
+      "answer": "Google",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 748,
+      "question": "Who Is The Creator Of Linux Operating System?",
+      "answer": "Linus Torvalds",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 749,
+      "question": "Which Is A Valid Program To Access The Internet.",
+      "answer": "Google Chrome",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 750,
+      "question": "In PowerPoint 2016, 'Rehearse Timing ' Option Is Available In",
+      "answer": "Slide Show Tab",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 751,
+      "question": "Is Used To Draw Picture, 3d Images And Animation",
+      "answer": "Graphic Software",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 752,
+      "question": "In Computer Communication \"Verification” Is Process Of?",
+      "answer": "Authentication",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 753,
+      "question": "In MS Word 2016, A Contains Button, Boxes And Menus That Allow Tasks To Be Performed More Quickly Than Using The Menu Bar.",
+      "answer": "Tool Bar",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 754,
+      "question": "Maximum Zoom Percentage In MS PowerPoint Is",
+      "answer": "400%",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 755,
+      "question": "Which Printer Produces Best Quality Graphics Production.",
+      "answer": "Plotter",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 756,
+      "question": "To Insert Blank Imbedded Word Object In Excel?",
+      "answer": "Click The Object Command On The Insert Menu",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 757,
+      "question": "How Do You Close A Word Document Without Closing Word Window?",
+      "answer": "Click On The Close Command On Office Menu",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 758,
+      "question": "CAI Stands For",
+      "answer": "Computer Assisted Instruction",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 759,
+      "question": "To Create A Formula, You Can Use",
+      "answer": "Cell References But Not Values",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 760,
+      "question": "Cell Entry \"July 16,2016\" Will Be Considered A By Excel Sheet",
+      "answer": "Value",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 761,
+      "question": "A Terabyte Represents About",
+      "answer": "1 Trillion Bytes",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 762,
+      "question": "Data Is Permanently Stored In",
+      "answer": "Hard Disk",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 763,
+      "question": "You Cannot Link Excel Worksheet Data To A Word Document?",
+      "answer": "With The Copy And Paste Button On The Standard Toolbar?",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 764,
+      "question": "What Is The Shortcut Key To Extend Your Current Selection By One Word To The Left?",
+      "answer": "Ctrl+Shift+Left Arrow",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 765,
+      "question": "In MS Word 2016, Is Not Available In Font Spacing.",
+      "answer": "Loosely",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 766,
+      "question": "Form Wizard, In MS Access Can Build Forms That Can Display Fields From",
+      "answer": "Multiple Tables Or Queries. Many",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 767,
+      "question": "In Computing, Which Of The Following Connects Two Similar Network Segments?",
+      "answer": "Bridge",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 768,
+      "question": "Which Program Is Run By Bios To Check Hardware Components Are Working Properly While Computer Is Turned On?",
+      "answer": "Post (Power-On Self-Test)",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 769,
+      "question": "Ctrl, Shift And Alt Are Called Keys.",
+      "answer": "Modifier",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 770,
+      "question": "CRT Stands For",
+      "answer": "Cathode Ray Tube",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 771,
+      "question": "A Word Template Stores Common Document",
+      "answer": "Structure",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 772,
+      "question": "In MS Excel 2016, 'Conditional Formatting'. Option Is Available In Menu.",
+      "answer": "Home",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 773,
+      "question": "In MS Word 2016, Which Shortcut Key Is Used 'To View A \"Print Preview\" Of A Document?",
+      "answer": "Alt+ Ctrl+I",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 774,
+      "question": "\"Adobe Flash \"Is An Example Of",
+      "answer": "Multimedia Software",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 775,
+      "question": "Which Of The Following Line Spacing Is Invalid In MS Word?",
+      "answer": "Triple",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 776,
+      "question": "The Orientation Of Page In MS Word Can Be Changed From",
+      "answer": "Layout Tab",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 777,
+      "question": "Incoming Messages Are Stored In Folder.",
+      "answer": "Inbox",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 778,
+      "question": "Is A Technique That Is Used To Send More Than One Call Over A Single Line?",
+      "answer": "Multiplexing",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 779,
+      "question": "The Keys Used To Lock The Keyboard.",
+      "answer": "Windows Logo +L",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 780,
+      "question": "What Is Full Form Of Led?",
+      "answer": "Light Emitting Diode",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 781,
+      "question": "In MS Word 2016 “Watermark\" Option Is Available In",
+      "answer": "Insert",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 782,
+      "question": "MS Excel 2016, One Has To Go To.................. Option For Setting Or Clearing Print Area",
+      "answer": "Page Layout",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 783,
+      "question": "Formatting A Cell In Currency ,You Can Specify",
+      "answer": "Decimal Places & Currency Symbol",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 784,
+      "question": "To Open A Template In Word , First Go To File And",
+      "answer": "Click New",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 785,
+      "question": "To Move Between The Worksheet In A Work Book In MS Excel, We Can Use Which Of The Following Shortcut?",
+      "answer": "Ctrl +Page Down",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 786,
+      "question": "Bios Is Used For?",
+      "answer": "Loading Operating System",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 787,
+      "question": "A Network That Covers Large Area, City Country And Beyond Is Called",
+      "answer": "Wan",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 788,
+      "question": "Which Of The Following Shortcuts Will Create A New Folder In Windows Folder?",
+      "answer": "Ctrl +Shift+N",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 789,
+      "question": "To Change Line Height To 1.5 Which Is The Following Correct Command?",
+      "answer": "Ctrl+5",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 790,
+      "question": "Maximum Number Of Rows In MS Excel 2016 Worksheet Is",
+      "answer": "1,048,576",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 791,
+      "question": "The ALU And CU Are Components Of",
+      "answer": "CPU",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 792,
+      "question": "Speakers Are",
+      "answer": "Output Devices",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 793,
+      "question": "In MS Word 2016, To Decrease Font Size To 1 Point, Press",
+      "answer": "Ctrl+ [",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 794,
+      "question": "In MS Word 2016, The Option 'Multilevel List' Is Available In",
+      "answer": "Home",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 795,
+      "question": "In Which Of The Following Form, Data Is Stored In A Computer?",
+      "answer": "Binary",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 796,
+      "question": "In MS Excel 2016, 'Print Titles' Option Is Available In Menu.",
+      "answer": "Page Layout",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 797,
+      "question": "Number Of Columns Is MS Excel 2007 Are?",
+      "answer": "16,384",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 798,
+      "question": "Iiiustrations Group Is In Which Tab?",
+      "answer": "Insert",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 799,
+      "question": "Which Of The Following Can Be Renamed",
+      "answer": "Worksheet And Workbook Both",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 800,
+      "question": "To Select More Than One Slide In Presentation?",
+      "answer": "Ctrl+Click On Slide",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 801,
+      "question": "Which Of Following Show Document Name And Information?",
+      "answer": "Title Bar",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 802,
+      "question": "In MS-Word 2016, Screenshot Is In?",
+      "answer": "Insert",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 803,
+      "question": "To Fix Values In An Excel We Use?",
+      "answer": "Absolute Reference",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 804,
+      "question": "\"Header\" And \"Footer\" Is In?",
+      "answer": "Insert",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 805,
+      "question": "Clipboard In Home Is Used For?",
+      "answer": "Copy & Paste",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 806,
+      "question": "\"Mail Merg\" Tab Is In?",
+      "answer": "Mailing",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 807,
+      "question": "Short-Cut Key For Finding Something?",
+      "answer": "Ctrl+F",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 808,
+      "question": "The Minimum Number Of Rows And Columns In MS Word Document Is?",
+      "answer": "1 By 1.",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 809,
+      "question": "Which Alignment Choice Spreads The Data Across The Width Of The Cell?",
+      "answer": "Distributed",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 810,
+      "question": "Dictionary Used In MS-Office?",
+      "answer": "Thesaurus",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 811,
+      "question": "Which Of The Following Keystrokes Updates A Bibliography Field?",
+      "answer": "F9",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 812,
+      "question": "Reusable Optical Storage Will Typically Have Acronym.",
+      "answer": "RW",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 813,
+      "question": "What Term Describes A Background That Appears As A Grainy, Non.Smooth Surface?",
+      "answer": "Texture",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 814,
+      "question": "The Structure Or Format Of Data Is Called",
+      "answer": "Syntax",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 815,
+      "question": "What Cascade Delete Option Is Used For?",
+      "answer": "It Ensures That All The Related Records Will Be Deleted Automatically When The Record From Parent Table Is Deleted.",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 816,
+      "question": "Unix Operating System Was Developed By",
+      "answer": "Dennis Ritchie & Ken Thompson",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 817,
+      "question": "A Hard Disk Becomes Totally Inaccessible When A Computer Virus Corrupts Its",
+      "answer": "Partition Table",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 818,
+      "question": "Algorithm And Flow Chart Help Us To",
+      "answer": "Specify The Problem Completely And Clearly",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 819,
+      "question": "What Is Defined By Handout Master?",
+      "answer": "Layout Of Handout",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 820,
+      "question": "In Microsoft Excel, The File You Create And Edit Is Called",
+      "answer": "A Workbook",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 821,
+      "question": "In MS Word 2016, The Shortcut Key To Open The Font Display Box",
+      "answer": "Is: Ctrl+D",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 822,
+      "question": "To Stop A Slideshow In MS PowerPoint Which Of The Following Option A Correct?",
+      "answer": "Press Escape",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 823,
+      "question": "In MS Word 2016, Which Of The Following Shortcut Key Is Used To Use Paste Special?",
+      "answer": "Ctrl+Alt+ V",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 824,
+      "question": "ALU Is A Component Of The Processor That Consists Of",
+      "answer": "Au (Arithmetic Unit) Lu (Logic Unit)",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 825,
+      "question": "What Is Defined By Handout Master?",
+      "answer": "Layout Of Handou",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 826,
+      "question": "Which Of The Following Is The First Computer To Use \"Stored Program Concept\"?",
+      "answer": "EDSAC (Electronic Delay Storage Automatic Calculator).",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 827,
+      "question": "In MS Word, Formulas And Symbols Are Used In Which Menu?",
+      "answer": "Insert Menu",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 828,
+      "question": "Which Of The Following Is A Data Base Management System?",
+      "answer": "Oracle",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 829,
+      "question": "In Which View Background Color Will Not Be Visible?",
+      "answer": "Print Preview",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 830,
+      "question": "What Is The Function Of Logical Unit In A Computer?",
+      "answer": "To Perform Arithmetic And Logic Operation",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 831,
+      "question": "Are Used To Display Data",
+      "answer": "Output Device",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 832,
+      "question": "Which Of The Following Windows Don't Have Start Button?",
+      "answer": "Window 8",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 833,
+      "question": "Which Of The Following Is Not A Valid Zoom Percentage In Excel?",
+      "answer": "500",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 834,
+      "question": "Bit Also Called",
+      "answer": "Binary Digit",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 835,
+      "question": "Prom Chips Are Programmed By Plugging Them Into",
+      "answer": "Prom Programmer",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 836,
+      "question": "A Normal CD-ROM Usually Can Store Up To Data?",
+      "answer": "680 Mb",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 837,
+      "question": "Linux Is An",
+      "answer": "Operating System",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 838,
+      "question": "Trackball Is A (N)",
+      "answer": "Input Device",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 839,
+      "question": "Which Of The Following Is The Method By By Which Data Is Converted From A Readable From To An Encoded Version?",
+      "answer": "Encryption",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 840,
+      "question": "What Is The Maximum Font Size You Can Apply For Any Character In MS Word?",
+      "answer": "1638",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 841,
+      "question": "Microsoft Window Uses A GUI Environment GUI (Pronounced \"Gooey\") Stand For.",
+      "answer": "Geographical User Interface",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 842,
+      "question": "To Copy A Picture Of The Screen To The Clipboard Use",
+      "answer": "Print Screen Key",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 843,
+      "question": "In MS Word 2016. Which Of The Following Command Is Not Available In Insert Menu?",
+      "answer": "Columns",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 844,
+      "question": "Which Type Of Computer Program Would Be Used Design An Invitation Card?",
+      "answer": "Word Processing",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 845,
+      "question": "The Shortcut Key To Close A Selected Window Is",
+      "answer": "Alt+F4",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 846,
+      "question": "In MS Excel , Which Function Automatically Total A Column Or Row Of Values?",
+      "answer": "Sum",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 847,
+      "question": "The Transfer Of Data From One Place To Another Is Called",
+      "answer": "Data Communication",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 848,
+      "question": "To Used As A Disk Scanner In Microsoft Windows.",
+      "answer": "Disk Cleanup",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 849,
+      "question": "A Computer That Can Destroy All Of Your Computer Programs",
+      "answer": "Virus",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 850,
+      "question": "In Computing, NOS Stand For",
+      "answer": "Network Operating System",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 851,
+      "question": "In MS Excel, If A Numerical Value Stars With....... Then This Value Can Be Treated As A Label",
+      "answer": "Apostrophe",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 852,
+      "question": "Which One Of The Following Is The Oldest Search Engine?",
+      "answer": "Archie (1990)",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 853,
+      "question": "Which Number Of Key Is Used With Shift To Type Percent?",
+      "answer": "5",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 854,
+      "question": "To Edit In An Embedded Excel Worksheet Object In A Word Document",
+      "answer": "Use The Excel Menu Bar Toolbars Inside The Word Application",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 855,
+      "question": "What Term Describes A Picture That Has Been Resized By A Percentage?",
+      "answer": "Scaled",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 856,
+      "question": "Which Of The Following Is Not An Application Software?",
+      "answer": "Windows Nt",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 857,
+      "question": "The Option Is Used To Show A Specific Row Or Column On Every Printed Page",
+      "answer": "Print Title",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 858,
+      "question": "CPU Is An Example Of",
+      "answer": "Hardware",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 859,
+      "question": "Print Input' Is",
+      "answer": "Syntax 860------Is A Computer Software Whose User Interface And API Resembles That Of Printer Driver: Virtual Printer",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 861,
+      "question": "In MS Word 2007, To Select A Column Of The Table From Bottom To Top, Press",
+      "answer": "Shift+ Alt+Page Up",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 862,
+      "question": "Add Or Remove Programs ' Is A Or An",
+      "answer": "Utility Program",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 863,
+      "question": "A Bus With 32 Data Line Can Transport How Many Bits At A Time",
+      "answer": "32 Bits",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 864,
+      "question": "Google Has Its On Headquarter In",
+      "answer": "California",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 865,
+      "question": "Excel Would Evaluate The Formula, = 20*10/5*8, And Return This Answer",
+      "answer": "320",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 866,
+      "question": "In MS Word When Are Apply \"Drop Cap\" On A Word Then By Default, First Character Of This Word Drops To",
+      "answer": "3 Lines",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 867,
+      "question": "To Convert A Decimal Number Into Binary Number, We Use The Method Of Repeated",
+      "answer": "Division",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 868,
+      "question": "In MS Word, Which View Shows Margins And The Rulers?",
+      "answer": "Print Layout View",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 869,
+      "question": "In Excel, You Can Sort Data In------- Ascending Order & Descending Order",
+      "answer": "",
+      "answer_rule": "unknown",
+      "flag": null
+    },
+    {
+      "number": 870,
+      "question": "Cells In MS Excel Can Be Uniquely Identified By",
+      "answer": "Column Letters And Row Numbers",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 871,
+      "question": "The Word Pentium Is Related To",
+      "answer": "Microprocessor",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 872,
+      "question": "To Print PowerPoint Presentation, Press",
+      "answer": "Ctrl+P",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 873,
+      "question": "Amazon Is A Best Example--------Site.",
+      "answer": "E-Commerce",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 874,
+      "question": "A Computer Cannot Function Without",
+      "answer": "Operating System",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 875,
+      "question": "Software That Assists You, Or Acts On Your Behalf, To Perform Repetitive Computer-Related Tasks Is A (N)",
+      "answer": "Ai Agent Or Intelligent Agent.",
+      "answer_rule": "semicolon",
+      "flag": null
+    },
+    {
+      "number": 876,
+      "question": "In MS Word 2007,-----------Is Used To Move Directly To Specific Location In A Document",
+      "answer": "Bookmarks",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 877,
+      "question": "In MS Excel, You Can Use The Horizontal And Vertical Scroll Bars",
+      "answer": "To View Different Rows And Columns",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 878,
+      "question": "What Is Full Form Of DSL In Terms Of Information Technology?",
+      "answer": "Digital Subscriber Line",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 879,
+      "question": "--------Function Calculates The Largest Value In A Set Of Numbers",
+      "answer": "Max",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 880,
+      "question": "From What Location Are The 1st Computer Instructions Available On Boot Up?",
+      "answer": "Rom Bios",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 881,
+      "question": "Slide Sorter Can Be Accessed Through--------------Menu",
+      "answer": "View",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 882,
+      "question": "Which Amongst The Following Is The Largest Unit Of Storage?",
+      "answer": "Terabyte",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 883,
+      "question": "The World's Largest Computer Company By Sales Is",
+      "answer": "Apple",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 884,
+      "question": "Which Of The Following Describes The Size Weight And Spacing In MS Word Documents?",
+      "answer": "Font",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 885,
+      "question": "Term Chart Wizard Data In MS Excel Refer To?",
+      "answer": "Horizontal Axis",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 886,
+      "question": "In MS Excel Undo Option Will-------------Last Action?",
+      "answer": "Change",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 887,
+      "question": "What Is The Shortcut Key You Can Press To Create A Copyright Symbol?",
+      "answer": "Alt+Ctrl+C",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 888,
+      "question": "Standard Single Layer Double Sided DVD Can Store Maximum Of",
+      "answer": "9.4 GB",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 889,
+      "question": "The Best Orientation To Fit Maximum Columns On A Single Sheet For Print Is?",
+      "answer": "Landscape",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 890,
+      "question": "Which Of These Terms Refers To The Sharpness Or Clarity Of An Image",
+      "answer": "Resolution",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 891,
+      "question": "A Is A Data Communication System Within A Building Plant, Campus, Or Between Nearby Buildings",
+      "answer": "LAN",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 892,
+      "question": "To Move The Previous Cell In A Table Inserted In A Document Press?",
+      "answer": "Shift + Tab",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 893,
+      "question": "Which Object Is The Output Of The Database Application?",
+      "answer": "Report",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 894,
+      "question": "When You Insert A Picture Into A Document ,The Default Text Wrapping Option Is",
+      "answer": "Line With Text",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 895,
+      "question": "In Order To Tell Excel That We Are Entering A Formula In Cell W Must Begin With An Operator Such As",
+      "answer": "=",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 896,
+      "question": "Which Of The Following Holds Data And Processing Instructions Temporarily Until The CPU Needs It?",
+      "answer": "Random Access Memory (Ram), Also Known As Main Memory",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 897,
+      "question": "What Happens If You Select First And Second Slide And Then Click On New Slide Button On Toolbar?",
+      "answer": "A New Slide Is Inserted As Third Slide In Presentation",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 898,
+      "question": "Working Area Of MS Excel Is Called",
+      "answer": "Work Sheet",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 899,
+      "question": "Getting Data From A Cell Located In A Different Sheet Is Called?",
+      "answer": "Referencing",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 900,
+      "question": "\"Foxpro\" Is",
+      "answer": "A Language",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 901,
+      "question": "How Much Data Can A Single Layer, Single Sided DVD Can Store?",
+      "answer": "4.7 Gb",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 902,
+      "question": "In The Computer Which Part Is The Most Complicated",
+      "answer": "CPU",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 903,
+      "question": "A Single Worksheet Prior To Excel 2007 Contains",
+      "answer": "256 Columns",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 904,
+      "question": "A Combination Of 16 Bits Is Called",
+      "answer": "Word",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 905,
+      "question": "What Is 11 In Binary?",
+      "answer": "1011",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 906,
+      "question": "In MS Access, To Create A New Table, In Which Method You Don't Need To Specify The Field Type And Size?",
+      "answer": "Create Table By Entering Data",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 907,
+      "question": "In MS Word, The Extend A Selection One Screen,Down, Press",
+      "answer": "Shift + Page Down",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 908,
+      "question": "Internet Was First Developed In",
+      "answer": "1960s",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 909,
+      "question": "Which Of The Following Is The Latest Version Of MS Excel?",
+      "answer": "Excel 2021",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 910,
+      "question": "Which Of The Following Is Not A System Tool?",
+      "answer": "Virus Scanning",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 911,
+      "question": "Cursor On The Screen Can Be Moved By",
+      "answer": "Mouse",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 912,
+      "question": "A Small High Speed Memory Insides CPU Is",
+      "answer": "Register",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 913,
+      "question": "Which Of The Following Keys Is Used To Repeat The Last Action?",
+      "answer": "F4",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 914,
+      "question": "Shut Down Option Is Available On",
+      "answer": "Start Menu",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 915,
+      "question": "In MS Word 2016, To Extend A Selection To Adjacent Cells Of The Table",
+      "answer": "Hold Down Shift And Press An Arrow Key Repeatedly",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 916,
+      "question": "Which Short Cut Keys Are Used To \"Open Startup Menu\" Text?",
+      "answer": "Ctrl + Esc",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 917,
+      "question": "To Delete One Word Before Cursor In MS Word?",
+      "answer": "Ctrl + Backspace",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 918,
+      "question": "In MS Word 2007, Which Of The Following Is Used To Extend A Selection One Character To The Right Side?",
+      "answer": "Shift+Right Arrow",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 919,
+      "question": "Information On A Hard Disk Is Usually Backed-Up Using A?",
+      "answer": "CD-ROM",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 920,
+      "question": "An Electronic Copy Of Data Such As A Tile Viewed On A Computer's Display Is Called",
+      "answer": "Soft Copy",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 921,
+      "question": "Which Of The Following Is The Key To Close A Dialog Box In Window?",
+      "answer": "Esc Key",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 922,
+      "question": "Add Now Hardware\" Option Exist In",
+      "answer": "Control Panel",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 923,
+      "question": "In Windows Operating System Is Known As A File Manager",
+      "answer": "Windows Explorer",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 924,
+      "question": "C.L.I Stands For",
+      "answer": "Calling Line Identification",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 925,
+      "question": "Function Of Is Similar To That Of A Mouse.",
+      "answer": "Joystick",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 926,
+      "question": "Microprocessors As Switching Devices Are For Which Generation Computers",
+      "answer": "Fourth Generation",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 927,
+      "question": "The Thin Black Cross-Shaped Pointer In MS Excel Is Used To",
+      "answer": "Complete Lists And Fill Patterns",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 928,
+      "question": "In MS Access, Which Of The Following Data Type Allows Alphanumeric Characters And Special Symbols?",
+      "answer": "Text",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 929,
+      "question": "The Default Language Of Microsoft Word Is",
+      "answer": "USA English",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 930,
+      "question": "When Creating A New Table Which Method Can Be Used To Choose Fields From Standard Databases And Tables",
+      "answer": "Create Table Using Wizard",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 931,
+      "question": "Rows In Microsoft Excel Are Labelled As",
+      "answer": "1, 2,3, Etc.",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 932,
+      "question": "A Type Of Malware Often Disguised As Legitimate Software Is",
+      "answer": "Trojan Horse",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 933,
+      "question": "Which Of Following Is Not One Of Excel's \"What-If' Function?",
+      "answer": "Auto Outline",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 934,
+      "question": "In PowerPoint 2007, An Orderly Display Of Information Using Different Media Elements Is Known As",
+      "answer": "Multimedia Presentation",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 935,
+      "question": "In Microsoft Window 7, Can Give You Information About Weather.",
+      "answer": "Gadgets",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 936,
+      "question": "When You Insert A Comment In A Document, The Comment Appears In A",
+      "answer": "Balloon",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 937,
+      "question": "Is Widely Used For Transmitting Streaming Videos Data On The Internet.",
+      "answer": "Mp4",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 938,
+      "question": "Outline Layout Shortcut Key In MS Word",
+      "answer": "Alt+Ctrl+O",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 939,
+      "question": "Different Computer Connect With Each Other Is Called?",
+      "answer": "Network",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 940,
+      "question": "Which Is Mostly Used Search Engine?",
+      "answer": "Google",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 941,
+      "question": "What Is Mean Of WRAM?",
+      "answer": "Windows Random Access Memory",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 942,
+      "question": "In Which Window Version The Option My Computer Introduced?",
+      "answer": "Windows 95",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 943,
+      "question": "Hyperlink Is Click On The Text And New Document",
+      "answer": "Open",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 944,
+      "question": "Selected Paragraph Up Key",
+      "answer": "Ctrl+Shift+Up Arrow",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 945,
+      "question": "Which Program Runs First After Computer Is Booted And Loading GUI?",
+      "answer": "Authentication",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 946,
+      "question": "Which Among The Following Is Not Necessary For Working Of A Standalone Computer?",
+      "answer": "LAN Card",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 947,
+      "question": "In MS Excel 2016, We Can Go To Cell A1 By Pressing",
+      "answer": "Ctrl + Home",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 948,
+      "question": "In MS Word 2007, To Extend A Selection To The Beginning Of A Paragraph Press",
+      "answer": "Ctrl+Shift+ Up Arrow",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 949,
+      "question": "Which Of The Following Is A Text Editor",
+      "answer": "Note Pad",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 950,
+      "question": "What Is The Largest Hardware Company?",
+      "answer": "HP",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 951,
+      "question": "If A Computer Has More Than One Processor Then It Is Known As.",
+      "answer": "Multiprocessor",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 952,
+      "question": "A Collection Of System Programs That Controls And Co-Ordinates The Overall Operations Of A Computer System Is Called.",
+      "answer": "Operating System",
+      "answer_rule": "final_period",
+      "flag": null
+    },
+    {
+      "number": 953,
+      "question": "What Type Of Operating System Ms-Dos Is?",
+      "answer": "Command Line Interface",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 954,
+      "question": "Ctrl+K Is Used For",
+      "answer": "Add Hyperlink",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 955,
+      "question": "In A PowerPoint Slide Two Sound Files Can Be Added What Was That Called?",
+      "answer": ".Wav Or .Mid",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 956,
+      "question": "To Access Directly Font Dialogue Box In PowerPoint Which Shortcut Key Used?",
+      "answer": "Ctrl+T",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 957,
+      "question": "What Devices Accept Data From Outside The Computer And Transfer It Into The CPU?",
+      "answer": "Input Devices",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 958,
+      "question": "Spam Or Fraudulent E-Mails Are Also Called",
+      "answer": "Junk Mail",
+      "answer_rule": "colon",
+      "flag": null
+    },
+    {
+      "number": 959,
+      "question": "Which Of The Following Is A Conventional Designation Of Pre-Released Software?",
+      "answer": "Beta",
+      "answer_rule": "question_mark",
+      "flag": null
+    },
+    {
+      "number": 960,
+      "question": "Temporary Storage Place For Information In A Computer Is Called",
+      "answer": "Buffer",
+      "answer_rule": "colon",
+      "flag": null
+    }
+  ]
+}

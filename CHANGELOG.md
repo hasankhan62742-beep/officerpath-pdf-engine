@@ -2,6 +2,48 @@
 
 All notable changes to this project. Dates in PKT (Asia/Karachi).
 
+## [0.5.0] — 2026-11-21 — Phase 1 M4: MCQ extraction (Dart parser port) + measurement
+
+### Added
+- Extraction package (`app/pipeline/extract/`): `models` (ExtractedQuestion,
+  QAPair, PendingQuestion, ParseResult — all JSON-serialisable),
+  `numbers` (clean/OCR-misread/bare numbers, Urdu-digit normalisation
+  for matching only — D1), `markers` (option regexes, E-rule, inline
+  markers, split_option_line, 5→4 normalisation, noise filter),
+  `signals` (answer-line/tick/bold/asterisk, precedence, confidence
+  ladder, OCR-provenance downgrade to unverified 0.54 — D4),
+  `keys` (paper-heading segments, strict same-paper join, key-match
+  ladder, orphan adoption, token-stream key parsing), `blocks`
+  (standard/one-liner/numberless-stem/interpolation/cross-page),
+  `qa` (Q&A-without-options + flashcard path; NEVER fabricates 4
+  options), `tables` (delimiter-aware Sr# path — D8 addition, not a
+  Dart port; row-wise grid; column-wise), `scoring` (candidate
+  confidence from number/option/marker/position/column signals —
+  evidence only, never overrides a rule), `validate` (separate
+  duplicate/conflict/fabrication checks), `service`
+  (`extract_document`, `extract_from_ocr_blocks`,
+  `extract_from_digital_pdf`; format order table → block → one-liner
+  → q-only → flashcard; paper-identity gate: one call = one document).
+- Per-line bold in the digital extractor (`app/pipeline/ocr/digital.py`,
+  the only M4 change under `app/pipeline/ocr/`): `style["bold_lines"]`
+  lists 0-based line indices whose spans are bold (PyMuPDF span flags
+  & 16); the extract service appends U+E000 per bold line (Dart marker
+  contract, consumed by the parser, never stored). OCR pages: bold
+  unavailable, never approximated (D17).
+- Benchmark harness (`scripts/benchmark_m4.py`): precision/recall/F1
+  for question detection, option extraction, answer correctness per
+  fixture + overall (digital vs scanned), PPSC-66 live end-to-end
+  (Tesseract eng+urd PSM 3, 200 DPI, layout reading order, p7 key
+  under the strict paper rule), clean Nastaliq CER re-measurement.
+  Results in `docs/benchmarks/m4-benchmark-2026-11-21.json`.
+- Deliberate changes from Dart (recorded): D8 Sr# table path (above);
+  D10 Q-only distractor shuffle seeded `random.Random(20261121)`; D13
+  paper-identity fields (`source_document_id`, `paper_number`,
+  `paper_title`, `exam`, `year` — nullable, missing = unknown, never
+  a wildcard match); D14 unknown Subject labels stay "unknown".
+  Not in M4: D15 separately attached key (app flow; M5/M6). No Alembic
+  migration — extraction results are not persisted in M4.
+
 ## [0.4.0] — 2026-11-21 — Phase 1 M3: OCR + layout, golden dataset v1, benchmark
 
 ### Added

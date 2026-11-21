@@ -1,0 +1,947 @@
+{
+  "benchmark": "m4-extraction",
+  "date": "2026-11-21",
+  "environment": "VM numbers (this machine), NOT Render numbers",
+  "python": "3.12.3",
+  "machine": "x86_64 Linux",
+  "notes": [
+    "Extractor: app/pipeline/extract (Dart parser port, M4).",
+    "Matching: normalised text similarity >= 0.85 (difflib) AND numbers agree when both have numbers; options per-letter >= 0.85; answers by letter (answer text for qa_pair).",
+    "Pending questions count as detected for question recall.",
+    "No PaddleOCR (ADR-005 deployment gate + OOM risk). No Gemini API calls.",
+    "TestPoint re-scored 2026-11-21 with option-marker normalisation (see fixture 'rescored' note); the run-5 un-normalised option recall 0.4356 was a scorer artifact (pdfplumber rows store options as 'A. of' vs GT bare 'of'). Question-detection numbers unchanged.",
+    "TestPoint re-scored 2026-11-21 after the pdfplumber line-consumption fix (see fixture rescored note); overall aggregates recomputed from the re-scored section. Run-5 TestPoint Q P/R/F1 was 0.5403/1.0/0.7015."
+  ],
+  "digital_fixtures": {
+    "testpoint_english_1000": {
+      "pdf": "English_1000_Most_Repeated_MCQs_by_TestPoint.pk.pdf",
+      "count": 1375,
+      "kind": "digital",
+      "seconds": 16.0,
+      "metrics": {
+        "question_detection": {
+          "precision": 0.8472,
+          "recall": 1.0,
+          "f1": 0.9173,
+          "tp": 1375,
+          "fp": 248,
+          "fn": 0
+        },
+        "option_extraction": {
+          "precision": 1.0,
+          "recall": 0.9987,
+          "f1": 0.9994,
+          "tp": 5493,
+          "fp": 0,
+          "fn": 7
+        },
+        "answer_correctness": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 1375,
+          "fp": 0,
+          "fn": 0,
+          "accuracy_on_matched_with_answer": 1.0
+        },
+        "detected_total": 1623,
+        "ground_truth_total": 1375,
+        "matched": 1375
+      },
+      "parse_counts": {
+        "questions": 1593,
+        "qa_pairs": 0,
+        "pending": 30,
+        "skipped": 0,
+        "excluded": 379,
+        "key_sections_found": 0,
+        "key_entries_applied": 0,
+        "unmatched_key_entries": 0,
+        "number_gaps": 3,
+        "number_duplicates": 285,
+        "options_complete_4_of_4": 1593
+      },
+      "rescored": "2026-11-21: re-scored after the pdfplumber line-consumption fix (match_pdfplumber_rows_to_lines: rows now consume their lines + table header, marker-stripped option matching, wrapped-option continuations). Extraction changed; all other sections are from run 5. Run-5 numbers were Q P/R/F1 0.5403/1.0/0.7015 (FP 1170 from 580 grid + 364 block phantoms + 226 pending).",
+      "rescore_seconds": 40.2
+    },
+    "computer_past_papers_qa": {
+      "pdf": "Computer_Past_Papers_2019-2025.pdf",
+      "count": 960,
+      "kind": "digital",
+      "seconds": 1.35,
+      "metrics": {
+        "question_detection": {
+          "precision": 0.8846,
+          "recall": 0.6948,
+          "f1": 0.7783,
+          "tp": 667,
+          "fp": 87,
+          "fn": 293
+        },
+        "option_extraction": null,
+        "answer_correctness": {
+          "precision": 0.991,
+          "recall": 0.991,
+          "f1": 0.991,
+          "tp": 661,
+          "fp": 6,
+          "fn": 6,
+          "accuracy_on_matched_with_answer": 0.991
+        },
+        "detected_total": 754,
+        "ground_truth_total": 960,
+        "matched": 667
+      },
+      "parse_counts": {
+        "questions": 0,
+        "qa_pairs": 754,
+        "pending": 0,
+        "skipped": 208,
+        "excluded": 1,
+        "key_sections_found": 0,
+        "key_entries_applied": 0,
+        "unmatched_key_entries": 0,
+        "number_gaps": 0,
+        "number_duplicates": 0,
+        "options_complete_4_of_4": 0
+      },
+      "mcq_detected_also": 0
+    },
+    "ca40": {
+      "pdf": "ppsc-current-affairs-40-mcqs.pdf",
+      "count": 40,
+      "kind": "digital",
+      "seconds": 0.18,
+      "metrics": {
+        "question_detection": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 40,
+          "fp": 0,
+          "fn": 0
+        },
+        "option_extraction": {
+          "precision": 1.0,
+          "recall": 0.9938,
+          "f1": 0.9969,
+          "tp": 159,
+          "fp": 0,
+          "fn": 1
+        },
+        "answer_correctness": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 40,
+          "fp": 0,
+          "fn": 0,
+          "accuracy_on_matched_with_answer": 1.0
+        },
+        "detected_total": 40,
+        "ground_truth_total": 40,
+        "matched": 40
+      },
+      "parse_counts": {
+        "questions": 40,
+        "qa_pairs": 0,
+        "pending": 0,
+        "skipped": 0,
+        "excluded": 0,
+        "key_sections_found": 0,
+        "key_entries_applied": 0,
+        "unmatched_key_entries": 0,
+        "number_gaps": 0,
+        "number_duplicates": 0,
+        "options_complete_4_of_4": 40
+      }
+    },
+    "urdu_noa": {
+      "pdf": "PDF_Urdu_MCQs_NOA.pdf",
+      "count": 135,
+      "kind": "digital",
+      "seconds": 0.38,
+      "metrics": {
+        "question_detection": {
+          "precision": 1.0,
+          "recall": 0.7926,
+          "f1": 0.8843,
+          "tp": 107,
+          "fp": 0,
+          "fn": 28
+        },
+        "option_extraction": {
+          "precision": 1.0,
+          "recall": 0.986,
+          "f1": 0.9929,
+          "tp": 422,
+          "fp": 0,
+          "fn": 6
+        },
+        "answer_correctness": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 104,
+          "fp": 0,
+          "fn": 0,
+          "accuracy_on_matched_with_answer": 1.0
+        },
+        "detected_total": 107,
+        "ground_truth_total": 135,
+        "matched": 107
+      },
+      "parse_counts": {
+        "questions": 105,
+        "qa_pairs": 0,
+        "pending": 2,
+        "skipped": 1,
+        "excluded": 29,
+        "key_sections_found": 0,
+        "key_entries_applied": 0,
+        "unmatched_key_entries": 0,
+        "number_gaps": 17,
+        "number_duplicates": 0,
+        "options_complete_4_of_4": 105
+      }
+    },
+    "ca_monthly_march_2025": {
+      "pdf": "Current-Affairs-March-2025-in-PDF.pdf",
+      "count": 25,
+      "kind": "digital",
+      "seconds": 1.53,
+      "metrics": {
+        "question_detection": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 29,
+          "fn": 25
+        },
+        "option_extraction": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "answer_correctness": null,
+        "detected_total": 29,
+        "ground_truth_total": 25,
+        "matched": 0
+      },
+      "parse_counts": {
+        "questions": 5,
+        "qa_pairs": 1,
+        "pending": 24,
+        "skipped": 0,
+        "excluded": 0,
+        "key_sections_found": 0,
+        "key_entries_applied": 0,
+        "unmatched_key_entries": 0,
+        "number_gaps": 0,
+        "number_duplicates": 1,
+        "options_complete_4_of_4": 5
+      }
+    },
+    "ca_monthly_april_2025": {
+      "pdf": "Current-Affairs-April-2025-in-PDF-Free-Version.pdf",
+      "count": 27,
+      "kind": "digital",
+      "seconds": 1.52,
+      "metrics": {
+        "question_detection": {
+          "precision": 0.0323,
+          "recall": 0.037,
+          "f1": 0.0345,
+          "tp": 1,
+          "fp": 30,
+          "fn": 26
+        },
+        "option_extraction": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 4,
+          "fp": 0,
+          "fn": 0
+        },
+        "answer_correctness": null,
+        "detected_total": 31,
+        "ground_truth_total": 27,
+        "matched": 1
+      },
+      "parse_counts": {
+        "questions": 3,
+        "qa_pairs": 0,
+        "pending": 28,
+        "skipped": 0,
+        "excluded": 0,
+        "key_sections_found": 0,
+        "key_entries_applied": 0,
+        "unmatched_key_entries": 0,
+        "number_gaps": 0,
+        "number_duplicates": 0,
+        "options_complete_4_of_4": 3
+      }
+    },
+    "ca_monthly_june_2025": {
+      "pdf": "Current-Affairs-June-2025-in-PDF__1.pdf",
+      "count": 30,
+      "kind": "digital",
+      "seconds": 1.46,
+      "metrics": {
+        "question_detection": {
+          "precision": 0.0294,
+          "recall": 0.0333,
+          "f1": 0.0312,
+          "tp": 1,
+          "fp": 33,
+          "fn": 29
+        },
+        "option_extraction": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 4,
+          "fp": 0,
+          "fn": 0
+        },
+        "answer_correctness": null,
+        "detected_total": 34,
+        "ground_truth_total": 30,
+        "matched": 1
+      },
+      "parse_counts": {
+        "questions": 4,
+        "qa_pairs": 0,
+        "pending": 30,
+        "skipped": 0,
+        "excluded": 0,
+        "key_sections_found": 0,
+        "key_entries_applied": 0,
+        "unmatched_key_entries": 0,
+        "number_gaps": 0,
+        "number_duplicates": 0,
+        "options_complete_4_of_4": 4
+      }
+    },
+    "ca_monthly_july_2025": {
+      "pdf": "Current-Affairs-July-2025-in-PDF.pdf",
+      "count": 25,
+      "kind": "digital",
+      "seconds": 2.17,
+      "metrics": {
+        "question_detection": {
+          "precision": 0.037,
+          "recall": 0.04,
+          "f1": 0.0385,
+          "tp": 1,
+          "fp": 26,
+          "fn": 24
+        },
+        "option_extraction": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0,
+          "tp": 4,
+          "fp": 0,
+          "fn": 0
+        },
+        "answer_correctness": null,
+        "detected_total": 27,
+        "ground_truth_total": 25,
+        "matched": 1
+      },
+      "parse_counts": {
+        "questions": 4,
+        "qa_pairs": 1,
+        "pending": 23,
+        "skipped": 0,
+        "excluded": 2,
+        "key_sections_found": 0,
+        "key_entries_applied": 0,
+        "unmatched_key_entries": 0,
+        "number_gaps": 0,
+        "number_duplicates": 0,
+        "options_complete_4_of_4": 4
+      }
+    },
+    "ca_monthly_pakistan_august_2025": {
+      "pdf": "Pakistan-Current-Affairs-August-2025-in-PDF.pdf",
+      "count": 18,
+      "kind": "digital",
+      "seconds": 1.09,
+      "metrics": {
+        "question_detection": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 21,
+          "fn": 18
+        },
+        "option_extraction": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "fp": 0,
+          "fn": 0
+        },
+        "answer_correctness": null,
+        "detected_total": 21,
+        "ground_truth_total": 18,
+        "matched": 0
+      },
+      "parse_counts": {
+        "questions": 1,
+        "qa_pairs": 0,
+        "pending": 20,
+        "skipped": 0,
+        "excluded": 0,
+        "key_sections_found": 0,
+        "key_entries_applied": 0,
+        "unmatched_key_entries": 0,
+        "number_gaps": 0,
+        "number_duplicates": 0,
+        "options_complete_4_of_4": 1
+      }
+    },
+    "pak_study_1000_numbers_only": {
+      "pdf": "Pak_Study_1000__MCQs_for_ETEA.pdf",
+      "total_questions_found": 1032,
+      "number_min": 1,
+      "number_max": 1032,
+      "kind": "digital",
+      "seconds": 66.65,
+      "metrics": {
+        "number_detection": {
+          "precision": 0.9989,
+          "recall": 0.8944,
+          "f1": 0.9438,
+          "tp": 923,
+          "fp": 1,
+          "fn": 109
+        }
+      },
+      "parse_counts": {
+        "questions": 929,
+        "qa_pairs": 74,
+        "pending": 77,
+        "skipped": 12,
+        "excluded": 168,
+        "key_sections_found": 0,
+        "key_entries_applied": 0,
+        "unmatched_key_entries": 0,
+        "number_gaps": 105,
+        "number_duplicates": 0,
+        "options_complete_4_of_4": 929
+      },
+      "detected_unique_numbers": 924,
+      "ground_truth_unique_numbers": 1032
+    }
+  },
+  "synthetic": {
+    "synthetic-clean-p1": {
+      "kind": "digital",
+      "expected_questions": 4,
+      "seconds": 0.0,
+      "questions": 0,
+      "pending": 4,
+      "options_complete_4_of_4": 0,
+      "skipped": 0,
+      "excluded": 0,
+      "note": "Exact-option assertions live in test_extract_service; benchmark reports counts only."
+    },
+    "synthetic-clean-p2": {
+      "kind": "digital",
+      "expected_questions": 4,
+      "seconds": 0.0,
+      "questions": 0,
+      "pending": 4,
+      "options_complete_4_of_4": 0,
+      "skipped": 0,
+      "excluded": 0,
+      "note": "Exact-option assertions live in test_extract_service; benchmark reports counts only."
+    },
+    "synthetic-nastaliq-p1": {
+      "kind": "scanned_ground_truth_lines",
+      "expected_questions": 4,
+      "seconds": 0.01,
+      "questions": 0,
+      "pending": 4,
+      "options_complete_4_of_4": 4,
+      "skipped": 0,
+      "excluded": 0,
+      "note": "Extractor on ground-truth lines only; Tesseract CER measured separately below."
+    }
+  },
+  "stored_tesseract_scanned": {
+    "ppsc66-p1": {
+      "kind": "scanned_stored_tesseract",
+      "seconds": 0.04,
+      "questions": 1,
+      "pending": 16,
+      "options_complete_4_of_4": 1,
+      "key_sections_found": 0,
+      "key_entries_applied": 0,
+      "unmatched_key_entries": 0,
+      "gemini_reference_question_starts": 8,
+      "note": "Gemini count is a question-count baseline only; no per-question ground truth for PPSC-66."
+    },
+    "ppsc66-p2": {
+      "kind": "scanned_stored_tesseract",
+      "seconds": 0.05,
+      "questions": 0,
+      "pending": 15,
+      "options_complete_4_of_4": 0,
+      "key_sections_found": 0,
+      "key_entries_applied": 0,
+      "unmatched_key_entries": 0,
+      "gemini_reference_question_starts": 21,
+      "note": "Gemini count is a question-count baseline only; no per-question ground truth for PPSC-66."
+    },
+    "ppsc66-p3": {
+      "kind": "scanned_stored_tesseract",
+      "seconds": 0.01,
+      "questions": 0,
+      "pending": 17,
+      "options_complete_4_of_4": 0,
+      "key_sections_found": 0,
+      "key_entries_applied": 0,
+      "unmatched_key_entries": 0,
+      "gemini_reference_question_starts": 19,
+      "note": "Gemini count is a question-count baseline only; no per-question ground truth for PPSC-66."
+    },
+    "ppsc66-p4": {
+      "kind": "scanned_stored_tesseract",
+      "seconds": 0.07,
+      "questions": 0,
+      "pending": 17,
+      "options_complete_4_of_4": 0,
+      "key_sections_found": 0,
+      "key_entries_applied": 0,
+      "unmatched_key_entries": 0,
+      "gemini_reference_question_starts": 20,
+      "note": "Gemini count is a question-count baseline only; no per-question ground truth for PPSC-66."
+    },
+    "ppsc66-p5": {
+      "kind": "scanned_stored_tesseract",
+      "seconds": 0.01,
+      "questions": 1,
+      "pending": 11,
+      "options_complete_4_of_4": 1,
+      "key_sections_found": 0,
+      "key_entries_applied": 0,
+      "unmatched_key_entries": 0,
+      "gemini_reference_question_starts": 19,
+      "note": "Gemini count is a question-count baseline only; no per-question ground truth for PPSC-66."
+    },
+    "ppsc66-p6": {
+      "kind": "scanned_stored_tesseract",
+      "seconds": 0.01,
+      "questions": 0,
+      "pending": 3,
+      "options_complete_4_of_4": 0,
+      "key_sections_found": 1,
+      "key_entries_applied": 0,
+      "unmatched_key_entries": 39,
+      "gemini_reference_question_starts": 85,
+      "note": "Gemini count is a question-count baseline only; no per-question ground truth for PPSC-66."
+    },
+    "ppsc66-p7": {
+      "kind": "scanned_stored_tesseract",
+      "seconds": 0.01,
+      "questions": 0,
+      "pending": 12,
+      "options_complete_4_of_4": 0,
+      "key_sections_found": 0,
+      "key_entries_applied": 0,
+      "unmatched_key_entries": 0,
+      "gemini_reference_question_starts": 34,
+      "note": "Gemini count is a question-count baseline only; no per-question ground truth for PPSC-66."
+    },
+    "ppsc66_whole_document_stored_tesseract": {
+      "kind": "scanned_stored_tesseract",
+      "seconds": 0.17,
+      "questions": 17,
+      "pending": 77,
+      "options_complete_4_of_4": 17,
+      "key_sections_found": 1,
+      "key_entries_applied": 16,
+      "unmatched_key_entries": [
+        "Paper 6 key entry 2 — no matching question",
+        "Paper 6 key entry 3 — no matching question",
+        "Paper 6 key entry 4 — no matching question",
+        "Paper 6 key entry 5 — no matching question",
+        "Paper 6 key entry 6 — no matching question",
+        "Paper 6 key entry 7 — no matching question",
+        "Paper 6 key entry 8 — no matching question",
+        "Paper 6 key entry 9 — no matching question",
+        "Paper 6 key entry 10 — no matching question",
+        "Paper 6 key entry 11 — no matching question",
+        "Paper 6 key entry 12 — no matching question",
+        "Paper 6 key entry 29 — no matching question",
+        "Paper 6 key entry 30 — no matching question",
+        "Paper 6 key entry 31 — no matching question",
+        "Paper 6 key entry 32 — no matching question",
+        "Paper 6 key entry 33 — no matching question",
+        "Paper 6 key entry 34 — no matching question",
+        "Paper 6 key entry 35 — no matching question",
+        "Paper 6 key entry 36 — no matching question",
+        "Paper 6 key entry 37 — no matching question",
+        "Paper 6 key entry 38 — no matching question",
+        "Paper 6 key entry 39 — no matching question",
+        "Paper 6 key entry 40 — no matching question"
+      ],
+      "number_gaps": [
+        "Q1 missing between Q0 (page 5) and Q2 (page 7)",
+        "Q10–Q12 missing between Q9 (page 7) and Q13 (page 1) (3 questions missing)",
+        "Q29–Q39 missing between Q28 (page 2) and Q40 (page 7) (11 questions missing)",
+        "Q41–Q45 missing between Q40 (page 7) and Q46 (page 3) (5 questions missing)",
+        "Q48–Q59 missing between Q47 (page 3) and Q60 (page 6) (12 questions missing)",
+        "Q61–Q65 missing between Q60 (page 6) and Q66 (page 4) (5 questions missing)",
+        "Q67–Q78 missing between Q66 (page 4) and Q79 (page 5) (12 questions missing)",
+        "Q80–Q81 missing between Q79 (page 5) and Q82 (page 5) (2 questions missing)",
+        "Q83 missing between Q82 (page 5) and Q84 (page 5)",
+        "Q85–Q94 missing between Q84 (page 5) and Q95 (page 5) (10 questions missing)",
+        "Q96 missing between Q95 (page 5) and Q97 (page 6)",
+        "Q98 missing between Q97 (page 6) and Q99 (page 6)"
+      ],
+      "number_duplicates": []
+    },
+    "ppsc66_p7_key_standalone": {
+      "kind": "scanned_stored_tesseract",
+      "key_entries_parsed_from_tesseract_text": 27,
+      "key_numbers": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        40,
+        67,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90,
+        91,
+        92,
+        93,
+        94,
+        95,
+        96,
+        100,
+        1088,
+        1258,
+        1335,
+        2021
+      ]
+    },
+    "ppsc66-table-computer-q67-81": {
+      "kind": "scanned_stored_tesseract",
+      "seconds": 0.0,
+      "questions": 0,
+      "pending": 4,
+      "options_complete_4_of_4": 0,
+      "gemini_reference_question_starts": 0,
+      "note": "Counts only; no per-question ground truth for the table photos."
+    },
+    "ppsc66-table-interjection-q230-257": {
+      "kind": "scanned_stored_tesseract",
+      "seconds": 0.01,
+      "questions": 0,
+      "pending": 5,
+      "options_complete_4_of_4": 0,
+      "gemini_reference_question_starts": 0,
+      "note": "Counts only; no per-question ground truth for the table photos."
+    },
+    "paper60_photo_gemini_text": {
+      "kind": "scanned_gemini_reference_text",
+      "expected_questions": 21,
+      "seconds": 0.07,
+      "questions": 17,
+      "pending": 0,
+      "options_complete_4_of_4": 17,
+      "note": "Extractor on the Gemini reference text (not OCR output); counts only, no per-question ground truth."
+    }
+  },
+  "ppsc66_live_tesseract": {
+    "status": "ok",
+    "engine": "tesseract",
+    "engine_version": "5.3.4",
+    "languages": "eng+urd",
+    "psm": 3,
+    "dpi": 200,
+    "total_seconds": 2063.89,
+    "extract_seconds": 0.11,
+    "per_page": {
+      "p1": {
+        "seconds": 206.19,
+        "digital_text_chars": 0,
+        "blocks": 42,
+        "lines": 108,
+        "layout_column_count": 4,
+        "layout_tables": 0,
+        "dpi_used": 200.0,
+        "render_width_px": 1700,
+        "render_height_px": 2200,
+        "gemini_reference_question_starts": 8
+      },
+      "p2": {
+        "seconds": 484.77,
+        "digital_text_chars": 0,
+        "blocks": 43,
+        "lines": 127,
+        "layout_column_count": 4,
+        "layout_tables": 0,
+        "dpi_used": 200.0,
+        "render_width_px": 1700,
+        "render_height_px": 2200,
+        "gemini_reference_question_starts": 21
+      },
+      "p3": {
+        "seconds": 749.82,
+        "digital_text_chars": 0,
+        "blocks": 42,
+        "lines": 118,
+        "layout_column_count": 3,
+        "layout_tables": 0,
+        "dpi_used": 200.0,
+        "render_width_px": 1700,
+        "render_height_px": 2200,
+        "gemini_reference_question_starts": 19
+      },
+      "p4": {
+        "seconds": 218.96,
+        "digital_text_chars": 0,
+        "blocks": 63,
+        "lines": 131,
+        "layout_column_count": 4,
+        "layout_tables": 0,
+        "dpi_used": 200.0,
+        "render_width_px": 1700,
+        "render_height_px": 2200,
+        "gemini_reference_question_starts": 20
+      },
+      "p5": {
+        "seconds": 31.29,
+        "digital_text_chars": 0,
+        "blocks": 11,
+        "lines": 60,
+        "layout_column_count": 2,
+        "layout_tables": 0,
+        "dpi_used": 200.0,
+        "render_width_px": 1700,
+        "render_height_px": 2200,
+        "gemini_reference_question_starts": 19
+      },
+      "p6": {
+        "seconds": 209.94,
+        "digital_text_chars": 0,
+        "blocks": 20,
+        "lines": 166,
+        "layout_column_count": 4,
+        "layout_tables": 0,
+        "dpi_used": 200.0,
+        "render_width_px": 1700,
+        "render_height_px": 2200,
+        "gemini_reference_question_starts": 85
+      },
+      "p7": {
+        "seconds": 162.82,
+        "digital_text_chars": 0,
+        "blocks": 35,
+        "lines": 116,
+        "layout_column_count": 5,
+        "layout_tables": 0,
+        "dpi_used": 200.0,
+        "render_width_px": 1700,
+        "render_height_px": 2200,
+        "gemini_reference_question_starts": 34
+      }
+    },
+    "questions": 14,
+    "pending": 54,
+    "questions_recovered_of_100": 41,
+    "detected_numbers_1_100": [
+      1,
+      3,
+      4,
+      6,
+      7,
+      8,
+      9,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      49,
+      51,
+      52,
+      54,
+      56,
+      57,
+      58,
+      61,
+      67,
+      97,
+      99
+    ],
+    "options_complete_4_of_4": 14,
+    "key_sections_found": 1,
+    "key_entries_applied": 13,
+    "unmatched_key_entries": [
+      "Paper 66 key entry 21 — no matching question",
+      "Paper 66 key entry 22 — no matching question",
+      "Paper 66 key entry 23 — no matching question",
+      "Paper 66 key entry 24 — no matching question",
+      "Paper 66 key entry 29 — no matching question",
+      "Paper 66 key entry 30 — no matching question",
+      "Paper 66 key entry 31 — no matching question"
+    ],
+    "p7_key_entries_parsed_live": 27,
+    "p7_key_numbers_live": [
+      1,
+      2,
+      3,
+      4,
+      6,
+      7,
+      8,
+      9,
+      10,
+      86,
+      87,
+      88,
+      89,
+      90,
+      91,
+      92,
+      93,
+      94,
+      95,
+      96,
+      97,
+      98,
+      99,
+      1088,
+      1258,
+      1335,
+      2021
+    ],
+    "number_gaps": [
+      "Q2 missing between Q1 (page 3) and Q3 (page 7)",
+      "Q5 missing between Q4 (page 7) and Q6 (page 5)",
+      "Q10–Q24 missing between Q9 (page 7) and Q25 (page 2) (15 questions missing)",
+      "Q48 missing between Q47 (page 3) and Q49 (page 3)",
+      "Q50 missing between Q49 (page 3) and Q51 (page 3)",
+      "Q53 missing between Q52 (page 3) and Q54 (page 3)",
+      "Q55 missing between Q54 (page 3) and Q56 (page 3)",
+      "Q59–Q60 missing between Q58 (page 4) and Q61 (page 4) (2 questions missing)",
+      "Q62–Q66 missing between Q61 (page 4) and Q67 (page 4) (5 questions missing)",
+      "Q68–Q96 missing between Q67 (page 4) and Q97 (page 6) (29 questions missing)",
+      "Q98 missing between Q97 (page 6) and Q99 (page 6)"
+    ],
+    "number_duplicates": [
+      "Q4 appears 2 times (page 7, page 7)",
+      "Q28 appears 2 times (page 1, page 2)"
+    ],
+    "skipped": 76,
+    "excluded": 51
+  },
+  "nastaliq_cer_clean": {
+    "status": "ok",
+    "engine": "tesseract",
+    "engine_version": "5.3.4",
+    "languages": "eng+urd",
+    "psm": 3,
+    "seconds": 18.39,
+    "blocks": 16,
+    "cer": 0.5933,
+    "reference_chars": 328,
+    "hypothesis_chars": 205,
+    "note": "Clean single-process run; M4's earlier 0.5933 was a contended run."
+  },
+  "d9_d16": {
+    "d9_flashcard_caps": {
+      "answers_over_caps": 3,
+      "of_total": 960,
+      "longest_answers_over_160_chars": []
+    },
+    "d16_inline_option_lines": {
+      "lines_with_3_or_more_inline_markers_per_pdf": {
+        "English_1000_Most_Repeated_MCQs_by_TestPoint.pk.pdf": 25,
+        "Computer_Past_Papers_2019-2025.pdf": 0,
+        "ppsc-current-affairs-40-mcqs.pdf": 3,
+        "PDF_Urdu_MCQs_NOA.pdf": 0,
+        "Current-Affairs-March-2025-in-PDF.pdf": 0,
+        "Current-Affairs-April-2025-in-PDF-Free-Version.pdf": 0,
+        "Current-Affairs-June-2025-in-PDF__1.pdf": 2,
+        "Current-Affairs-July-2025-in-PDF.pdf": 1,
+        "Pakistan-Current-Affairs-August-2025-in-PDF.pdf": 0,
+        "Pak_Study_1000__MCQs_for_ETEA.pdf": 7
+      },
+      "total": 38,
+      "note": "3/4-column single-line option layouts are UNVERIFIED if the total is 0 — no fixture exercises that shape."
+    }
+  },
+  "overall": {
+    "digital_mcq_fixtures": {
+      "question_detection": {
+        "precision": 0.7976,
+        "recall": 0.9104,
+        "f1": 0.8503,
+        "tp": 1525,
+        "fp": 387,
+        "fn": 150
+      },
+      "option_extraction": {
+        "precision": 1.0,
+        "recall": 0.9977,
+        "f1": 0.9989,
+        "tp": 6086,
+        "fp": 0,
+        "fn": 14
+      },
+      "answer_correctness": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "tp": 1519,
+        "fp": 0,
+        "fn": 0
+      }
+    }
+  },
+  "total_seconds": 2517.9,
+  "peak_rss_mb": 551.8,
+  "testpoint_rescored_at": "2026-11-21"
+}

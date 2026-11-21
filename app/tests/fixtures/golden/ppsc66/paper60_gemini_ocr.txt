@@ -1,0 +1,188 @@
+Basic Computer Studies
+6. Which menu provides you options like
+Animation Scheme, custom Animation, Slide
+Transition?
+(A) Insert Menu
+(B) Format Menu
+(C) Tools Menu
+(D) Slide Show Menu*
+♦♦♦♦♦♦♦♦♦♦
+PAPER 60
+DATA ENTRY OPERATOR (Police)
+1. Which key on the keyboard can be used to slide
+show?
+(A) F1
+(B) F2
+(C) F5*
+(D) F10
+2. Which one is Hypertext language?
+(A) XML
+(B) HTML*
+(C) WML
+(D) HTTP
+3. Another name for free software to:
+(A) Encrypted Software
+(B) Copy Rights Protect Software
+(C) Customized Software
+(D) Public Domain Software*
+4. Which of the following is not used to access the
+web?
+(A) ISDN
+(B) Modem
+(C) UDP *
+(D) DSL
+5. A computer network is identified by its:
+(A) Mac Address
+(B) Port Address
+(C) IP Address*
+(D) Location Address
+6. Which of the following is correct option for
+sending same letter to multiple persons?
+(A) Mail merge*
+(B) Macros
+(C) Template
+(D) Alignment
+7. In MS Excel, to create a formula, you can use:
+(A) Values but not cell references
+(B) Cell references but not values
+(C) Values or cell references although not both
+at the same time
+(D) Both value and cell references*
+8. Which programme is generally used in
+architectural design?
+(A) Excel
+(B) Power Point
+(C) Auto CAD *
+(D) MS Word
+9. In MS Word, "Delete" key delete letters from the
+side of curser.
+(A) Right*
+(B) Up
+(C) Down
+(D) Left
+10. What lets you to create new presentation by
+selecting ready-made font color and graphics
+affects in PowerPoint?
+(A) Presentation Template
+(B) Master slide
+(C) Design Template*
+(D) Animation Scheme
+11. Which of the following is not a function in
+Microsoft Excel?
+639
+(A) SUM
+(B) MAX
+(C) MIN
+(D) AVG*
+12. When an Excel workbook is linked to a Word
+document:
+(A) The Word document contains a copy of the
+actual data
+(B) The Word document cannot be edited
+(C) The word document must contain a
+hyperlink
+(D) The word document contains a
+reference to the original source
+application*
+13. ____________ users can open MS Excel 2016 file
+at the same time.
+(A) 100
+(B) 50
+(C) 256
+(D) None of these*
+14. In MS Word 2016, to extend a selection to
+adjacent cells of the table:
+(A) Hold down SHIFT and press an arrow
+key repeatedly*
+(B) Press Alt + A
+(C) Ctrl + Alt + H
+(D) Alt + End
+15. When you delete a text box object from a slide
+in PowrPoint Presentation:
+(A) The object is deleted but text box and the
+text inside is left on the slide
+(B) The text box is deleted and the text is
+pasted the slide
+(C) The text box and text both are deleted*
+(D) None of these
+16. Which is a volatile memory?
+(A) ROM
+(B) BIOS
+(C) PROM
+(D) RAM*
+17. ____________ occurs when a person sends a
+message (or many messages) with angry or
+antagonistic content.
+(A) Flaming *
+(B) Email Bankruptcy
+(C) Email Phishing
+(D) Email fatigue
+18. Which of the following Excel feature allows
+users to evaluate values and return a result?
+(A) Formulas*
+(B) Formatting
+(C) Filters
+(D) Insertions
+19. Common methods of Internet access by users
+include:
+(A) Broadband over coaxial cable
+(B) Fiber optics or copper wires
+(C) Wi-Fi
+(D) All of these*
+20. In MS Excel 2016, zoom level of a page can
+only be
+(A) 10 percent to 300 percent
+(B) 5 percent to 100 percent
+(C) 10 percent to 400 percent*
+(D) 5 percent to 300 percent
+21. In MS Word, what is the function of CTRL + R?
+(A) Open the print dialogue
+640
+(B)
+(C)
+(D)
+22. Wh
+to e
+(A)
+(B)
+(C)
+(D)
+23. All
+follo
+(A)
+(B)
+(C)
+(D)
+24. Bi
+(A)
+(B)
+(C)
+(D)
+25.
+26. T
+(A)
+(B)
+(C)
+(D)
+27. T
+(A)
+(B)
+(C)
+(D)
+28.
+(A)
+(B)
+(C)
+(D)
+29.
+(A)
+(B)
+(C)
+(D)
+30.
+(A)
+(B)
+(C)
+(D)
+HANDWRITTEN: Dot Matrix printer
+HANDWRITTEN: impact printer

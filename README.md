@@ -3,23 +3,22 @@
 Server-side document intelligence engine for **OfficerPath AI**
 (Phase 1, Master Prompt Ultimate Edition + v2, Milestones M0–M8).
 
-> **Phase 1 M3 scope.** This service registers documents, ingests and
-> validates uploaded files (magic bytes, limits, SHA-256 dedup,
-> per-page classification), stores originals immutably, tracks
-> processing jobs + pipeline stage history, and exposes health/version
-> endpoints. M2 adds the PDF stage: PyMuPDF analysis (digital/scanned/
-> mixed/blank per page), rendering at bounded DPI, measured per-page
-> quality (blur, contrast, noise, skew, ink), and adaptive OpenCV
-> preprocessing with mark preservation (ticks/stars/circles/underlines/
-> highlights survive; colour copies kept). M3 adds OCR + layout: a
-> pluggable OCR registry (digital extractor, Tesseract eng+urd,
-> PaddleOCR PP-OCRv5 Arabic-script via ONNX Runtime, Gemini-advisory
-> disabled by default with no key provisioned), per-page engine
-> routing with disagreement handling, and geometry layout analysis
-> (columns, reading order, header/footer, regions, grid tables,
-> figures). Benchmark it with `scripts/benchmark_m3.py` against the
-> golden dataset v1 (`docs/benchmarks/`). It does **not** do MCQ
-> extraction, answer detection, or matching yet — that is M4–M6.
+> **Phase 1 M4 scope (Part B + Part E).** M4 adds MCQ extraction
+> (`app/pipeline/extract/`): a verbatim port of the Flutter Dart
+> parser (question/option markers, OCR-misread numbers, answer
+> signals with precedence answer-line > key > tick > bold > asterisk,
+> strict same-paper key join, block/one-liner/q-only/flashcard
+> paths, Q&A-without-options pairs, table paths, candidate scoring,
+> separate validation), measured by `scripts/benchmark_m4.py`
+> against the golden dataset v2 (`docs/benchmarks/`). Deliberate
+> changes from Dart: D8 delimiter-aware Sr# table path (pdfplumber
+> cells / line-based), D10 seeded deterministic distractor shuffle
+> (`random.Random(20261121)`), D13 structured paper-identity fields
+> on every question record, D14 unknown Subject labels stay
+> "unknown" (never silently mapped to GK). It does **not** do
+> answer matching across papers, admin approval, or persistence of
+> extraction results yet — that is M5–M6. No Alembic migration in
+> M4 (extraction results are not persisted).
 > The Flutter app and live Supabase are untouched by this repo except
 > for the documented migration steps below.
 

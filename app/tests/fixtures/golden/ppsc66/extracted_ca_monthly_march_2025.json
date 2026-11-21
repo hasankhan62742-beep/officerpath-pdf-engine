@@ -1,0 +1,351 @@
+{
+  "source": "ppsc66/Current-Affairs-March-2025-in-PDF.pdf",
+  "extraction": "PyMuPDF span dict; question = bold spans, options = 'A. '...'D. ' spans, explanation = following plain spans.",
+  "answer_mechanism": "UNKNOWN — verified span-by-span: no option span is bold or coloured and no 'Correct Answer' line exists; the explanation is prose that may or may not contain the answer text, so no answer is recorded. 'explanation_option_matches' is a noisy statistic only.",
+  "count": 25,
+  "option_spans_checked": 100,
+  "bold_or_coloured_option_spans": 0,
+  "explanation_option_match_histogram": {
+    "0": 9,
+    "1": 13,
+    ">1": 3
+  },
+  "questions": [
+    {
+      "index": 1,
+      "page": 5,
+      "question": "announcement, what percentage tariff was specifically imposed on imports from Pakistan?",
+      "a": "5%",
+      "b": "10%",
+      "c": "15%",
+      "d": "20%",
+      "explanation": "In late March 2025, President Donald Trump introduced a protectionist trade policy under which a baseline 10% tariff was imposed on all imports to the U.S. However, higher tariffs of up to 15% were placed on select countries — including Pakistan, China, India, and Australia — citing concerns over trade imbalances and strategic interests. This move was widely criticized for sparking fears of a global trade war and impacting Pakistan’s exports, particularly in the textile and surgical instruments sectors.",
+      "answer": null,
+      "explanation_option_matches": [
+        "B",
+        "C"
+      ]
+    },
+    {
+      "index": 2,
+      "page": 6,
+      "question": "proximity to the ancient Gandhara civilization and rich cultural heritage?",
+      "a": "Islamabad",
+      "b": "Karachi",
+      "c": "Peshawar",
+      "d": "Lahore",
+      "explanation": "A travel feature highlighted Peshawar for its rich cultural heritage, including its connection to the ancient Gandhara civilization and the Kalash ethnic group in the Hindu Kush region.",
+      "answer": null,
+      "explanation_option_matches": [
+        "C"
+      ]
+    },
+    {
+      "index": 3,
+      "page": 7,
+      "question": "agreement with Pakistan to unlock how much new funding?",
+      "a": "$500 million",
+      "b": "$1.3 billion",
+      "c": "$2 billion",
+      "d": "$2.5 billion",
+      "explanation": "The IMF agreed to provide Pakistan with $1.3 billion under a new 28-month climate resilience loan program, pending board approval.",
+      "answer": null,
+      "explanation_option_matches": [
+        "B"
+      ]
+    },
+    {
+      "index": 4,
+      "page": 8,
+      "question": "What significant event took place in Pakistan on March 23, 2025?",
+      "a": "General elections",
+      "b": "Independence Day celebrations",
+      "c": "Pakistan Day Parade",
+      "d": "Signing of a peace treaty",
+      "explanation": "Pakistan celebrated its national day with the annual Pakistan Day Parade on March 23, 2025.",
+      "answer": null,
+      "explanation_option_matches": [
+        "C"
+      ]
+    },
+    {
+      "index": 5,
+      "page": 9,
+      "question": "(NOC) to launch its services in Pakistan in March 2025?",
+      "a": "OneWeb",
+      "b": "Starlink",
+      "c": "Amazon’s Kuiper​",
+      "d": "HughesNet",
+      "explanation": "Elon Musk’s Starlink received approval to initiate its services in Pakistan in March 2025, marking a significant development in the country’s internet connectivity landscape. The Ministry of Information Technology and Telecommunication announced the NOC grant on March 21, 2025. Starlink Services, owned by tech billionaire Elon Musk, is one of the most technologically advanced companies globally among those providing internet via Low Earth Orbit (LEO) satellites.",
+      "answer": null,
+      "explanation_option_matches": [
+        "B"
+      ]
+    },
+    {
+      "index": 6,
+      "page": 10,
+      "question": "hijacking?",
+      "a": "150",
+      "b": "182",
+      "c": "200",
+      "d": "250",
+      "explanation": "The BLA, the group which carried out the attack, claimed that it had more than 180 hostages on the train with it, a majority of them security personnel.",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 7,
+      "page": 11,
+      "question": "Who claimed responsibility for the 2025 Jaffar Express hijacking?",
+      "a": "BLA",
+      "b": "ISIS-K",
+      "c": "TTP",
+      "d": "Taliban",
+      "explanation": "Balochistan Liberation Army militants blow up railway tracks and hijack the Jaffar Express train bound from Quetta to Peshawar taking 450 people hostages including both security personnel and civilians.",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 8,
+      "page": 12,
+      "question": "March 2025?",
+      "a": "10%",
+      "b": "11%",
+      "c": "12%",
+      "d": "13%",
+      "explanation": "",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 9,
+      "page": 13,
+      "question": "Who claimed responsibility for the 2025 Bannu Cantonment attack?",
+      "a": "Balochistan Liberation Army",
+      "b": "Jaish Al-Fursan",
+      "c": "Hafiz Gul Bahadur Group",
+      "d": "ISIS-K",
+      "explanation": "Eighteen people are killed in a combined suicide bombing and assault on a military base in Bannu , Khyber Pakhtunkhwa, that is claimed by the Pakistani Taliban affiliate Jaish Al- Fursan.",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 10,
+      "page": 14,
+      "question": "early March 2025?",
+      "a": "Peace talks between military leaders",
+      "b": "Trade agreement signing",
+      "c": "Border clash at Torkham crossing",
+      "d": "Diplomatic delegation visit",
+      "explanation": "The second round of Pakistan-Türkiye Counter-Terrorism Consultations was held in Islamabad on 10 February 2025. Pakistan delegation was led by the Director General for Counter-Terrorism at the Ministry of Foreign Affairs, Ambassador Abdul Hameed, and the Turkish side was headed by the Director General for Intelligence and Security, Ministry of Foreign Affairs of Türkiye, Ambassador KenanYilmaz.",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 11,
+      "page": 16,
+      "question": "a significant death toll?",
+      "a": "Typhoon",
+      "b": "Earthquake",
+      "c": "Flood",
+      "d": "Landslide",
+      "explanation": "In late March 2025, a 7.7 magnitude earthquake struck Myanmar, resulting in a death toll surpassing 2,000 and overwhelming healthcare facilities. The disaster also affected neighboring Thailand, causing at least 19 fatalities.",
+      "answer": null,
+      "explanation_option_matches": [
+        "B"
+      ]
+    },
+    {
+      "index": 12,
+      "page": 17,
+      "question": "announce in late March 2025?",
+      "a": "Implementation of a baseline 10% tariff on imports",
+      "b": "Withdrawal from the World Trade Organization",
+      "c": "Introduction of a new free trade agreement with China",
+      "d": "Reduction of existing tariffs on European goods",
+      "explanation": "In late March 2025, President Donald Trump announced the implementation of a baseline 10% tariff on imports, with higher rates for key trading partners, including Australia. This move sparked fears of a global recession and led to expectations that central banks, such as the Reserve Bank of Australia, might reduce interest rates to mitigate economic impacts.",
+      "answer": null,
+      "explanation_option_matches": [
+        "A"
+      ]
+    },
+    {
+      "index": 13,
+      "page": 18,
+      "question": "Who won the ICC Champions Trophy 2025?",
+      "a": "Australia",
+      "b": "New Zealand",
+      "c": "India",
+      "d": "England",
+      "explanation": "India clinched the ICC Champions Trophy 2025 by defeating New Zealand by four wickets in the final held at the Dubai International Cricket Stadium on March 9, 2025.",
+      "answer": null,
+      "explanation_option_matches": [
+        "B",
+        "C"
+      ]
+    },
+    {
+      "index": 14,
+      "page": 19,
+      "question": "March 23, 2025?",
+      "a": "United States",
+      "b": "China",
+      "c": "France",
+      "d": "Turkey",
+      "explanation": "China hosted a diplomatic summit between Ukraine and Russia, attempting to mediate peace and reduce tensions. While no formal agreement was reached, both sides agreed to continue negotiations.",
+      "answer": null,
+      "explanation_option_matches": [
+        "B"
+      ]
+    },
+    {
+      "index": 15,
+      "page": 20,
+      "question": "in March 2025?",
+      "a": "Saudi Arabia",
+      "b": "United Arab Emirates",
+      "c": "Qatar",
+      "d": "Kuwait",
+      "explanation": "The UAE unveiled a $50 billion investment strategy aimed at developing infrastructure, energy, and agriculture sectors across Africa. This initiative strengthens the UAE’s global economic influence and enhances its trade partnerships with African nations.",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 16,
+      "page": 21,
+      "question": "elections?",
+      "a": "Venezuela",
+      "b": "Russia",
+      "c": "Iran",
+      "d": "China",
+      "explanation": "The Russian government accused the U.S. of supporting opposition groups ahead of Russia’s presidential elections, claiming that Washington was attempting to influence the political process. The U.S. denied the allegations, calling them baseless.",
+      "answer": null,
+      "explanation_option_matches": [
+        "B"
+      ]
+    },
+    {
+      "index": 17,
+      "page": 22,
+      "question": "of military rule in March 2025?",
+      "a": "Sudan",
+      "b": "Burkina Faso",
+      "c": "Mali",
+      "d": "Chad",
+      "explanation": "Burkina Faso successfully conducted its",
+      "answer": null,
+      "explanation_option_matches": [
+        "B"
+      ]
+    },
+    {
+      "index": 18,
+      "page": 23,
+      "question": "2025?",
+      "a": "NASA",
+      "b": "ESA",
+      "c": "CNSA",
+      "d": "ISRO",
+      "explanation": "The China National Space Administration (CNSA) achieved a significant milestone by successfully landing its rover, named ‘Zhurong 2’, on Mars. This marks China’s second successful Mars landing, demonstrating its growing capabilities in space exploration.",
+      "answer": null,
+      "explanation_option_matches": [
+        "C"
+      ]
+    },
+    {
+      "index": 19,
+      "page": 24,
+      "question": "to mass protests?",
+      "a": "Recep Tayyip Erdoğan",
+      "b": "Ekrem İmamoğlu",
+      "c": "Ahmet Davutoğlu",
+      "d": "Devlet Bahçeli",
+      "explanation": "Istanbul’s mayor, Ekrem İmamoğlu, a key opponent of President Erdoğan, was arrested on charges of corruption. His arrest sparked nationwide protests, with over 1,100 people detained. The move was widely condemned as an attempt to suppress opposition before Turkey’s upcoming elections.",
+      "answer": null,
+      "explanation_option_matches": [
+        "B"
+      ]
+    },
+    {
+      "index": 20,
+      "page": 25,
+      "question": "14, 2025, citing human rights violations?",
+      "a": "North Korea",
+      "b": "China",
+      "c": "Iran",
+      "d": "Russia",
+      "explanation": "The U.S. imposed fresh sanctions on North Korea due to continued human rights abuses and missile tests. The sanctions target North Korean banks and key officials responsible for suppressing dissent.",
+      "answer": null,
+      "explanation_option_matches": [
+        "A"
+      ]
+    },
+    {
+      "index": 21,
+      "page": 26,
+      "question": "2025?",
+      "a": "Ceasefire between Israel and Syria",
+      "b": "Peace agreement between Syria and Turkey",
+      "c": "Integration of SDF-controlled areas into Syrian state institutions",
+      "d": "A new Syrian constitution",
+      "explanation": "Syrian interim President Ahmed al-Sharaa and Syrian Democratic Forces (SDF) commander Mazloum Abdi agreed to integrate SDF-controlled areas, including oil-rich northeastern regions, into the Syrian government. The deal is seen as a major step towards stabilizing the country after years of civil war.",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 22,
+      "page": 27,
+      "question": "importer in the world during 2020-24?",
+      "a": "India",
+      "b": "China",
+      "c": "Ukraine",
+      "d": "Japan",
+      "explanation": "According to Stockholm International Peace Research Institute (SIPRI), India was the second- largest arms importer from 2020-24, though its imports fell by 9.3% compared to 2015-19. Ukraine became the world’s largest arms importer, with imports rising nearly 100 times. India’s arms imports from Russia fell to 36% in 2020-24 from 55% in 2015-19. India was the top arms buyer from both Russia and France. The U.S. led global arms exports with 43%, while Russia’s exports dropped by 64%. China exited the top 10 arms importers list for the first time since 1990- 94, showing domestic production growth.",
+      "answer": null,
+      "explanation_option_matches": [
+        "A",
+        "B",
+        "C"
+      ]
+    },
+    {
+      "index": 23,
+      "page": 28,
+      "question": "How many Champions Trophy titles has India won as of 2025?",
+      "a": "One",
+      "b": "Two",
+      "c": "Three",
+      "d": "Four",
+      "explanation": "With their 2025 victory, India secured their third Champions Trophy title, having previously won in 2002 and 2013.",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 24,
+      "page": 29,
+      "question": "energy in March 2025?",
+      "a": "Development of a high-efficiency solar panel",
+      "b": "Creation of a cost-effective hydrogen fuel cell",
+      "c": "Discovery of a new method for nuclear fusion",
+      "d": "Invention of a biodegradable battery",
+      "explanation": "Researchers announced a novel approach to achieving nuclear fusion, potentially paving the way for a nearly limitless and clean energy source. This breakthrough could revolutionize the energy industry in the coming decades.",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 25,
+      "page": 30,
+      "question": "would be the official language of the USA.",
+      "a": "English",
+      "b": "French",
+      "c": "Italian",
+      "d": "Spanish",
+      "explanation": "On March 1, 2025, President Donald Trump announced that English would be the official language of the country. He said that this decision would help bring unity in a nation with people from different backgrounds. The White House released an executive order stating that it was “long past time” to make English the official language of the United States.",
+      "answer": null,
+      "explanation_option_matches": [
+        "A"
+      ]
+    }
+  ]
+}

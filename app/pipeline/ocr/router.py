@@ -27,6 +27,10 @@ from __future__ import annotations
 import difflib
 
 from app.pipeline.interfaces import BoundingBox, OCRBlock
+from app.pipeline.ocr.deployment import (
+    DeploymentProfile,
+    deployment_exclusions,
+)
 from app.pipeline.ocr.normalize import normalize_for_comparison
 
 # IoU above this means two blocks cover (approximately) the same region.
@@ -38,13 +42,24 @@ AGREEMENT_SIMILARITY = 0.8
 DEDUP_SIMILARITY = 0.85
 
 
-def route_page(classification: str, available_engines: list[str]) -> list[str]:
+def route_page(
+    classification: str,
+    available_engines: list[str],
+    deployment: DeploymentProfile | None = None,
+) -> list[str]:
     """Engine names to run for one page, in order. `available_engines`
     is the registry's available_names() (digital-pymupdf is always
-    in it). Unknown classifications get a best-effort OCR attempt."""
+    in it). Unknown classifications get a best-effort OCR attempt.
+    When `deployment` is given, engines it excludes (see
+    deployment_exclusions — PaddleOCR on a low-memory profile) are
+    removed BEFORE the preference order is applied, so a gated engine
+    is never selected. With deployment=None the M3 behaviour is kept
+    (tests and offline tooling)."""
+    excluded = deployment_exclusions(available_engines, deployment)
+    effective = [name for name in available_engines if name not in excluded]
     ocr_engine = None
     for candidate in ("paddleocr", "tesseract"):
-        if candidate in available_engines:
+        if candidate in effective:
             ocr_engine = candidate
             break
     if classification == "digital":

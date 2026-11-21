@@ -27,6 +27,11 @@ from dataclasses import dataclass, field
 from app.config import Settings
 from app.pipeline.ingestion.service import StageRecorder
 from app.pipeline.interfaces import OCRBlock, PageContext, PipelineStage
+from app.pipeline.ocr.deployment import (
+    DeploymentProfile,
+    deployment_exclusions,
+    deployment_profile_from_settings,
+)
 from app.pipeline.ocr.registry import OCRRegistry, default_registry
 from app.pipeline.ocr.router import compare_engines, deduplicate_blocks, route_page
 from app.pipeline.ocr.tesseract import EngineUnavailableError
@@ -53,6 +58,9 @@ class PageOcrResult:
     page_number: int
     engines_run: list[str] = field(default_factory=list)
     engines_unavailable: dict[str, str] = field(default_factory=dict)
+    # Engines excluded by the deployment profile (ADR-006), with the
+    # reason — recorded per page for traceability, never silent.
+    engines_excluded_by_deployment: dict[str, str] = field(default_factory=dict)
     block_count: int = 0
     blocks_by_engine: dict[str, int] = field(default_factory=dict)
     deduplicated: int = 0
@@ -101,6 +109,23 @@ def run_ocr_stage(
             "ocr engines unavailable",
             extra={"fields": {"document_id": str(document_id), "engines": unavailable}},
         )
+    # Deployment-aware routing (ADR-006): the profile is resolved
+    # once per document; an unknown profile name fails loudly here
+    # (ValueError) rather than routing pages to a wrong budget.
+    deployment = deployment_profile_from_settings(settings)
+    excluded = deployment_exclusions(available, deployment)
+    if excluded:
+        log.info(
+            "ocr engines excluded by deployment profile",
+            extra={
+                "fields": {
+                    "document_id": str(document_id),
+                    "deployment_profile": deployment.name,
+                    "memory_budget_mb": deployment.memory_budget_mb,
+                    "engines": excluded,
+                }
+            },
+        )
     result = DocumentOcrResult(document_id=document_id)
     for page_input in pages:
         page_result = _process_one_page(
@@ -113,6 +138,8 @@ def run_ocr_stage(
             registry=registry,
             available=available,
             unavailable=unavailable,
+            deployment=deployment,
+            deployment_excluded=excluded,
             correlation_id=correlation_id,
         )
         result.pages.append(page_result)
@@ -143,14 +170,17 @@ def _process_one_page(
     registry: OCRRegistry,
     available: list[str],
     unavailable: dict[str, str],
+    deployment: DeploymentProfile,
+    deployment_excluded: dict[str, str],
     correlation_id: str | None,
 ) -> PageOcrResult:
     page_result = PageOcrResult(
         page_number=page_input.page_number,
         engines_unavailable={name: reason for name, reason in unavailable.items()},
+        engines_excluded_by_deployment=dict(deployment_excluded),
     )
     try:
-        engine_names = route_page(page_input.classification, available)
+        engine_names = route_page(page_input.classification, available, deployment=deployment)
         if not engine_names:
             page_result.error = (
                 "no_ocr_engine: no engine available for "

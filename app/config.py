@@ -111,6 +111,15 @@ class Settings(BaseSettings):
     # load, it reports unavailable with the reason (M3 report).
     paddleocr_language: str = "ar"
     paddleocr_enabled: bool = True
+    # --- M4: deployment-aware OCR routing (ADR-006) ---
+    # Deployment profile: "render-free" (Render free, 512 MB),
+    # "vps" (Hostinger KVM 1, 4 GB), "local" (dev VM, 8 GB). The
+    # router never selects PaddleOCR on a profile whose memory
+    # budget is below its measured peak (M3: 1,775-3,667 MB).
+    # An unknown profile name fails loudly at startup of the OCR
+    # stage. memory_budget_mb overrides the profile default when set.
+    deployment_profile: str = "local"
+    memory_budget_mb: int | None = None
     # Gemini advisory (AIAssistProvider, prompt §15 / ADR-002): DISABLED
     # by default. Enabling ALSO needs a server key in the environment
     # (GEMINI_API_KEY — never in code); with no key the provider
@@ -121,7 +130,7 @@ class Settings(BaseSettings):
     gemini_max_calls_per_day: int = 0  # 0 = advisory disabled entirely
     gemini_max_output_tokens: int = 2048
     # Golden dataset version used by the benchmark harness.
-    benchmark_dataset_version: str = "golden-v1"
+    benchmark_dataset_version: str = "golden-v2"
 
     @property
     def supabase_configured(self) -> bool:

@@ -70,12 +70,14 @@ def _extract_page(fitz_page: fitz.Page, page: PageContext) -> list[OCRBlock]:
         fonts: set[str] = set()
         sizes: list[float] = []
         bold = False
+        bold_lines: list[int] = []
         italic = False
         colours: set[str] = set()
         for line in block.get("lines", []):
             line_text = "".join(span.get("text", "") for span in line.get("spans", []))
             if line_text:
                 lines.append(line_text)
+            line_bold = False
             for span in line.get("spans", []):
                 if span.get("font"):
                     fonts.add(str(span["font"]))
@@ -84,10 +86,17 @@ def _extract_page(fitz_page: fitz.Page, page: PageContext) -> list[OCRBlock]:
                 flags = int(span.get("flags", 0))
                 if flags & 16:  # PyMuPDF span flag: bold
                     bold = True
+                    line_bold = True
                 if flags & 2:  # PyMuPDF span flag: italic
                     italic = True
                 if span.get("color") is not None:
                     colours.add(f"#{int(span['color']):06x}")
+            if line_bold and line_text:
+                # M4 (D17): per-line bold indices, 0-based within the
+                # block. The extract service appends U+E000 to each
+                # bold line so the parser can read the bold signal
+                # per option (block-level "bold" is too coarse).
+                bold_lines.append(len(lines) - 1)
         text = "\n".join(lines).strip()
         if not text:
             continue
@@ -105,6 +114,7 @@ def _extract_page(fitz_page: fitz.Page, page: PageContext) -> list[OCRBlock]:
                     "fonts": sorted(fonts),
                     "size_pt": round(max(sizes), 1) if sizes else None,
                     "bold": bold,
+                    "bold_lines": bold_lines,  # M4 (D17): 0-based line indices
                     "italic": italic,
                     "colours": sorted(colours),
                 },

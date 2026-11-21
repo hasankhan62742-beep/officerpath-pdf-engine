@@ -1,5 +1,5 @@
 {
-  "version": "golden-v1",
+  "version": "golden-v2",
   "created": "2026-11-21",
   "sources": {
     "synthetic": "scripts/generate_m2_fixtures.py (M2, deterministic)",
@@ -9,7 +9,8 @@
     "ground_truth": "exact text drawn into the fixture (synthetic only)",
     "gemini_reference": "Gemini 3.5-flash-lite OCR output (reference, not ground truth)",
     "gemini_reference_hand_verified": "Gemini reference, hand-checked vs the image (p-1 only)",
-    "none": "no reference exists for this entry (Paper 60: file absent from source fixtures)"
+    "extracted_ground_truth": "programmatically extracted from the file's own text layer (inline answer marking), NOT hand-verified — see scripts/extract_golden_v2_ground_truth.py",
+    "none": "no reference exists for this entry"
   },
   "hand_verified_pages": [
     "ppsc66-p1"
@@ -383,6 +384,47 @@
       "notes": "Empty page: every engine must return no blocks."
     },
     {
+      "id": "synthetic-nastaliq-p1",
+      "kind": "scanned",
+      "source": "synthetic-nastaliq/nastaliq-p1.png",
+      "page": 1,
+      "reference_kind": "ground_truth",
+      "reference_file": "synthetic-nastaliq/nastaliq-p1.txt",
+      "lines": [
+        "ماڈل پیپر — عمومی معلومات",
+        "1. پاکستان کا دارالحکومت کون سا ہے؟",
+        "(A) کراچی",
+        "(B) لاہور",
+        "(C) اسلام آباد",
+        "(D) کوئٹہ",
+        "2. لاہور سے کون سا دریا گزرتا ہے؟",
+        "(A) سندھ",
+        "(B) راوی",
+        "(C) چناب",
+        "(D) جہلم",
+        "3. پاکستان کا سب سے بڑا صحرا کون سا ہے؟",
+        "(A) تھر",
+        "(B) چولستان",
+        "(C) خاران",
+        "(D) ناران",
+        "4. قومی ترانہ کس نے لکھا؟",
+        "(A) اقبال",
+        "(B) حفیظ جالندھری",
+        "(C) فیض",
+        "(D) غالب"
+      ],
+      "left_column_lines": null,
+      "right_column_lines": null,
+      "categories": [
+        "synthetic",
+        "scanned",
+        "urdu",
+        "nastaliq"
+      ],
+      "hand_verified": false,
+      "notes": "4 Urdu MCQs in Nastaliq (Noto Nastaliq Urdu, rendered with PIL raqm/harfbuzz shaping). Tesseract Nastaliq CER measured in M4 — see docs/benchmarks/BENCHMARK_M4_2026-11-21.md."
+    },
+    {
       "id": "ppsc66-p1",
       "kind": "scanned",
       "source": "ppsc66/p-1.png",
@@ -563,10 +605,10 @@
     {
       "id": "paper60-photo",
       "kind": "scanned",
-      "source": "absent: no Paper 60 file in ~/workspace/officerpath-ai/test-fixtures/ppsc66/ (checked 2026-11-21)",
+      "source": "ppsc66/paper60-photo.jpg",
       "page": 1,
-      "reference_kind": "none",
-      "reference_file": null,
+      "reference_kind": "gemini_reference",
+      "reference_file": "ppsc66/paper60_gemini_ocr.txt",
       "lines": null,
       "left_column_lines": null,
       "right_column_lines": null,
@@ -577,7 +619,363 @@
         "real"
       ],
       "hand_verified": false,
-      "notes": "Paper 60 phone photo; no image and no Gemini reference text exist in the source fixtures, so the benchmark records it as not-run."
+      "notes": "Paper 60 phone photo; recovered from the media library (IMG_20261119_151817_041.jpg, 19 Nov 2026), NOT re-sent by the owner — the M3 'missing' claim was wrong. Gemini reference text, not hand-verified."
+    },
+    {
+      "id": "ca-monthly-march-2025",
+      "kind": "digital",
+      "source": "ppsc66/Current-Affairs-March-2025-in-PDF.pdf",
+      "page": null,
+      "reference_kind": "none",
+      "reference_file": null,
+      "lines": null,
+      "left_column_lines": null,
+      "right_column_lines": null,
+      "categories": [
+        "digital",
+        "english",
+        "real",
+        "current-affairs",
+        "answers-unknown"
+      ],
+      "hand_verified": false,
+      "notes": "mcqsplanet.com, 32pp, 25 MCQs (1 per content page: question + A–D + explanation). Answers UNKNOWN: no option span is bold or coloured and no 'Correct Answer' line exists (verified over 100 option spans); the explanation is prose that may or may not contain the answer text (explanation matched exactly one option in 13/25 questions, none in 9, more than one in 3) — NOT a reliable mechanism, so no answer is recorded. Questions only: ppsc66/extracted_ca_monthly_march_2025.json."
+    },
+    {
+      "id": "ca-monthly-april-2025",
+      "kind": "digital",
+      "source": "ppsc66/Current-Affairs-April-2025-in-PDF-Free-Version.pdf",
+      "page": null,
+      "reference_kind": "none",
+      "reference_file": null,
+      "lines": null,
+      "left_column_lines": null,
+      "right_column_lines": null,
+      "categories": [
+        "digital",
+        "english",
+        "real",
+        "current-affairs",
+        "answers-unknown"
+      ],
+      "hand_verified": false,
+      "notes": "mcqsplanet.com, 34pp, 27 MCQs (1 per content page: question + A–D + explanation). Answers UNKNOWN: no option span is bold or coloured and no 'Correct Answer' line exists (verified over 108 option spans); the explanation is prose that may or may not contain the answer text (explanation matched exactly one option in 21/27 questions, none in 5, more than one in 1) — NOT a reliable mechanism, so no answer is recorded. Questions only: ppsc66/extracted_ca_monthly_april_2025.json."
+    },
+    {
+      "id": "ca-monthly-june-2025",
+      "kind": "digital",
+      "source": "ppsc66/Current-Affairs-June-2025-in-PDF__1.pdf",
+      "page": null,
+      "reference_kind": "none",
+      "reference_file": null,
+      "lines": null,
+      "left_column_lines": null,
+      "right_column_lines": null,
+      "categories": [
+        "digital",
+        "english",
+        "real",
+        "current-affairs",
+        "answers-unknown"
+      ],
+      "hand_verified": false,
+      "notes": "mcqsplanet.com, 37pp, 30 MCQs (1 per content page: question + A–D + explanation). Answers UNKNOWN: no option span is bold or coloured and no 'Correct Answer' line exists (verified over 120 option spans); the explanation is prose that may or may not contain the answer text (explanation matched exactly one option in 9/30 questions, none in 20, more than one in 1) — NOT a reliable mechanism, so no answer is recorded. Questions only: ppsc66/extracted_ca_monthly_june_2025.json. One sampled explanation states a figure (8 dead) matching no option (options 5/9/12/15) — the explanation cannot be trusted as the answer key."
+    },
+    {
+      "id": "ca-monthly-july-2025",
+      "kind": "digital",
+      "source": "ppsc66/Current-Affairs-July-2025-in-PDF.pdf",
+      "page": null,
+      "reference_kind": "none",
+      "reference_file": null,
+      "lines": null,
+      "left_column_lines": null,
+      "right_column_lines": null,
+      "categories": [
+        "digital",
+        "english",
+        "real",
+        "current-affairs",
+        "answers-unknown"
+      ],
+      "hand_verified": false,
+      "notes": "mcqsplanet.com, 32pp, 25 MCQs (1 per content page: question + A–D + explanation). Answers UNKNOWN: no option span is bold or coloured and no 'Correct Answer' line exists (verified over 100 option spans); the explanation is prose that may or may not contain the answer text (explanation matched exactly one option in 9/25 questions, none in 16, more than one in 0) — NOT a reliable mechanism, so no answer is recorded. Questions only: ppsc66/extracted_ca_monthly_july_2025.json."
+    },
+    {
+      "id": "ca-monthly-pakistan-august-2025",
+      "kind": "digital",
+      "source": "ppsc66/Pakistan-Current-Affairs-August-2025-in-PDF.pdf",
+      "page": null,
+      "reference_kind": "none",
+      "reference_file": null,
+      "lines": null,
+      "left_column_lines": null,
+      "right_column_lines": null,
+      "categories": [
+        "digital",
+        "english",
+        "real",
+        "current-affairs",
+        "answers-unknown"
+      ],
+      "hand_verified": false,
+      "notes": "mcqsplanet.com, 22pp, 18 MCQs (1 per content page: question + A–D + explanation). Answers UNKNOWN: no option span is bold or coloured and no 'Correct Answer' line exists (verified over 72 option spans); the explanation is prose that may or may not contain the answer text (explanation matched exactly one option in 12/18 questions, none in 5, more than one in 1) — NOT a reliable mechanism, so no answer is recorded. Questions only: ppsc66/extracted_ca_monthly_pakistan_august_2025.json."
+    },
+    {
+      "id": "ppsc66-table-interjection-q230-257-resent",
+      "kind": "scanned",
+      "source": "ppsc66/table-interjection-q230-257-resent-20261121.jpg",
+      "page": 1,
+      "reference_kind": "none",
+      "reference_file": null,
+      "lines": null,
+      "left_column_lines": null,
+      "right_column_lines": null,
+      "categories": [
+        "scanned",
+        "table-photo",
+        "english",
+        "real",
+        "resent-2026-11-21"
+      ],
+      "hand_verified": false,
+      "notes": "Re-capture (2026-11-21) of the same Q230–257 Interjection / Parts of Speech / Gerund table page as ppsc66-table-interjection-q230-257; different md5 (0309372a…), kept as a separate version. No Gemini reference for this capture; OCR-only."
+    },
+    {
+      "id": "ppsc66-table-computer-q67-81-resent",
+      "kind": "scanned",
+      "source": "ppsc66/table-computer-q67-81-resent-20261121.jpg",
+      "page": 1,
+      "reference_kind": "none",
+      "reference_file": null,
+      "lines": null,
+      "left_column_lines": null,
+      "right_column_lines": null,
+      "categories": [
+        "scanned",
+        "table-photo",
+        "english",
+        "real",
+        "resent-2026-11-21"
+      ],
+      "hand_verified": false,
+      "notes": "Re-capture (2026-11-21) of the same Q67–81 MS Word table page ('Page 5 of 71') as ppsc66-table-computer-q67-81; different md5 (927ccc5e…), kept as a separate version. No Gemini reference for this capture; OCR-only."
+    },
+    {
+      "id": "ppsc-ca-40-mcqs",
+      "kind": "digital",
+      "source": "ppsc66/ppsc-current-affairs-40-mcqs.pdf",
+      "page": null,
+      "reference_kind": "extracted_ground_truth",
+      "reference_file": "ppsc66/ground_truth_ca40.json",
+      "lines": null,
+      "left_column_lines": null,
+      "right_column_lines": null,
+      "categories": [
+        "digital",
+        "english",
+        "real",
+        "current-affairs",
+        "inline-answers"
+      ],
+      "hand_verified": false,
+      "notes": "6-page digital CA paper, 40 MCQs; answers from the bold 'Correct Answer: X) ...' line after each question's four options (extracted ground truth, not hand-verified). No separate key."
+    },
+    {
+      "id": "testpoint-english-1000",
+      "kind": "digital",
+      "source": "ppsc66/English_1000_Most_Repeated_MCQs_by_TestPoint.pk.pdf",
+      "page": null,
+      "reference_kind": "extracted_ground_truth",
+      "reference_file": "ppsc66/ground_truth_testpoint_1000.json",
+      "lines": null,
+      "left_column_lines": null,
+      "right_column_lines": null,
+      "categories": [
+        "digital",
+        "table",
+        "english",
+        "real",
+        "inline-answers"
+      ],
+      "hand_verified": false,
+      "notes": "Table-format MCQs (Sr# | Question | A–D | Ans); 1375 rows extracted — the '1000' in the filename is NOT the row count, and Sr# restarts per topic section (12 restarts; Sr# 1..479, 285 values occur more than once), so rows are keyed by (page, sr), not Sr# alone. Extracted ground truth, not hand-verified."
+    },
+    {
+      "id": "computer-past-papers-2019-2025",
+      "kind": "digital",
+      "source": "ppsc66/Computer_Past_Papers_2019-2025.pdf",
+      "page": null,
+      "reference_kind": "extracted_ground_truth",
+      "reference_file": "ppsc66/ground_truth_computer_qa.json",
+      "lines": null,
+      "left_column_lines": null,
+      "right_column_lines": null,
+      "categories": [
+        "digital",
+        "english",
+        "real",
+        "qa-no-options",
+        "inline-answers"
+      ],
+      "hand_verified": false,
+      "notes": "Q&A pairs with NO options (new document type — the extractor must NOT force 4 options); answer = text after '?' (':' / ';' / final '.' fallbacks); 960 pairs, Q1–960; numbers [670, 860] absent from the text layer; [643, 644] each carry two different questions in the source; 4 pairs ([8, 61, 396, 869]) have no separable answer in the text layer. Extracted ground truth, not hand-verified."
+    },
+    {
+      "id": "urdu-mcqs-noa",
+      "kind": "digital",
+      "source": "ppsc66/PDF_Urdu_MCQs_NOA.pdf",
+      "page": null,
+      "reference_kind": "extracted_ground_truth",
+      "reference_file": "ppsc66/ground_truth_urdu_noa.json",
+      "lines": null,
+      "left_column_lines": null,
+      "right_column_lines": null,
+      "categories": [
+        "digital",
+        "english",
+        "urdu-topic",
+        "real",
+        "lowercase-markers",
+        "inline-answers"
+      ],
+      "hand_verified": false,
+      "notes": "NOA 'History and Personalities'; questions in English, options lowercase a.–d.; answers marked '(Correct)' in the text layer: 129/135 with an answer, without: [39, 55, 107, 110, 120], double-marked: [54], missing an option letter: [25, 33, 42, 43, 44, 48, 56, 57, 69, 78, 80, 87, 94, 103, 107, 135] — the text layer is jumbled (blocks out of reading order, some 'd.' markers missing). First Urdu-topic MCQ file in the set. Extracted ground truth, not hand-verified."
+    },
+    {
+      "id": "pak-study-1000-etea",
+      "kind": "digital",
+      "source": "ppsc66/Pak_Study_1000__MCQs_for_ETEA.pdf",
+      "page": null,
+      "reference_kind": "none",
+      "reference_file": null,
+      "lines": null,
+      "left_column_lines": null,
+      "right_column_lines": null,
+      "categories": [
+        "digital",
+        "english",
+        "real",
+        "scale-test"
+      ],
+      "hand_verified": false,
+      "notes": "Pak Study MCQs, header 'Part 1 of 5' (file actually spans Parts 1–5); 1032 questions, Q1–1032, no gaps; NO answer marking in the text layer (0 occurrences of '(Correct)' / 'Correct Answer' / 'Ans:' / 'Answer:'); 5 zero-char pages ([34, 89, 134, 181, 280]); pp. 273–280 are back matter (ads/contents), no questions. Question numbers per page: ppsc66/extracted_pak_study_1000_ranges.json."
+    },
+    {
+      "id": "science-test-noa",
+      "kind": "scanned",
+      "source": "ppsc66/Science_test_NOA.pdf",
+      "page": null,
+      "reference_kind": "none",
+      "reference_file": null,
+      "lines": null,
+      "left_column_lines": null,
+      "right_column_lines": null,
+      "categories": [
+        "scanned",
+        "english",
+        "real",
+        "camscanner"
+      ],
+      "hand_verified": false,
+      "notes": "CamScanner scan, 13pp (312 chars of watermark text only), OCR-only; same class as PPSC-66."
+    },
+    {
+      "id": "math-test-noa",
+      "kind": "scanned",
+      "source": "ppsc66/Math_test_NOA.pdf",
+      "page": null,
+      "reference_kind": "none",
+      "reference_file": null,
+      "lines": null,
+      "left_column_lines": null,
+      "right_column_lines": null,
+      "categories": [
+        "scanned",
+        "english",
+        "real",
+        "camscanner",
+        "math"
+      ],
+      "hand_verified": false,
+      "notes": "CamScanner scan, 13pp (watermark text only), OCR-only; math formulas/symbols are the hardest OCR case in the set."
+    },
+    {
+      "id": "past-paper-assistant-sgad",
+      "kind": "scanned",
+      "source": "ppsc66/Past_Paper_Assistant__S_GAD.pdf",
+      "page": null,
+      "reference_kind": "none",
+      "reference_file": null,
+      "lines": null,
+      "left_column_lines": null,
+      "right_column_lines": null,
+      "categories": [
+        "scanned",
+        "english",
+        "real",
+        "camscanner"
+      ],
+      "hand_verified": false,
+      "notes": "CamScanner scan, 5pp (55 chars watermark only, 2 images/page), OCR-only; Assistant (S&GAD) past paper."
+    },
+    {
+      "id": "capsule-gk",
+      "kind": "scanned",
+      "source": "ppsc66/Capsule_of_GK.pdf",
+      "page": null,
+      "reference_kind": "none",
+      "reference_file": null,
+      "lines": null,
+      "left_column_lines": null,
+      "right_column_lines": null,
+      "categories": [
+        "scanned",
+        "english",
+        "real",
+        "scale-test",
+        "stress-test"
+      ],
+      "hand_verified": false,
+      "notes": "Essentially scanned, 195pp (7,417 chars, watermark text only), 1 image/page; largest fixture; OCR-only — do NOT run full OCR in M4; M7 stress test."
+    },
+    {
+      "id": "history-notes-3000bc-2023",
+      "kind": "scanned",
+      "source": "ppsc66/3000B.c_to_2023_History_Notes_by_gkwithadnan.pdf",
+      "page": null,
+      "reference_kind": "none",
+      "reference_file": null,
+      "lines": null,
+      "left_column_lines": null,
+      "right_column_lines": null,
+      "categories": [
+        "scanned",
+        "english",
+        "real",
+        "notes"
+      ],
+      "hand_verified": false,
+      "notes": "Pure scanned notes book, 13pp (ZERO text-layer chars, 1 image/page); long-form scanned notes, not MCQs; OCR-only."
+    },
+    {
+      "id": "pak-affairs-notes-csps",
+      "kind": "digital",
+      "source": "ppsc66/Pak_Affairs_by_CSPs.pdf",
+      "page": null,
+      "reference_kind": "none",
+      "reference_file": null,
+      "lines": null,
+      "left_column_lines": null,
+      "right_column_lines": null,
+      "categories": [
+        "digital",
+        "english",
+        "real",
+        "notes"
+      ],
+      "hand_verified": false,
+      "notes": "Study NOTES book, 75pp (92,472 chars), NOT an MCQ paper — long-form notes document type. Carries a copyright notice; test fixture only, never redistribute."
     }
   ]
 }

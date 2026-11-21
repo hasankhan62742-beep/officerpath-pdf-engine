@@ -1,0 +1,396 @@
+{
+  "source": "ppsc66/Current-Affairs-June-2025-in-PDF__1.pdf",
+  "extraction": "PyMuPDF span dict; question = bold spans, options = 'A. '...'D. ' spans, explanation = following plain spans.",
+  "answer_mechanism": "UNKNOWN — verified span-by-span: no option span is bold or coloured and no 'Correct Answer' line exists; the explanation is prose that may or may not contain the answer text, so no answer is recorded. 'explanation_option_matches' is a noisy statistic only.",
+  "count": 30,
+  "option_spans_checked": 120,
+  "bold_or_coloured_option_spans": 0,
+  "explanation_option_match_histogram": {
+    "0": 20,
+    "1": 9,
+    ">1": 1
+  },
+  "questions": [
+    {
+      "index": 1,
+      "page": 5,
+      "question": "What was the death toll from flash floods in Swat on June 27, 2025?",
+      "a": "5",
+      "b": "9",
+      "c": "12",
+      "d": "15",
+      "explanation": "Heavy pre-monsoon rainfall caused sudden flash floods in Swat Valley, sweeping away tourists picnicking by the river. At least eight people were confirmed dead, with dozens more reported missing in Khyber Pakhtunkhwa. Nationwide, rain-related deaths totaled 18 in just 24 hours, highlighting the severe impact of sudden weather events before monsoon onset.",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 2,
+      "page": 6,
+      "question": "Nobel Peace Prize?",
+      "a": "June 18, 2025",
+      "b": "June 21, 2025",
+      "c": "June 17, 2025",
+      "d": "June 23, 2025",
+      "explanation": "Just days after the White House visit, Pakistan—via its Foreign Ministry—submitted the nomination to the Nobel Committee. The government has formally decided to recommend US President Donald Trump for the 2026 Nobel Peace Prize, praising his decisive diplomatic intervention and leadership during the recent Pakistan-India standoff, according to an official statement.",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 3,
+      "page": 7,
+      "question": "When was the Balochistan FY 2025–26 budget presented?",
+      "a": "June 17, 2025",
+      "b": "June 18, 2025",
+      "c": "June 19, 2025",
+      "d": "None of these",
+      "explanation": "The PPP-led government in Balochistan on 17 June 2025 presented its second budget of the current term, featuring a record outlay of Rs1.03 trillion and proposing a development expenditure of Rs349.5 billion. The budget for the fiscal year of 2025-26 also commits to ‘austerity’ in its current expenditure, aiming to produce a provincial cash surplus of Rs36.5bn, according to budget documents.",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 4,
+      "page": 8,
+      "question": "What was the total outlay of the Punjab provincial budget for FY 2025–26?",
+      "a": "Rs 4.5 trillion",
+      "b": "Rs 5.0 trillion",
+      "c": "Rs 5.335 trillion",
+      "d": "Rs 6.0 trillion",
+      "explanation": "Punjab’s budget for FY 2025–26 was Rs 5,335 billion, with Rs 1,240 billion (23%) dedicated to development—marking a 47% increase from the previous year.",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 5,
+      "page": 9,
+      "question": "30” list in the Entertainment & Sports category?",
+      "a": "Naila Kiani",
+      "b": "Sana Mir",
+      "c": "Arshad Nadeem",
+      "d": "Karishma Ali",
+      "explanation": "Pakistani javelin thrower",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 6,
+      "page": 10,
+      "question": "On what date was Pakistan’s Federal Budget 2025–26 presented?",
+      "a": "3 June 2025",
+      "b": "5 June 2025",
+      "c": "12 June 2025",
+      "d": "10 June 2025",
+      "explanation": "The",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 7,
+      "page": 11,
+      "question": "How many escapees were recaptured by June 13 after Malir jail break?",
+      "a": "50",
+      "b": "78",
+      "c": "165",
+      "d": "225",
+      "explanation": "By mid-June, security agencies had re-arrested",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 8,
+      "page": 12,
+      "question": "poverty line as per the World Bank 2025 report?",
+      "a": "90 million",
+      "b": "107 million",
+      "c": "75 million",
+      "d": "50 million",
+      "explanation": "As of June 2025, the World Bank reports that approximately 44.7% of Pakistan’s population is living below the international poverty line of $4.20 per person per day. This equates to over 107 million people. Additionally, 16.5% of the population, or more than 39 million individuals, are classified as living in extreme poverty, defined as earning less than $3 per person per day.",
+      "answer": null,
+      "explanation_option_matches": [
+        "B"
+      ]
+    },
+    {
+      "index": 9,
+      "page": 13,
+      "question": "was their magnitude range?",
+      "a": "20 quakes, 2.0–4.0",
+      "b": "36 quakes, 1.5–3.6",
+      "c": "50 quakes, 3.0–5.5",
+      "d": "10 quakes, 0.5–2.0",
+      "explanation": "Karachi experienced an unusual seismic swarm: 36 minor tremors between magnitudes 1.5 and 3.6, unsettling residents and prompting structural inspections.",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 10,
+      "page": 14,
+      "question": "2025?",
+      "a": "Zarb-e-Azb",
+      "b": "Operation Herof 2.0",
+      "c": "Operation Panagha",
+      "d": "Radd-ul-Fasaad",
+      "explanation": "BLA militants persisted with Operation Herof 2.0, conducting attacks against security outposts—indicating sustained provincial unrest.",
+      "answer": null,
+      "explanation_option_matches": [
+        "B"
+      ]
+    },
+    {
+      "index": 11,
+      "page": 15,
+      "question": "2024–25 Economic Survey?",
+      "a": "KP",
+      "b": "Sindh",
+      "c": "Balochistan",
+      "d": "Punjab",
+      "explanation": "Balochistan has the lowest literacy rate at 42.0%, due to limited access to schools, poor infrastructure, and ongoing security challenges.",
+      "answer": null,
+      "explanation_option_matches": [
+        "C"
+      ]
+    },
+    {
+      "index": 12,
+      "page": 16,
+      "question": "is:",
+      "a": "52.0%",
+      "b": "60.8%",
+      "c": "57.5%",
+      "d": "55.1%",
+      "explanation": "Sindh recorded a literacy rate of 57.5%, with a strong urban-rural divide—urban areas performing significantly better than rural districts.",
+      "answer": null,
+      "explanation_option_matches": [
+        "C"
+      ]
+    },
+    {
+      "index": 13,
+      "page": 17,
+      "question": "Pakistan’s overall rank?",
+      "a": "15th",
+      "b": "31st",
+      "c": "45th",
+      "d": "60th",
+      "explanation": "Sindh recorded a literacy rate of 57.5%, with a strong urban-rural divide—urban areas performing significantly better than rural districts.",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 14,
+      "page": 18,
+      "question": "June 2025?",
+      "a": "Central Bank Digital Currency",
+      "b": "FinTech licensing",
+      "c": "Crypto asset regulation",
+      "d": "Mobile money",
+      "explanation": "The State Bank and SECP launched consultations to draft",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 15,
+      "page": 19,
+      "question": "what followed?",
+      "a": "Sana Yousaf; suspect arrested next day in Faisalabad",
+      "b": "Ayesha Farid; case unsolved",
+      "c": "Zara Shah; assailant escaped",
+      "d": "Maria Khan; publicly funded memorial",
+      "explanation": "Sana Yousaf, popular with 740K TikTok followers, was murdered on her birthday in Islamabad amid suspected honour-based motives. Her cousin Umar Hayat was apprehended in Faisalabad 20 hours later. Her killing sparked nationwide outrage, social media activism (#JusticeForSanaYousaf), and a protest organised by Aurat March Islamabad.",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 16,
+      "page": 21,
+      "question": "What major cyber-threat was reported on June 28, 2025?",
+      "a": "SolarWind attack resurgence",
+      "b": "“Scattered Spider” hacking critical airlines",
+      "c": "China’s cyber-espionage on US universities",
+      "d": "Ransomware attack on NATO servers",
+      "explanation": "Cybersecurity firms Google/Mandiant warned that Scattered Spider (UNC3944) targeted aviation companies like Hawaiian Airlines and WestJet around June 28.",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 17,
+      "page": 22,
+      "question": "retaliation for the United States strikes on Iranian nuclear facilities?",
+      "a": "19 June 2025",
+      "b": "21 June 2025",
+      "c": "23 June 2025",
+      "d": "None of these",
+      "explanation": "On 23 June 2025, Iran launched missiles at Al Udeid Air Base in Qatar, in retaliation for the United States strikes on Iranian nuclear facilities on 22 June as part of the Iran–Israel war. The attack, codenamed Operation Glad Tidings of Victory, followed a 16 June drone attack by Iran on the US consulate in Erbil, Iraq. It was Iran’s second attack on a US base, after Operation Martyr Soleimani in 2020.",
+      "answer": null,
+      "explanation_option_matches": [
+        "C"
+      ]
+    },
+    {
+      "index": 18,
+      "page": 23,
+      "question": "against Iranian nuclear facilities, during the Iran–Israel war?",
+      "a": "Operation Midnight Hammer",
+      "b": "Operation Glad Tidings of Victory",
+      "c": "Operation Iron Sword",
+      "d": "None of these",
+      "explanation": "On June 22, 2025, the United States Air Force and Navy attacked three nuclear facilities in Iran as part of the Iran–Israel war. The Fordow Uranium Enrichment Plant, the Natanz Nuclear Facility, and the Isfahan Nuclear Technology Center were targeted with fourteen GBU-57A/B MOP (Massive Ordnance Penetrator) 30,000-pound (14,000 kg) “bunker buster” bombs carried by Northrop B-2 Spirit stealth bombers, and with Tomahawk missiles fired from a submarine.",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 19,
+      "page": 24,
+      "question": "Who won the ICC World Test Championship Final 2025?",
+      "a": "India",
+      "b": "South Africa",
+      "c": "Australia",
+      "d": "England",
+      "explanation": "South Africa have broken a 27-year drought by claiming an emphatic five-wicket victory over Australia in the ICC World Test Championship Final at Lord’s on 21 June 2025. he Proteas made reasonably light work of the 69 runs they needed to win the mace on the fourth morning in London, with Kyle Verreynne hitting the winning shot to deliver South Africa their first men’s senior ICC trophy since 1998.",
+      "answer": null,
+      "explanation_option_matches": [
+        "B",
+        "C"
+      ]
+    },
+    {
+      "index": 20,
+      "page": 25,
+      "question": "What was a key theme of the G7 Summit held in Canada in June 2025?",
+      "a": "The regulation of cryptocurrencies",
+      "b": "AI safety, climate action, and critical minerals cooperation",
+      "c": "Brexit negotiation outcomes",
+      "d": "Expansion of the United Nations",
+      "explanation": "The G7 focused on coordinating action on climate change, artificial intelligence governance, support for Ukraine, and securing global supply chains.",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 21,
+      "page": 26,
+      "question": "Which country topped the Henley Passport Index 2025?",
+      "a": "Japan",
+      "b": "South Korea",
+      "c": "Singapore",
+      "d": "Germany",
+      "explanation": "",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 22,
+      "page": 27,
+      "question": "2025?",
+      "a": "COP29",
+      "b": "SB62 (Subsidiary Bodies Climate Talks)",
+      "c": "IPCC Plenary Session",
+      "d": "Bonn Energy Transition Forum",
+      "explanation": "SB62 refers to the UNFCCC Subsidiary Bodies meetings, crucial for laying groundwork ahead of COP30 in Brazil (Dec 2025). Held in Bonn, the June 2025 session focused on global carbon markets, loss & damage funding, and mitigation timelines. Developing countries demanded faster delivery of the promised $100 billion/year climate finance, which remains a contentious issue.",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 23,
+      "page": 28,
+      "question": "to Middle East tensions?",
+      "a": "UNGA Human Rights Forum",
+      "b": "Paris Conference on Climate Justice",
+      "c": "UN Conference on Two-State Solution",
+      "d": "Geneva Accord Talks",
+      "explanation": "The UN Conference aimed at reviving the Israeli–Palestinian peace process, scheduled for June 17–20, 2025, was postponed amid escalating violence between Israel and Iran. The postponement followed",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 24,
+      "page": 29,
+      "question": "on June 13, 2025?",
+      "a": "Operation Iron Dome",
+      "b": "Operation Desert Sword",
+      "c": "Operation Rising Lion",
+      "d": "Operation Northern Blitz",
+      "explanation": "On June 13, Israel launched",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 25,
+      "page": 30,
+      "question": "2025?",
+      "a": "Argentina",
+      "b": "Egypt",
+      "c": "Vietnam",
+      "d": "Indonesia",
+      "explanation": "Vietnam joined BRICS as a “partner country” with limited participation rights—part of the group’s ongoing expansion and global south cooperation.",
+      "answer": null,
+      "explanation_option_matches": [
+        "C"
+      ]
+    },
+    {
+      "index": 26,
+      "page": 31,
+      "question": "Which Iranian nuclear scientist was killed in the Israeli airstrikes?",
+      "a": "Leila Tavassoli",
+      "b": "Mohsen Fakhrizadeh",
+      "c": "Dr. Mohsen Rezaei",
+      "d": "Fereydoon Abbasi",
+      "explanation": "Dr. Mohsen Rezaei was a top nuclear engineer working on uranium centrifuge development. He was killed in a strike on the Natanz facility.",
+      "answer": null,
+      "explanation_option_matches": [
+        "C"
+      ]
+    },
+    {
+      "index": 27,
+      "page": 32,
+      "question": "in the Israeli strike?",
+      "a": "Ali Shamkhani",
+      "b": "Mohammad Pakpour",
+      "c": "Hossein Salami",
+      "d": "Qasem Soleimani",
+      "explanation": "Major General Hossein Salami, head of Iran’s IRGC, was killed in a precision strike on his residence in Tehran, significantly damaging Iran’s strategic command.",
+      "answer": null,
+      "explanation_option_matches": [
+        "C"
+      ]
+    },
+    {
+      "index": 28,
+      "page": 33,
+      "question": "10+ deaths?",
+      "a": "Vienna, Austria",
+      "b": "Graz, Austria",
+      "c": "Zurich, Switzerland",
+      "d": "Munich, Germany",
+      "explanation": "A tragic mass shooting at a high school in Graz shocked Austria and Europe. Over 10 students and teachers were killed by a 17-year-old student who had posted disturbing content online days before. The event reignited debate on Austria’s relatively lax gun ownership rules and the rise of online radicalization in youth across Europe.",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 29,
+      "page": 34,
+      "question": "What incident triggered protests in Los Angeles on June 6, 2025?",
+      "a": "A police shooting",
+      "b": "A migrant detention center fire",
+      "c": "ICE raids on migrant neighborhoods",
+      "d": "Ban on sanctuary city funding",
+      "explanation": "On June 6, 2025, Los Angeles erupted in protests after Immigration and Customs Enforcement (ICE) agents raided predominantly Latino neighborhoods, detaining dozens of undocumented immigrants. Videos of aggressive enforcement tactics went viral, prompting widespread condemnation and calls for federal accountability. The protests highlighted growing tension between federal immigration policy and sanctuary city protections under local law.",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 30,
+      "page": 35,
+      "question": "Agreement on Fisheries Subsidies?",
+      "a": "Kenya",
+      "b": "Fiji",
+      "c": "Nicaragua",
+      "d": "Nepal",
+      "explanation": "On June 2, 2025, Nicaragua submitted its instrument of acceptance for the Agreement on Fisheries Subsidies to the WTO Director-General, becoming the 101st WTO member to do so. This is a key step toward the global effort to ban harmful fishing subsidies and protect marine ecosystems.",
+      "answer": null,
+      "explanation_option_matches": [
+        "C"
+      ]
+    }
+  ]
+}

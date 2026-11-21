@@ -16,8 +16,8 @@ def _dataset():
 
 def test_manifest_version_and_counts():
     dataset = _dataset()
-    assert dataset["version"] == "golden-v1"
-    assert len(dataset["entries"]) == 19
+    assert dataset["version"] == "golden-v2"
+    assert len(dataset["entries"]) == 38  # 19 v1 + 18 v2 + 1 Nastaliq (M4)
     assert dataset["hand_verified_pages"] == ["ppsc66-p1"]
 
 
@@ -28,6 +28,31 @@ def test_every_reference_file_exists():
             path = GOLDEN / entry["reference_file"]
             assert path.exists(), f"missing reference {entry['reference_file']}"
             assert path.stat().st_size > 0
+
+
+def test_extracted_ground_truth_files_parse_and_count():
+    """v2: every extracted_ground_truth reference must parse as JSON and
+    carry the measured row count (never hand-edited)."""
+    dataset = _dataset()
+    extracted = [e for e in dataset["entries"] if e["reference_kind"] == "extracted_ground_truth"]
+    assert len(extracted) == 4  # ca40, testpoint, computer, urdu
+    for entry in extracted:
+        data = json.loads((GOLDEN / entry["reference_file"]).read_text(encoding="utf-8"))
+        assert isinstance(data["count"], int) and data["count"] > 0, entry["id"]
+
+
+def test_paper60_photo_points_at_real_files():
+    """v2 (M4 fix): the M3 'missing' claim was wrong — the photo and the
+    Gemini reference both exist now."""
+    dataset = _dataset()
+    entry = next(e for e in dataset["entries"] if e["id"] == "paper60-photo")
+    assert entry["source"] == "ppsc66/paper60-photo.jpg"
+    assert entry["reference_kind"] == "gemini_reference"
+    assert entry["reference_file"] == "ppsc66/paper60_gemini_ocr.txt"
+    # Source/reference live under the golden dir (like the ocr-*.txt files),
+    # NOT under fixtures/ppsc66/ (which holds the M3 page images).
+    assert (GOLDEN / entry["source"]).exists()
+    assert (GOLDEN / entry["reference_file"]).exists()
 
 
 def test_every_synthetic_source_exists():

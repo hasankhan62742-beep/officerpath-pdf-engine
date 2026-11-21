@@ -1,0 +1,1254 @@
+{
+  "source": "ppsc66/PDF_Urdu_MCQs_NOA.pdf",
+  "extraction": "PyMuPDF text layer, line-based; options are lowercase a.-d.; the answer is the option whose text carries '(Correct)'. Questions are in English (topic: Urdu history/personalities). The text layer is JUMBLED (blocks out of reading order, e.g. Q49-54 after Q55; some 'd.' markers missing, their text merged into the previous option), so questions are sorted by number here and imperfect rows are flagged below instead of silently repaired. Header/footer lines are skipped.",
+  "count": 135,
+  "number_min": 1,
+  "number_max": 135,
+  "gaps": [],
+  "with_answer": 129,
+  "without_answer": [
+    39,
+    55,
+    107,
+    110,
+    120
+  ],
+  "multiple_marked": [
+    54
+  ],
+  "missing_option_letters": [
+    25,
+    33,
+    42,
+    43,
+    44,
+    48,
+    56,
+    57,
+    69,
+    78,
+    80,
+    87,
+    94,
+    103,
+    107,
+    135
+  ],
+  "questions": [
+    {
+      "number": 1,
+      "question": "The first Nobel laureate poet of Urdu?",
+      "a": "Faiz Ahmad Faiz",
+      "b": "Rabindranath Tagore",
+      "c": "Akbar Allabadi",
+      "d": "Mirza Ghalib",
+      "answer": "b"
+    },
+    {
+      "number": 2,
+      "question": "The name of first Urdu drama is?",
+      "a": "Heer Ranjha",
+      "b": "Andhera Ujala",
+      "c": "An kahi",
+      "d": "Andar Sabha",
+      "answer": "d"
+    },
+    {
+      "number": 3,
+      "question": "Who’s the first poet of Punjabi?",
+      "a": "Baba Bulleh Shah",
+      "b": "Sultan Bahu",
+      "c": "Baba Fareed Ganj Shakar",
+      "d": "Waris Shah",
+      "answer": "c"
+    },
+    {
+      "number": 4,
+      "question": "Name of first Pakistani poetess?",
+      "a": "Parveen Shakir",
+      "b": "Ada Jafri",
+      "c": "Kishwar Naveed",
+      "d": "Bushra Farukh",
+      "answer": "b"
+    },
+    {
+      "number": 5,
+      "question": "First Sufi poet of Urdu is:",
+      "a": "Qutub Shah",
+      "b": "Mirza Ghalib",
+      "c": "Khwaja Mir Dard",
+      "d": "Allam Iqbal",
+      "answer": "c"
+    },
+    {
+      "number": 6,
+      "question": "Who’s the first essayist of Urdu?",
+      "a": "Allama Rashid ul Khairi",
+      "b": "Sir Sayed Ahmad Khan",
+      "c": "Aziz Ahmad",
+      "d": "Mirza Adeeb",
+      "answer": "b"
+    },
+    {
+      "number": 7,
+      "question": "First dramatist of Urdu is:",
+      "a": "Amanat Lakhnawi",
+      "b": "Anwar Masood",
+      "c": "Rajindar Singh Bedi",
+      "d": "Imtiaz Ali Taj",
+      "answer": "a"
+    },
+    {
+      "number": 8,
+      "question": "Who’s first beginner of Qaseeda?",
+      "a": "Imam Al Busiri",
+      "b": "Muhammad Rafi Sauda",
+      "c": "Ahmad Shawqi",
+      "d": "Ibn-al-Farid",
+      "answer": "b"
+    },
+    {
+      "number": 9,
+      "question": "Who first started letter writing?",
+      "a": "Mirza Ghalib",
+      "b": "Imtiaz Ali Taj",
+      "c": "Faiz Ahmad Faiz",
+      "d": "Akbar Allaadi",
+      "answer": "a"
+    },
+    {
+      "number": 10,
+      "question": "Who’s the first outline writer?",
+      "a": "Mumtaz Mufti",
+      "b": "Ahmad Nadeem Qasmi",
+      "c": "Farhat ullah Baig",
+      "d": "Naseem Hijazi",
+      "answer": "c"
+    },
+    {
+      "number": 11,
+      "question": "Who’s called as “Musavr-e-Gham”?",
+      "a": "Krishan Chandar",
+      "b": "Nazir Ahmad Dehlvi",
+      "c": "Qudrat ullah",
+      "d": "Allama Rashid ul Khairi",
+      "answer": "d"
+    },
+    {
+      "number": 12,
+      "question": "Who first started “Sawag Nigari”?",
+      "a": "Altaf Hussain Halli",
+      "b": "Ibn-e-Safi",
+      "c": "Shaukat Saddique",
+      "d": "Mushtaq Ahmad Yousafi",
+      "answer": "a"
+    },
+    {
+      "number": 13,
+      "question": "Who’s called as “Musavr-e-Haqiqat”?",
+      "a": "Ahmad Faraz",
+      "b": "Allam Iqbal",
+      "c": "Mir Taqi Mir",
+      "d": "Mirza Hadi Ruswa",
+      "answer": "b"
+    },
+    {
+      "number": 14,
+      "question": "Who’s the first Islamic poet?",
+      "a": "Wali Muhammad Wali",
+      "b": "Shah Mubarak Abroo",
+      "c": "Hafeez Jalandhary",
+      "d": "Siraj-u-din Ali Khan",
+      "answer": "c"
+    },
+    {
+      "number": 15,
+      "question": "Name of first historical novelist?",
+      "a": "Naseem Hijazi",
+      "b": "Intizar Hussain",
+      "c": "Zulfiqar Gillani",
+      "d": "Khushwant Singh",
+      "answer": "a"
+    },
+    {
+      "number": 16,
+      "question": "____________ called as Shakespeare of urdu.",
+      "a": "Altaf ussain Halli",
+      "b": "Agha Hashar Kashmiri",
+      "c": "Sayed Amin Ashraf",
+      "d": "Faraz Ahmad",
+      "answer": "b"
+    },
+    {
+      "number": 17,
+      "question": "First animadverted (Tanqeed Nigar) of urdu?",
+      "a": "Sadat Hasan Manto",
+      "b": "Ibn-e-Ansha",
+      "c": "Altaf Hussain Halli",
+      "d": "Ibn-e-Safi",
+      "answer": "c"
+    },
+    {
+      "number": 18,
+      "question": "___________ was use to spoke in the era of Mughal Empires.",
+      "a": "Urdu",
+      "b": "Persian",
+      "c": "Hindi",
+      "d": "Punjabi",
+      "answer": "b"
+    },
+    {
+      "number": 19,
+      "question": "In urdu poetry, mysticism (taswuf) found firsty?",
+      "a": "Majeed Amjad",
+      "b": "Ahmad Nadeem Qasmi",
+      "c": "Khwaja mir Dard",
+      "d": "Masud Hussain Khan",
+      "answer": "c"
+    },
+    {
+      "number": 20,
+      "question": "Who is the writer of “Dastan-e-Mujahid”?",
+      "a": "Nassem Hijazi",
+      "b": "Noon Meem Rshid",
+      "c": "Firaq Gorakhpori",
+      "d": "Ali Sardar Jafri",
+      "answer": "a"
+    },
+    {
+      "number": 21,
+      "question": "What was the first group of Iqbal’s poetry?",
+      "a": "Kalyat-e-Iqbal",
+      "b": "Payam-e-Mashriq",
+      "c": "Bang-e-Daran",
+      "d": "Zarb-e-Kaleem",
+      "answer": "c"
+    },
+    {
+      "number": 22,
+      "question": "Inference of “Jotian Chtkhna”?",
+      "a": "Marry Marry Phirna",
+      "b": "Rona Dhona",
+      "c": "Cheekhna Chilana",
+      "d": "Hasty Rhna",
+      "answer": "a"
+    },
+    {
+      "number": 23,
+      "question": "Wazir AghaRehman Baba is the poet of __________ language.",
+      "a": "Punjabi",
+      "b": "Sindhi",
+      "c": "Persian",
+      "d": "Pashto",
+      "answer": "d"
+    },
+    {
+      "number": 24,
+      "question": "“Sayed-ul-Shuhada” in terms of grammar?",
+      "a": "Laqab",
+      "b": "Khtab",
+      "c": "Tamgha",
+      "d": "Aizaz",
+      "answer": "a"
+    },
+    {
+      "number": 25,
+      "question": "_________ is the writer of “Toba Tec Singh”.",
+      "a": "Sadat Hasan Manto",
+      "b": "Mushtaq Ahmad Yousfi",
+      "c": "Abdul Halim",
+      "d": "",
+      "answer": "a"
+    },
+    {
+      "number": 26,
+      "question": "Mazhar Kaleem “Sodeshi Rail” is the humorous essay of _____________.",
+      "a": "Ghulam Abbas",
+      "b": "Shoukat Thanvi",
+      "c": "Idriz Azad",
+      "d": "Shibli Nomani",
+      "answer": "b"
+    },
+    {
+      "number": 27,
+      "question": "Molana Zafar Ali Khan was the alumni of ___________.",
+      "a": "Islamia College Peshawar",
+      "b": "Ali Garh",
+      "c": "Govt. College University, Lahore",
+      "d": "East India Company, College",
+      "answer": "b"
+    },
+    {
+      "number": 28,
+      "question": "What was the real name of “Noon-Meem-Rashid”?",
+      "a": "Naveed Mirza Rashid",
+      "b": "Nadeem Muhammad Rashid",
+      "c": "Nazir Muhammad Rashid",
+      "d": "Nazim Mirza Rashid",
+      "answer": "c"
+    },
+    {
+      "number": 29,
+      "question": "What is meant by “Qabil-e-Deed?",
+      "a": "Badsourat",
+      "b": "Khobsourat",
+      "c": "Dykhny K Qabil",
+      "d": "None of these",
+      "answer": "c"
+    },
+    {
+      "number": 30,
+      "question": "“Do ghaz zameen bhi na mili koee yar mai” this verse belongs to?",
+      "a": "Qateel Shifai",
+      "b": "Naeem Hashmi",
+      "c": "Bahadur Shah Zafar",
+      "d": "Wasif Ali Wasif",
+      "answer": "c"
+    },
+    {
+      "number": 31,
+      "question": "Ali Sardar Jafri Who is the first poet for Urdu poems?",
+      "a": "Allam Muhammad Iqbal",
+      "b": "Nazeer Akbar Abadi",
+      "c": "Shakeb Jalai",
+      "d": "Khwaja Mir Dard",
+      "answer": "b"
+    },
+    {
+      "number": 32,
+      "question": "___________ is a writer of famous novel “Khuda ki Basti”.",
+      "a": "Qudrat Ullah",
+      "b": "Naseen Hijazi",
+      "c": "Shoukat Saddique",
+      "d": "Krishan Chandar",
+      "answer": "c"
+    },
+    {
+      "number": 33,
+      "question": "Who called as “Baba-e-Urdu”?",
+      "a": "Molvi Abdul Haq",
+      "b": "",
+      "c": "",
+      "d": "",
+      "answer": "a"
+    },
+    {
+      "number": 34,
+      "question": "Who is the first Urdu poetess?",
+      "a": "Maa Lqabai Chnda",
+      "b": "Parveen Shakir",
+      "c": "Ada Jafri",
+      "d": "Kishwar Naheed",
+      "answer": "a"
+    },
+    {
+      "number": 35,
+      "question": "__________ is first Urdu’s hindu poet.",
+      "a": "Naam Daiv",
+      "b": "Krishan Kumar",
+      "c": "Raam Chandar",
+      "d": "Rajinder Singh Bedi",
+      "answer": "a"
+    },
+    {
+      "number": 36,
+      "question": "Which one is the longest poem of Urdu?",
+      "a": "Mado Jazar Islam",
+      "b": "Shikwa",
+      "c": "Jawab-e-Shikwa",
+      "d": "Awaz-e-Gaib",
+      "answer": "a"
+    },
+    {
+      "number": 37,
+      "question": "Which one is the longest poem in world?",
+      "a": "Maha Bharat",
+      "b": "Beowulf",
+      "c": "Mado Jazar Islam",
+      "d": "Sphere",
+      "answer": "a"
+    },
+    {
+      "number": 38,
+      "question": "Which poetess published her poetry very first?",
+      "a": "Maa Lqaai Chnda",
+      "b": "Parveen Shakir",
+      "c": "Ada Jafri",
+      "d": "Kishwar Naheed",
+      "answer": "a"
+    },
+    {
+      "number": 39,
+      "question": "First ever Newspaper for Urdu?",
+      "a": "Nwaye Wakt",
+      "b": "Saleem Kausar",
+      "c": "Zamir Jafri",
+      "d": "Wazir Agha",
+      "answer": null
+    },
+    {
+      "number": 40,
+      "question": "Which poet published his poetry very first?",
+      "a": "Qali Qutab",
+      "b": "Mirza Ghali",
+      "c": "Faiz Ahmad Faiz",
+      "d": "Ghulam Abbas",
+      "answer": "a"
+    },
+    {
+      "number": 41,
+      "question": "First ever romancer (Afsana Nigar) of Urdu?",
+      "a": "Farhat Ishtiaq",
+      "b": "Ali sardar Jafri",
+      "c": "Mirza Hadi Ruswa",
+      "d": "Preem Chand",
+      "answer": "d"
+    },
+    {
+      "number": 42,
+      "question": "Who first wrote Urdu romance story (Afsana)?",
+      "a": "Rashis Jahan",
+      "b": "Mirza Adeeb",
+      "c": "Nazir Ahmad Dehlavi Soze Wattan",
+      "d": "",
+      "answer": "c"
+    },
+    {
+      "number": 43,
+      "question": "First novelist of Urdu?",
+      "a": "Mir Taqi Mir",
+      "b": "Qudrat Ullah",
+      "c": "Deputy Nazeer Ahmad Umera Ahmad",
+      "d": "",
+      "answer": "c"
+    },
+    {
+      "number": 44,
+      "question": "Who is the poet of “Ban K Chiriya”?",
+      "a": "Mukhtar Sadiqque",
+      "b": "Majeed Amjad",
+      "c": "Mirza Ghalib Allam Iqbal",
+      "d": "",
+      "answer": "b"
+    },
+    {
+      "number": 45,
+      "question": "Sir Sayed wrote Tehzib-ul-Ikhlaq in:",
+      "a": "1860",
+      "b": "1870",
+      "c": "1880",
+      "d": "1890",
+      "answer": "b"
+    },
+    {
+      "number": 46,
+      "question": "Who first started Urdu Dramas?",
+      "a": "Shahid Nadeem",
+      "b": "Atta Shad",
+      "c": "Inder Raj Anand",
+      "d": "Munshi Pream Chand",
+      "answer": "d"
+    },
+    {
+      "number": 47,
+      "question": "Idea of “Afsana” come from___________.",
+      "a": "French",
+      "b": "English",
+      "c": "German",
+      "d": "Chinese",
+      "answer": "b"
+    },
+    {
+      "number": 48,
+      "question": "Which Language introduced Subjective writing (Inshaia)?",
+      "a": "French",
+      "b": "English",
+      "c": "",
+      "d": "",
+      "answer": "b"
+    },
+    {
+      "number": 49,
+      "question": "Who is the founder of subjective writing?",
+      "a": "Abn-e-Khaldon",
+      "b": "Mocain",
+      "c": "Goetay",
+      "d": "Mopsan",
+      "answer": "b"
+    },
+    {
+      "number": 50,
+      "question": "Who first started subjective writing in Pakistan?",
+      "a": "Ahmad Nadeem Qasmi",
+      "b": "Mirza Adeeb",
+      "c": "Wazir Aga",
+      "d": "Intizar Hussain",
+      "answer": "c"
+    },
+    {
+      "number": 51,
+      "question": "Mirza Farhat Ullah Baig, Rashed Ahmad Sadiqque, Shhid Ahmad Dehlavi belongs to:",
+      "a": "Drama writer",
+      "b": "Outline Writer",
+      "c": "Romance Writer",
+      "d": "Novel Writer",
+      "answer": "b"
+    },
+    {
+      "number": 52,
+      "question": "Senior poet for Taswuf and Falsafa is:",
+      "a": "Mirza Ghalib",
+      "b": "Ahmad Faraz",
+      "c": "Mir Taqi Mir",
+      "d": "Mushtaq Ahmad Yousafi",
+      "answer": "a"
+    },
+    {
+      "number": 53,
+      "question": "Who wrote the book “baap ka Gunnah”?",
+      "a": "Nazir Ahmad Dehlavi",
+      "b": "Hakeem Ahmad Shuja",
+      "c": "Josh Milhabadi",
+      "d": "Mir Amman",
+      "answer": "b"
+    },
+    {
+      "number": 54,
+      "question": "Who is the writer of “Okhay Log”?",
+      "a": "Waris Shah",
+      "b": "Mumtaz Mufti",
+      "c": "Doctor Saleem Akhtar",
+      "d": "Akhtar Sherani",
+      "answer": null
+    },
+    {
+      "number": 55,
+      "question": "Who wrote the book named “Urdu ki Akhri Kitab”?",
+      "a": "Itazar Hussain",
+      "b": "Ali Sardar Jafri",
+      "c": "German",
+      "d": "Chinese",
+      "answer": null
+    },
+    {
+      "number": 56,
+      "question": "Who wrote “Undlas mai Ajnabi” and “Khana Badosh”?",
+      "a": "Ghulam Abbas",
+      "b": "Gopi Chand Narang",
+      "c": "Mastansar Hussain Tarar",
+      "d": "",
+      "answer": "c"
+    },
+    {
+      "number": 57,
+      "question": "Who wrote poem “Saaqi Nama”?",
+      "a": "Mirza Ghalib",
+      "b": "Allam Muhammad Iqbal",
+      "c": "Mir Taqi Mir Jaun Ellia",
+      "d": "",
+      "answer": "b"
+    },
+    {
+      "number": 58,
+      "question": "Who wrote maximum poems for children?",
+      "a": "Faraz Ahmad",
+      "b": "Wasif Ali Wasif",
+      "c": "Allam Iqbal",
+      "d": "Ada Jafri",
+      "answer": "c"
+    },
+    {
+      "number": 59,
+      "question": "Who wrote “Ghar se Ghar tak” and “Kapas ka Phool”?",
+      "a": "Shaukat Thanvi",
+      "b": "Fehmida Riaz",
+      "c": "Akhtar Raza Saleemi",
+      "d": "Ahmad Nadeem Qasmi",
+      "answer": "d"
+    },
+    {
+      "number": 60,
+      "question": "Who wrote “Ibn-ul-Wakt”?",
+      "a": "Deputy Nazeer Ahmad",
+      "b": "Abdul Halim",
+      "c": "Nayier Masud",
+      "d": "Rashid Jahan",
+      "answer": "a"
+    },
+    {
+      "number": 61,
+      "question": "Who wrote “Aag ka Darya”?",
+      "a": "Sadat Hassan Manto",
+      "b": "Qurat-ul-Ain Haider",
+      "c": "Mushtaq Ahmad Yousafi",
+      "d": "Ismat Chughtai",
+      "answer": "b"
+    },
+    {
+      "number": 62,
+      "question": "Who is the writer of “Over Coat”?",
+      "a": "Mir Taqi Mir",
+      "b": "Ibn-e-Safi",
+      "c": "Ghulam Abbas",
+      "d": "Intazar Hussain",
+      "answer": "c"
+    },
+    {
+      "number": 63,
+      "question": "Who wrote “Shehr-e-Ashoob”?",
+      "a": "Liaqut Khan",
+      "b": "Mulana Zafar Ali khan",
+      "c": "Hasrat Mohani",
+      "d": "Hameed Akhtar",
+      "answer": "b"
+    },
+    {
+      "number": 64,
+      "question": "Who wrote “Jevay Jevay Pakistan”?",
+      "a": "Jamil-u-din Aali",
+      "b": "Shah Mubarak Abru",
+      "c": "Noor Jahan",
+      "d": "Hafeez Jalandhri",
+      "answer": "a"
+    },
+    {
+      "number": 65,
+      "question": "Who wrote the poem “Ibles ki Majlis-e-Shura”?",
+      "a": "Mirza Ghalib",
+      "b": "Allam Muhammad Iqbal",
+      "c": "Faiz Ahmad Faiz",
+      "d": "Sikandar Ali Wajid",
+      "answer": "b"
+    },
+    {
+      "number": 66,
+      "question": "Who is the writer of poem “Ay Rah-e-Haq k Shaheedo”?",
+      "a": "Zulfiqar Ali Bukhari",
+      "b": "Munawur Lakhnavi",
+      "c": "Sheer Kazmi",
+      "d": "Qamar Jalavi",
+      "answer": "c"
+    },
+    {
+      "number": 67,
+      "question": "Name of published book of Iqbal in Urdu and Persian?",
+      "a": "Kulliyat-e-Iqbal",
+      "b": "Armagan-e-Hijaz",
+      "c": "Zarb-e-Kaleem",
+      "d": "Bang-e-Dran",
+      "answer": "b"
+    },
+    {
+      "number": 68,
+      "question": "“Chacha Chakan” and “Anarkali” is written by__________.",
+      "a": "Muhammad Azad",
+      "b": "Imtiaz Ali Taj",
+      "c": "Zahida Hina",
+      "d": "Ghulam Abbas",
+      "answer": "b"
+    },
+    {
+      "number": 69,
+      "question": "Who is the writer of “Urdu Shairi Per Aik Nazar”?",
+      "a": "Wazir Agha",
+      "b": "Khwaja Ahmad Abaas",
+      "c": "Kaleem-u-din Ahmad Altaf Gohar",
+      "d": "",
+      "answer": "c"
+    },
+    {
+      "number": 70,
+      "question": "Who is the writer of “Khak or Khoon”?",
+      "a": "Parveen Shakir",
+      "b": "Farhat Ishtiaq",
+      "c": "Naseem Hijazi",
+      "d": "Nadeem Qasm",
+      "answer": "c"
+    },
+    {
+      "number": 71,
+      "question": "Poem Talo-e-Islam is written in _______________ book.",
+      "a": "Javid Nama",
+      "b": "Bang-e-Dran",
+      "c": "Kalyat-e-Iqbal",
+      "d": "Payam-e-Mashriq",
+      "answer": "b"
+    },
+    {
+      "number": 72,
+      "question": "Who’s first song lyricist?",
+      "a": "Javed Akhtar",
+      "b": "Muhammad Rafi",
+      "c": "Sahir Ludhianvi",
+      "d": "Kumar Sanu",
+      "answer": "c"
+    },
+    {
+      "number": 73,
+      "question": "What is meant by “Thali Ka Bengan”?",
+      "a": "Tajarba Kar",
+      "b": "Gyr Mustaqil Mizaj",
+      "c": "Bad Ikhlaq",
+      "d": "Be lehaz",
+      "answer": "b"
+    },
+    {
+      "number": 74,
+      "question": "What is inference of “Tifal Maktab”?",
+      "a": "Na Tajarba Kar",
+      "b": "Tajarba Kar",
+      "c": "Gyr Zimedar",
+      "d": "None of these",
+      "answer": "a"
+    },
+    {
+      "number": 75,
+      "question": "Who is the writer of famous drama “Andhera Ujala”?",
+      "a": "Javeed Hashmi",
+      "b": "Youns Javeed",
+      "c": "Zahida Hina",
+      "d": "Hashim Nadeem",
+      "answer": "b"
+    },
+    {
+      "number": 76,
+      "question": "Who wrote “Black Out”?",
+      "a": "Allama Iqbal",
+      "b": "Faiz Ahmad Faiz",
+      "c": "Mirza Babar Alli Anees",
+      "d": "Hasrat Mohani",
+      "answer": "b"
+    },
+    {
+      "number": 77,
+      "question": "Who wrote “Raja Gidh”?",
+      "a": "Quratulain Haider",
+      "b": "Ismat Chughtai",
+      "c": "Bano Qudsia",
+      "d": "Farhat Istiaq",
+      "answer": "c"
+    },
+    {
+      "number": 78,
+      "question": "Who wrote “Bazar-e-Husan”?",
+      "a": "Abdullah Husain",
+      "b": "Mustaq Ahmad Yousafi",
+      "c": "Ashfaq Ahmad Mir Taqi Mir",
+      "d": "",
+      "answer": "a"
+    },
+    {
+      "number": 79,
+      "question": "Who wrote Afsana “Kafan”?",
+      "a": "Pream Chand",
+      "b": "Ahmad Nadeem Qasmi",
+      "c": "Ashfaq Ahmad",
+      "d": "Rayaz Ahmad",
+      "answer": "a"
+    },
+    {
+      "number": 80,
+      "question": "Who wrote Afsana “Kutbah”?",
+      "a": "Ahmad Nadeem Qasmi",
+      "b": "Ghulam Abbas",
+      "c": "Hajra Maror Khadija Mastoor",
+      "d": "",
+      "answer": "b"
+    },
+    {
+      "number": 81,
+      "question": "Who wrote “Maai Gull Bano”?",
+      "a": "Ibn-e-Ansha",
+      "b": "Mirza Ghalib",
+      "c": "Ahmad Nadeem Qasmi",
+      "d": "Ahmad Faraz",
+      "answer": "c"
+    },
+    {
+      "number": 82,
+      "question": "Rustom-o-Sharab is the drama of:",
+      "a": "Shah Jahan",
+      "b": "Agha Hashar Kashmiri",
+      "c": "Momin Khan Momin",
+      "d": "Amir Minai",
+      "answer": "b"
+    },
+    {
+      "number": 83,
+      "question": "Who wrote Taleem-e-Balghan?",
+      "a": "Ibn-e-Ansha",
+      "b": "Ahmad Nadeem Qasmi",
+      "c": "Khwaja Moen-u-Din",
+      "d": "Nazir ahmad Dehlavi",
+      "answer": "c"
+    },
+    {
+      "number": 84,
+      "question": "Khwaja Moen-u-Din wrote Taleem-e-Balghan in:",
+      "a": "1950",
+      "b": "1954",
+      "c": "1958",
+      "d": "1962",
+      "answer": "b"
+    },
+    {
+      "number": 85,
+      "question": "Who wrote “Hayat-e-Javid”?",
+      "a": "Altaf Hussain Halli",
+      "b": "Ahmad Faraz",
+      "c": "Ibn-e-Ansha",
+      "d": "Abdul Hameed",
+      "answer": "a"
+    },
+    {
+      "number": 86,
+      "question": "Who wrote “Atish Kadah”?",
+      "a": "Aftab Ahmad Sadiqque",
+      "b": "Muhammad Din taseer",
+      "c": "Ismat Chughtai",
+      "d": "Ahmad Nadeen Qasmi",
+      "answer": "b"
+    },
+    {
+      "number": 87,
+      "question": "Who wrote “Awaz Dost”?",
+      "a": "Rashis Jahan",
+      "b": "Mirza Adeeb",
+      "c": "Mukhtar Sauod Younas Javeed",
+      "d": "",
+      "answer": "c"
+    },
+    {
+      "number": 88,
+      "question": "First book for Urdu?",
+      "a": "Udas naslain",
+      "b": "Khana Badosh",
+      "c": "Sab Ras",
+      "d": "La Hasil",
+      "answer": "c"
+    },
+    {
+      "number": 89,
+      "question": "Who is the writer of famous book “Nakat-ul-Shearah”?",
+      "a": "Mir Taqi Mir",
+      "b": "Mulana Muhammad Hussain Azad",
+      "c": "Altaf Hussain Hali",
+      "d": "Bano Qudsia",
+      "answer": "a"
+    },
+    {
+      "number": 90,
+      "question": "1st prose book of Iqbal is:",
+      "a": "Ap beti",
+      "b": "Tazkra",
+      "c": "Ilm-ul-Qitsad",
+      "d": "Bal-e-Jibreel",
+      "answer": "c"
+    },
+    {
+      "number": 91,
+      "question": "Khizr-e-Rah is placed in Iqbal’s book named ________?",
+      "a": "Bal-e-Jibreel",
+      "b": "Bang-e-Daran",
+      "c": "Kulyat-e-Iqbal",
+      "d": "Pyam-e-Mashriq",
+      "answer": "b"
+    },
+    {
+      "number": 92,
+      "question": "Tittle of Khakim Badhin’s preface?",
+      "a": "Dast-e-Zulaikha",
+      "b": "Professor",
+      "c": "Hill Station",
+      "d": "Sibghay and Sons",
+      "answer": "a"
+    },
+    {
+      "number": 93,
+      "question": "Drama is a word of _________ language.",
+      "a": "Greek Language",
+      "b": "European",
+      "c": "Persian",
+      "d": "Urdu",
+      "answer": "a"
+    },
+    {
+      "number": 94,
+      "question": "Name of last poem of Allam Iqbal?",
+      "a": "Pyam-e-Masriq",
+      "b": "Hazrat Insaan",
+      "c": "Zaboor-e-ajam Trana-e-Mili",
+      "d": "",
+      "answer": "b"
+    },
+    {
+      "number": 95,
+      "question": "Novel “Udaas Naslain” includes 50 Chapters and _____ Parts.",
+      "a": "2",
+      "b": "3",
+      "c": "4",
+      "d": "5",
+      "answer": "c"
+    },
+    {
+      "number": 96,
+      "question": "How many chapters of “Udaas Naslain”",
+      "a": "30",
+      "b": "40",
+      "c": "50",
+      "d": "6",
+      "answer": "c"
+    },
+    {
+      "number": 97,
+      "question": "“Raftagan” is a poem of:",
+      "a": "Momin Khan Momin",
+      "b": "Majeed Amjad",
+      "c": "Noon Meem Rashid",
+      "d": "Ali Safdar Jafri",
+      "answer": "b"
+    },
+    {
+      "number": 98,
+      "question": "Which poetry book includes poem “Peshru”?",
+      "a": "Shab-e-Rafta",
+      "b": "Kalyat-e-Majeed",
+      "c": "Tab-e-nau",
+      "d": "Alma Mater",
+      "answer": "a"
+    },
+    {
+      "number": 99,
+      "question": "Tittle of “Chand Hum Asar”?",
+      "a": "Khakaay",
+      "b": "Chaand",
+      "c": "Dost",
+      "d": "None of these Grammar",
+      "answer": "a"
+    },
+    {
+      "number": 100,
+      "question": "Andha kia jany ______ ki bahar?",
+      "a": "Basant",
+      "b": "Phoolon",
+      "c": "Khushion",
+      "d": "None of these",
+      "answer": "a"
+    },
+    {
+      "number": 101,
+      "question": "What is inference of “Pait Katna”?",
+      "a": "Bhook Bardast Krna",
+      "b": "Tkleef Bardast Krna",
+      "c": "Gussa Bardast Krna",
+      "d": "Sabar Krna",
+      "answer": "a"
+    },
+    {
+      "number": 102,
+      "question": "Dedication for “Shab-e-Rafta” goes to?",
+      "a": "Alma Mater",
+      "b": "Genre",
+      "c": "Subh-e-Nou",
+      "d": "Notable Works",
+      "answer": "c"
+    },
+    {
+      "number": 103,
+      "question": "What is the meaning of word Poem (Nazm)?",
+      "a": "Andaz-e-Byaan",
+      "b": "Tarteeb-o-Tanzeem",
+      "c": "",
+      "d": "",
+      "answer": "b"
+    },
+    {
+      "number": 104,
+      "question": "From which University Allam Iqbal got his degree in doctorate?",
+      "a": "Ludwig Maximilian University, Munich",
+      "b": "Govt. College Lahore",
+      "c": "Heidelberg University",
+      "d": "European School of Management and Technology Miscellaneous",
+      "answer": "a"
+    },
+    {
+      "number": 105,
+      "question": "Which writer comes in mind after listening the word “Gender Writing”?",
+      "a": "John Elia",
+      "b": "Sadat Hassan Manto",
+      "c": "Ghulam Abbas",
+      "d": "Ashfaq Ahmad",
+      "answer": "b"
+    },
+    {
+      "number": 106,
+      "question": "What is ment by “Khafif hona”?",
+      "a": "Shrminda Hona",
+      "b": "Khush Hona",
+      "c": "Akar Jana",
+      "d": "BeShram Hona",
+      "answer": "a"
+    },
+    {
+      "number": 107,
+      "question": "What is the meaning of “Aary Ana”?",
+      "a": "Kisi Bat par Dat jana",
+      "b": "Asani Peda Krna",
+      "c": "e. Rokawat Banna (Correct",
+      "d": "",
+      "answer": null
+    },
+    {
+      "number": 108,
+      "question": "What is the meaning of “Fakhta Urana”?",
+      "a": "Prindy urana",
+      "b": "Patang Lagna",
+      "c": "Mazay Urana",
+      "d": "Khush Hona",
+      "answer": "c"
+    },
+    {
+      "number": 109,
+      "question": "What is literal meaning of “Tarb”?",
+      "a": "Ghami",
+      "b": "Trarpna",
+      "c": "Khushi",
+      "d": "Khilkhilan",
+      "answer": "c"
+    },
+    {
+      "number": 110,
+      "question": "Synonym of “Yaas”?",
+      "a": "Aasha",
+      "b": "Yakeen",
+      "c": "Na Umeedi",
+      "d": "Fakhar",
+      "answer": null
+    },
+    {
+      "number": 111,
+      "question": "How Many “Afsany” in Kapas Ka phoool?",
+      "a": "14",
+      "b": "15",
+      "c": "16",
+      "d": "17",
+      "answer": "d"
+    },
+    {
+      "number": 112,
+      "question": "(Correct)What is meant by “dawat-e-Sheraz”?",
+      "a": "Saat rang ka khana",
+      "b": "Sada Khana",
+      "c": "Shahi Khana",
+      "d": "Desi Khana",
+      "answer": "b"
+    },
+    {
+      "number": 113,
+      "question": "Who Compose writing of Majeed Amjad?",
+      "a": "Dr. Khwaja Zikriya",
+      "b": "Mushtaq Ahmad yousafi",
+      "c": "Ibn-e-Ansha",
+      "d": "Ahmad Nadeem Qasmi",
+      "answer": "a"
+    },
+    {
+      "number": 114,
+      "question": "The name of hero, in Udas Naslain is ____________.",
+      "a": "Asghar",
+      "b": "Shehriyar",
+      "c": "Naeem",
+      "d": "Suleman",
+      "answer": "c"
+    },
+    {
+      "number": 115,
+      "question": "Deevan and ____________ are two poetry books of Nasir Kazmi.",
+      "a": "Dast-e-Zulaikhan",
+      "b": "Shb-e-Nuh",
+      "c": "Barg-e-Nay",
+      "d": "Nadar Log",
+      "answer": "c"
+    },
+    {
+      "number": 116,
+      "question": "There are _____ outlines in “Chand Hum Asr”?",
+      "a": "24",
+      "b": "25",
+      "c": "26",
+      "d": "27",
+      "answer": "a"
+    },
+    {
+      "number": 117,
+      "question": "There ______ publications of Mir Taqi Mir.",
+      "a": "4",
+      "b": "6",
+      "c": "8",
+      "d": "10",
+      "answer": "b"
+    },
+    {
+      "number": 118,
+      "question": "In novel Raja Gidh, What is Gidh representing for?",
+      "a": "Chapters",
+      "b": "Alamat",
+      "c": "Points",
+      "d": "None of these",
+      "answer": "b"
+    },
+    {
+      "number": 119,
+      "question": "Novel nigar, afsana nigar, or drama nawees?",
+      "a": "Yusfi",
+      "b": "Ahmad Nadeem Qasmi",
+      "c": "Bano Qudsia",
+      "d": "None of these",
+      "answer": "b"
+    },
+    {
+      "number": 120,
+      "question": "Most of the Afsany of Ahmad Nadeem Qasmi relates to:",
+      "a": "Urban (Shehri)",
+      "b": "Rural (Daihi)",
+      "c": "Both",
+      "d": "None of these",
+      "answer": null
+    },
+    {
+      "number": 121,
+      "question": "Rules for “Durayat” describes in the book named:",
+      "a": "Chand Hum Asar",
+      "b": "Zindgi",
+      "c": "Seerat-un-Nabi",
+      "d": "Javid Nama",
+      "answer": "c"
+    },
+    {
+      "number": 122,
+      "question": "Migration and Apartness (Judai) prominent in the Kalam of:",
+      "a": "Mir Taqi Mir",
+      "b": "Jun Elia",
+      "c": "Nasir Kazmi",
+      "d": "Mirza Ghalib",
+      "answer": "c"
+    },
+    {
+      "number": 123,
+      "question": "Story of Molvi Nazeer Ahmad is outline written by:",
+      "a": "Nasem Hijazi",
+      "b": "Ibn-e-Safi",
+      "c": "Mirza Hadi Ruswa",
+      "d": "Farhat Ullah Baig",
+      "answer": "d"
+    },
+    {
+      "number": 124,
+      "question": "Farhat ullah Baig was the student of:",
+      "a": "Molvi Nazeer Ahmad",
+      "b": "Rauf Prakesh",
+      "c": "Firaq Gorakhpori",
+      "d": "Abdul Hameed",
+      "answer": "a"
+    },
+    {
+      "number": 125,
+      "question": "Real name of Patras Bukhari was:",
+      "a": "Ali Bukhari",
+      "b": "Hameed Shah Bukhari",
+      "c": "Ahmad Shah Bukhari",
+      "d": "Naeem Shah Bukhari",
+      "answer": "c"
+    },
+    {
+      "number": 126,
+      "question": "Mzameen-e-Rasheed was the _____ prose book of Rasheed Ahmad Sadiqque.",
+      "a": "1st",
+      "b": "2nd",
+      "c": "3rd",
+      "d": "4th",
+      "answer": "a"
+    },
+    {
+      "number": 127,
+      "question": "Mzameen-e-Rasheed includes ________ essays.",
+      "a": "10",
+      "b": "15",
+      "c": "20",
+      "d": "25",
+      "answer": "c"
+    },
+    {
+      "number": 128,
+      "question": "Aab-e-Gham is the comprising essays of:",
+      "a": "Ashfaq Ahmad Yousafi",
+      "b": "Mushtaq Ahmad Yousafi",
+      "c": "Shaukat Sadiqque",
+      "d": "Mirza Hadi Ruswa",
+      "answer": "b"
+    },
+    {
+      "number": 129,
+      "question": "Book of Mushtaq Ahmad “Aab-e-Gham” published in:",
+      "a": "1986",
+      "b": "1989",
+      "c": "1992",
+      "d": "1996",
+      "answer": "b"
+    },
+    {
+      "number": 130,
+      "question": "____________ is the father of modren Urdu.",
+      "a": "Mirza Ghalib",
+      "b": "Molvi Abdul Haq",
+      "c": "Molvi Nazeer Ahmad",
+      "d": "Sir Sayed Ahmad khan",
+      "answer": "d"
+    },
+    {
+      "number": 131,
+      "question": "__________ was the biggest poet of his era.",
+      "a": "Mirza Ghalib",
+      "b": "Bahadur Shah Zafar",
+      "c": "Mir Taqib Mir",
+      "d": "Shaukat Thanvi",
+      "answer": "c"
+    },
+    {
+      "number": 132,
+      "question": "In the era of Momin and Ghalib, _________ got very fame.",
+      "a": "Poems",
+      "b": "Shairi",
+      "c": "Ghazals",
+      "d": "All of these",
+      "answer": "c"
+    },
+    {
+      "number": 133,
+      "question": "Faiz Ahmad Faiz, Noon Meem Rashid and Majeeb Amjad belongs to:",
+      "a": "Threek e Khilafat",
+      "b": "Tehreek e Pakistan",
+      "c": "Taraki Pasand Tehreek",
+      "d": "Muslim League",
+      "answer": "c"
+    },
+    {
+      "number": 134,
+      "question": "_________ called as first rebel poetess of urdu.",
+      "a": "Prveen Shakir",
+      "b": "Bushra Farukh",
+      "c": "Shabnam Romani",
+      "d": "Kishwar Naheed",
+      "answer": "d"
+    },
+    {
+      "number": 135,
+      "question": "What is meant by “Naqash par aab hona”?",
+      "a": "Jaldi Zail Hona",
+      "b": "Jald Gussa hona",
+      "c": "Masly ka hal nikalna None of these Good Luck",
+      "d": "",
+      "answer": "a"
+    }
+  ]
+}

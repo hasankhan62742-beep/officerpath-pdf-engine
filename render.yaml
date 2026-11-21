@@ -21,6 +21,14 @@ services:
         value: production
       - key: PORT
         value: 8000
+      # M4 (ADR-006): Render free is 512 MB — PaddleOCR (M3 measured
+      # peak 1,775-3,667 MB) must never be selected here. The profile
+      # gates it in the router; PADDLEOCR_ENABLED=false is belt and
+      # braces so the package is not even registered.
+      - key: DEPLOYMENT_PROFILE
+        value: render-free
+      - key: PADDLEOCR_ENABLED
+        value: "false"
       # Secrets below are set in the Render Dashboard (never in this
       # file, never in the repo). The service starts without them and
       # /health reports `degraded` until they are set — that is the

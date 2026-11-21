@@ -1,0 +1,333 @@
+{
+  "source": "ppsc66/Current-Affairs-July-2025-in-PDF.pdf",
+  "extraction": "PyMuPDF span dict; question = bold spans, options = 'A. '...'D. ' spans, explanation = following plain spans.",
+  "answer_mechanism": "UNKNOWN — verified span-by-span: no option span is bold or coloured and no 'Correct Answer' line exists; the explanation is prose that may or may not contain the answer text, so no answer is recorded. 'explanation_option_matches' is a noisy statistic only.",
+  "count": 25,
+  "option_spans_checked": 100,
+  "bold_or_coloured_option_spans": 0,
+  "explanation_option_match_histogram": {
+    "0": 16,
+    "1": 9,
+    ">1": 0
+  },
+  "questions": [
+    {
+      "index": 1,
+      "page": 5,
+      "question": "Who became Pakistan’s first female train driver?",
+      "a": "Maryam Bukhari",
+      "b": "Ayesha Tariq",
+      "c": "Nida Saleh",
+      "d": "Fatima Khalid",
+      "explanation": "Nida Saleh made history in July 2025 by becoming Pakistan’s first female train operator on the Lahore Orange Line Metro Train.",
+      "answer": null,
+      "explanation_option_matches": [
+        "C"
+      ]
+    },
+    {
+      "index": 2,
+      "page": 6,
+      "question": "U.S.–Pakistan trade deal?",
+      "a": "July 26, 2025",
+      "b": "July 28, 2025",
+      "c": "July 30, 2025",
+      "d": "August 1, 2025",
+      "explanation": "President Trump posted on his Truth Social account that the deal was done, emphasizing joint oil reserve development with Pakistan. It was publicly confirmed by both governments the next day.",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 3,
+      "page": 7,
+      "question": "When was Operation Sarbakaf launched?",
+      "a": "July 2, 2025",
+      "b": "July 15, 2025",
+      "c": "July 29, 2025",
+      "d": "August 1, 2025",
+      "explanation": "The Pakistan Army and security forces began Operation Sarbakaf in the early morning on",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 4,
+      "page": 8,
+      "question": "scrutiny in late July 2025 due to border clashes?",
+      "a": "Thailand and Cambodia",
+      "b": "Vietnam and Laos",
+      "c": "Myanmar and Malaysia",
+      "d": "Indonesia and Timor-Leste",
+      "explanation": "Escalating military and refugee tensions between Thailand and Cambodia prompted the UN to call for restraint and humanitarian access after cross-border shelling displaced thousands.",
+      "answer": null,
+      "explanation_option_matches": [
+        "A"
+      ]
+    },
+    {
+      "index": 5,
+      "page": 9,
+      "question": "Pakistan signed which landmark UN treaty on July 22, 2025?",
+      "a": "Global Climate Pact",
+      "b": "UNCLOS BBNJ Agreement (marine biodiversity)",
+      "c": "International Trade & Investment Pact",
+      "d": "UN Counter-terrorism Treaty",
+      "explanation": "On July 22 Pakistan signed the UN Agreement under UNCLOS on the Conservation and Sustainable Use of Marine Biological Diversity of Areas Beyond National Jurisdiction, reaffirming its leadership in multilateral ecological governance.",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 6,
+      "page": 10,
+      "question": "Tianjin, July 2025?",
+      "a": "Shehbaz Sharif",
+      "b": "Hina Rabbani Khar",
+      "c": "Ishaq Dar",
+      "d": "Bilawal Bhutto Zardari",
+      "explanation": "As Pakistan’s Foreign Minister, Ishaq Dar led the delegation, held bilateral meetings, and pushed for stronger Pakistan-China strategic ties. 14-16 July 2025.",
+      "answer": null,
+      "explanation_option_matches": [
+        "C"
+      ]
+    },
+    {
+      "index": 7,
+      "page": 11,
+      "question": "Pakistan?",
+      "a": "National Rangers",
+      "b": "Civil Defense Brigade",
+      "c": "Federal Constabulary",
+      "d": "National Guard",
+      "explanation": "Announced July 14, transforming the Frontier Constabulary into a nationwide force for riot control and counter-terrorism.",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 8,
+      "page": 12,
+      "question": "Which country trained the riot police trainers for Punjab’s new force?",
+      "a": "United Kingdom",
+      "b": "Turkey",
+      "c": "United States",
+      "d": "China",
+      "explanation": "Trainers from Turkey led the eight-week program, using manuals from the US, Europe, and Turkey itself.",
+      "answer": null,
+      "explanation_option_matches": [
+        "B"
+      ]
+    },
+    {
+      "index": 9,
+      "page": 13,
+      "question": "group was blamed by Pakistani authorities?",
+      "a": "Tehrik-e-Taliban Pakistan",
+      "b": "Baloch Liberation Army (BLA)",
+      "c": "Islamic State Khorasan",
+      "d": "Lashkar-e-Taiba",
+      "explanation": "Nine bus passengers have been killed after gunmen kidnapped them in Pakistan’s restive southwestern Balochistan province, officials have said. The passengers were taken from several buses on Thursday evening, the provincial government spokesman, Shahid Rind, said on July 11, 2025. The bus was travelling from Balochistan to the central region of Punjab. It is thought the travellers were targeted due to their Punjabi ethnicity, officials said.",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 10,
+      "page": 14,
+      "question": "years was this ban in place?",
+      "a": "3 years",
+      "b": "5 years",
+      "c": "7 years",
+      "d": "10 years",
+      "explanation": "The UK reinstated safety permits in July 2025 after imposing the ban in 2020, citing improvements in aviation standards.",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 11,
+      "page": 15,
+      "question": "Which virtual asset regulation took effect on July 9, 2025?",
+      "a": "Ban on Bitcoin trading",
+      "b": "Launch of Pakistan Crypto Council",
+      "c": "Enforcement of the Virtual Assets Act, 2025",
+      "d": "Cracking down on offshore crypto firms",
+      "explanation": "Pakistan enacted its first Virtual Assets Act, forming PVARA to regulate crypto firms and launching a CBDC pilot — a major fintech milestone.",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 12,
+      "page": 16,
+      "question": "initiative?",
+      "a": "A. Digital currency (CBDC)",
+      "b": "Mobile banking",
+      "c": "24-hour interbank market",
+      "d": "Islamic banking bonds",
+      "explanation": "Pakistan’s state minister on blockchain and crypto, Bilal bin Saqib, said in a statement that Pakistan’s government had approved the “Virtual Assets Act, 2025” creating an independent regulator to license and oversee the crypto sector.",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 13,
+      "page": 17,
+      "question": "May–June 2025?",
+      "a": "Below 1%",
+      "b": "3–4%",
+      "c": "Around 7–8%",
+      "d": "Over 10%",
+      "explanation": "In May-June 2025, Pakistan’s annual inflation rate was around 3.2% to 3.5%. Specifically, the headline inflation rate was 3.2% in June, a slight decrease from 3.5% in May. On a month-on month basis, inflation increased by 0.2% in June.",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 14,
+      "page": 18,
+      "question": "What was Pakistan’s national CPI inflation rate for June 2025?",
+      "a": "1.5%",
+      "b": "3.23%",
+      "c": "5.0%",
+      "d": "7.1%",
+      "explanation": "Pakistan’s national CPI (Consumer Price Index) inflation rate for June 2025 was 3.2%. This is a decrease from the previous month’s rate of 3.5% and a significant drop compared to June 2024’s 12.6%, according to the Pakistan Bureau of Statistics. The monthly increase was 0.2%.",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 15,
+      "page": 20,
+      "question": "Israeli airstrikes around July 30, 2025?",
+      "a": "Iraq",
+      "b": "Syria",
+      "c": "Iran",
+      "d": "Lebanon",
+      "explanation": "Israeli airstrikes hit Syrian regime targets in Damascus, allegedly targeting command centers and presidential areas, causing multiple casualties and raising regional tensions further.",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 16,
+      "page": 21,
+      "question": "(July 28–29, 2025)?",
+      "a": "Hamas surrendered",
+      "b": "A ceasefire was immediately declared",
+      "c": "Two-state solution proposals were discussed, but U.S.",
+      "d": "Israel agreed to full withdrawal",
+      "explanation": "discouraged wide participation The international conference aimed at brokering peace and disarming Hamas, but U.S. officials advised several allies to skip the event, citing lack of clear structure.",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 17,
+      "page": 22,
+      "question": "on July 21, 2025?",
+      "a": "India",
+      "b": "Bangladesh",
+      "c": "Pakistan",
+      "d": "Indonesia",
+      "explanation": "A Bangladesh Air Force F-7 jet crashed into a school in Dhaka, resulting in the deaths of the pilot and 30 others, including schoolchildren. It raised serious concerns about aviation safety in urban areas.",
+      "answer": null,
+      "explanation_option_matches": [
+        "B"
+      ]
+    },
+    {
+      "index": 18,
+      "page": 23,
+      "question": "their July summit in Beijing?",
+      "a": "EU dropped tariffs on Chinese EVs",
+      "b": "China suspended rare earth controls",
+      "c": "Both sides reaffirmed normalized parliamentary ties",
+      "d": "EU agreed to a trade surplus cap",
+      "explanation": "Ahead of the high-level meeting in Beijing, Beijing and Brussels agreed to reinstate full legislative exchanges, lifting prior restrictions and diplomatic freezes, which signals a warming of ties.",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 19,
+      "page": 24,
+      "question": "What did the IMF announce on July 18, 2025 concerning the global economy?",
+      "a": "Plans to scrap debt restructuring framework",
+      "b": "Revision of global growth forecast upward",
+      "c": "Launch of a new digital currency",
+      "d": "Merger with World Bank",
+      "explanation": "While in South Africa, IMF leadership indicated that global inflation was easing and economic conditions improving, prompting plans to revise the global growth forecast upward. But ongoing trade tensions remained a key risk.",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 20,
+      "page": 25,
+      "question": "What measures were decided by 12 countries at the Bogotá summit?",
+      "a": "Increase Gaza military aid",
+      "b": "Sanctions and export controls on Israel",
+      "c": "Launch joint Gaza peacekeeping mission",
+      "d": "Recognize Palestinian statehood",
+      "explanation": "Twelve nations approved six actions—including stopping arms, fuel, and dual-use tech transfers to Israel, legal investigations under universal jurisdiction, and halting related trade/enforcement.",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 21,
+      "page": 26,
+      "question": "How many countries attended the Bogotá summit and who hosted it?",
+      "a": "12 countries; led by USA and Canada",
+      "b": "32 countries; hosted by Colombia and South Africa",
+      "c": "20 countries; hosted by EU",
+      "d": "50 countries; hosted by UN",
+      "explanation": "The Hague Group summit in Bogotá drew 32 nations and was co-hosted by Colombia’s President Gustavo Petro and South Africa.",
+      "answer": null,
+      "explanation_option_matches": []
+    },
+    {
+      "index": 22,
+      "page": 27,
+      "question": "currency?",
+      "a": "Hungary",
+      "b": "Poland",
+      "c": "Sweden",
+      "d": "Bulgaria",
+      "explanation": "Bulgaria has been approved to adopt the euro effective 1 January 2026, which would make it the 21st member state of the eurozone. Welcome to the euro, Bulgaria sign at the EU Commission on 8 July 2025, Brussels. Bulgaria is located in southeastern Europe, occupying the eastern part of the Balkan Peninsula. It shares borders with Romania to the north, Turkey and Greece to the south, North Macedonia to the southwest, and Serbia to the west. It is bounded by the Black Sea on the east. The Balkan Mountains cross the central part of the country.",
+      "answer": null,
+      "explanation_option_matches": [
+        "D"
+      ]
+    },
+    {
+      "index": 23,
+      "page": 28,
+      "question": "admitted as a full member?",
+      "a": "Malaysia",
+      "b": "Indonesia",
+      "c": "Nigeria",
+      "d": "Vietnam",
+      "explanation": "Indonesia was officially admitted as a full member during the BRICS Summit, alongside the announcement of 10 partner countries, expanding the bloc’s global footprint. The 17th BRICS Summit, held in Rio de Janeiro on 6–7 July 2025, was a relatively subdued affair.",
+      "answer": null,
+      "explanation_option_matches": [
+        "B"
+      ]
+    },
+    {
+      "index": 24,
+      "page": 29,
+      "question": "Which country has successfully tested its Feitian 2 hypersonic vehicle?",
+      "a": "United States",
+      "b": "China",
+      "c": "Japan",
+      "d": "India",
+      "explanation": "Recently, China successfully tested its Feitian 2 hypersonic vehicle. Feitian 2 can switch between propulsion modes during flight for better performance. The vehicle uses a kerosene-hydrogen peroxide fuel mix. This positions China strongly in the global hypersonic technology race. Feitian 2 has potential uses in defense and civilian sectors.",
+      "answer": null,
+      "explanation_option_matches": [
+        "B"
+      ]
+    },
+    {
+      "index": 25,
+      "page": 30,
+      "question": "Greenhouse gases and Water cycle (GOSAT-GW)?",
+      "a": "China",
+      "b": "India",
+      "c": "Australia",
+      "d": "Japan",
+      "explanation": "Recently, Japan launched the Global Observing Satellite for Greenhouse gases and Water cycle (GOSAT-GW) from Tanegashima Space Centre. GOSAT-GW is an Earth observation satellite developed by the Japanese Aerospace Exploration Agency (JAXA). It was launched using the H-2A rocket. Its objectives are to monitor global-mean concentrations of Greenhouse Gases (GHGs), verify national anthropogenic GHG emissions inventories, and detect GHG emissions from large sources like megacities and power plants.",
+      "answer": null,
+      "explanation_option_matches": [
+        "D"
+      ]
+    }
+  ]
+}
