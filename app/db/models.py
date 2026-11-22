@@ -167,6 +167,86 @@ class StudentProfile(Base):
 
 
 # ---------------------------------------------------------------------------
+# Tables created by Alembic 0005 (Phase 2, M5 — subjects / topics)
+# ---------------------------------------------------------------------------
+
+
+class Subject(Base):
+    """A global reference subject (doc 03 §2.2).
+
+    Seeded with the 13 subjects from the Phase 2 prompt §12.
+    Global, not per-user; a question with no row in
+    ``question_subjects`` is simply uncategorised — the UI must
+    never force a category. Classification is optional and, in
+    M5, manual only: the engine does NOT auto-classify."""
+
+    __tablename__ = "subjects"
+
+    id: Mapped[uuid.UUID] = _uuid_pk()
+    name: Mapped[str] = mapped_column(Text, nullable=False, unique=True)
+    slug: Mapped[str] = mapped_column(Text, nullable=False, unique=True)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    created_at: Mapped[datetime] = _created_at()
+    updated_at: Mapped[datetime] = _updated_at()
+
+
+class Topic(Base):
+    """A topic inside one subject (doc 03 §2.2). No topics are
+    seeded in M5 — the table exists so M6+ can add them; the UI
+    assigns subjects only until topics exist."""
+
+    __tablename__ = "topics"
+
+    id: Mapped[uuid.UUID] = _uuid_pk()
+    subject_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("subjects.id", ondelete="CASCADE"), nullable=False
+    )
+    name: Mapped[str] = mapped_column(Text, nullable=False)
+    slug: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime] = _created_at()
+    updated_at: Mapped[datetime] = _updated_at()
+
+    __table_args__ = (Index("ix_topics_subject_slug", "subject_id", "slug", unique=True),)
+
+
+class QuestionSubject(Base):
+    """A manual subject/topic assignment for one extracted
+    question (doc 03 §2.2). ``assigned_by`` is the user who
+    assigned it; ``confidence`` is ``manual`` (M5 assigns by hand
+    only) or ``unassigned``. One row per (question, subject,
+    topic) — a question may carry several subjects."""
+
+    __tablename__ = "question_subjects"
+
+    id: Mapped[uuid.UUID] = _uuid_pk()
+    question_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("extracted_questions.id", ondelete="CASCADE"), nullable=False
+    )
+    subject_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid, ForeignKey("subjects.id", ondelete="SET NULL"), nullable=True
+    )
+    topic_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid, ForeignKey("topics.id", ondelete="SET NULL"), nullable=True
+    )
+    assigned_by: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
+    confidence: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    created_at: Mapped[datetime] = _created_at()
+    updated_at: Mapped[datetime] = _updated_at()
+
+    __table_args__ = (
+        Index(
+            "ix_question_subjects_qst",
+            "question_id",
+            "subject_id",
+            "topic_id",
+            unique=True,
+        ),
+        Index("ix_question_subjects_subject", "subject_id", "created_at"),
+    )
+
+
+# ---------------------------------------------------------------------------
 # Tables created by Alembic 0001 (engine-owned §14 schema)
 # ---------------------------------------------------------------------------
 

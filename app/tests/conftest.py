@@ -25,6 +25,7 @@ import app.api.v1.async_jobs as async_jobs_api
 import app.api.v1.dashboard as dashboard_api
 import app.api.v1.documents as documents_api
 import app.api.v1.me as me_api
+import app.api.v1.questions as questions_api
 import app.api.v1.review as review_api
 import app.api.v1.routes as routes_api
 from app.config import settings
@@ -115,6 +116,7 @@ def engine_db(tmp_path, monkeypatch):
     monkeypatch.setattr(review_api, "get_session", lambda: factory())
     monkeypatch.setattr(documents_api, "get_session", lambda: factory())
     monkeypatch.setattr(dashboard_api, "get_session", lambda: factory())
+    monkeypatch.setattr(questions_api, "get_session", lambda: factory())
     monkeypatch.setattr(settings, "storage_root", str(tmp_path / "storage"))
     yield factory
     engine.dispose()

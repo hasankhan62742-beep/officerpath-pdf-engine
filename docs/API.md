@@ -149,6 +149,78 @@ response). Local bytes are deleted best-effort; bucket bytes
 are never touched. Returns `{document_id, deleted: true,
 job_cancelled}`.
 
+## Question bank + extraction results (Phase 2, M5)
+
+All owner-only (other user: **404**), all read the engine DB
+(ADR-011 single store). Questions are the stored
+`extracted_questions` rows written by the Phase 1 store —
+this API never edits them; corrections go through the M6
+endpoint below and only the audit trail is listed here.
+
+**Truth rules:** `correct_index` is `-1` when the engine does
+not know the answer (rendered UNKNOWN, never as a correct
+option); `confidence` is `null` when there is no answer row;
+`inferred` answers carry an explicit flag and are never shown
+as verified; `answer_status` is one of `verified` /
+`detected` / `unknown` / `needs_review` / `conflicting`.
+Q&A pairs are NOT stored as question rows (the Phase 1 store
+keeps their count only) — `qa_pairs` in the document-questions
+response is that count, never fake rows.
+
+### `GET /api/v1/documents/{document_id}/questions` → 200
+Auth. One document's extraction results, in printed-number
+order (numeric when parseable — never created_at order, which
+ties on SQLite). Query: `limit` (1–100, default 50), `offset`.
+Returns `{document_id, questions: [QuestionItem], total, limit,
+offset, counts: {questions, answered, unknown, pending,
+inferred, corrected}, qa_pairs}`. Each item carries its
+options, `correct_index`, `answer_source`, `confidence`,
+`verified` / `inferred` / `corrected` flags, `status`,
+`answer_status`, `page`, and its subject assignments.
+
+### `GET /api/v1/questions` → 200
+Auth. The question bank: all of the caller's questions across
+documents, newest first. Query: `q` (search question text),
+`document_id`, `status` (`answered` / `unknown` / `pending` /
+`inferred` / `corrected` / `conflicting`), `subject_id`,
+`confidence_min` / `confidence_max` (0–1; only questions with
+an answer row can match a band), `limit` (1–100, default 20),
+`offset`. Returns `{questions: [QuestionItem], total, limit,
+offset}`. Bad `status`: **422**.
+
+### `GET /api/v1/questions/{question_id}` → 200
+Auth. One question with its full evidence trail and correction
+history. Returns `QuestionItem` + `evidence: [{detector,
+source_type, value_normalized, page_number,
+detector_confidence, artifact_ref}]` (from `answer_evidence`
+rows; empty for unknown answers — no detector claimed them) +
+`corrections: [{id, field_name, old_value, new_value, reason,
+created_at}]` (newest first).
+
+### `GET /api/v1/documents/{document_id}/questions/{question_id}/corrections` → 200
+Auth. The audit trail for one question: every manual
+correction with old/new values, newest first. Returns
+`{question_id, corrections, total}`.
+
+### `GET /api/v1/subjects` → 200
+Auth. All active subjects with their topics (global reference
+data — no user filter). Returns `{subjects: [{id, name, slug,
+description, topics: [{id, name, slug}]}], total}`. The 13
+subjects from the Phase 2 prompt §12 are seeded by Alembic
+0005; no topics are seeded yet. Classification is optional and
+manual only — the engine never auto-assigns a subject.
+
+### `POST /api/v1/questions/{question_id}/subjects` → 200
+Auth. Manually assign a subject (optionally a topic) to one of
+the caller's questions. Body: `{subject_id, topic_id?}`.
+Idempotent: re-assigning the same subject returns the existing
+row with `already_assigned: true`. Unknown subject/topic or
+another user's question: **404**.
+
+### `DELETE /api/v1/questions/{question_id}/subjects/{subject_id}` → 200
+Auth. Remove a subject assignment. Returns `{question_id,
+subject_id, removed: true}`. Missing assignment: **404**.
+
 ## Dashboard — summary (Phase 2, M4)
 
 ### `GET /api/v1/dashboard/summary` → 200

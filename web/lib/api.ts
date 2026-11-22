@@ -330,3 +330,288 @@ export async function updateProfile(
     body: JSON.stringify(input),
   });
 }
+
+// ---------------------------------------------------------------------------
+// Extraction results + question bank (Phase 2, M5). All values come
+// from the engine database; the frontend never invents an answer.
+// correct_index -1 means UNKNOWN — the UI renders it as unknown,
+// never as a correct option. confidence is null when the engine
+// has no answer row.
+// ---------------------------------------------------------------------------
+
+export interface SubjectAssignment {
+  subject_id: string;
+  subject_name: string;
+  subject_slug: string;
+  topic_id: string | null;
+  topic_name: string | null;
+}
+
+export type AnswerStatus =
+  | "verified"
+  | "detected"
+  | "unknown"
+  | "needs_review"
+  | "conflicting";
+
+export interface QuestionItem {
+  question_id: string;
+  document_id: string;
+  document_title: string;
+  number: string | null;
+  text: string;
+  options: string[];
+  kind: string;
+  correct_index: number;
+  correct_letter: string;
+  answer_source: string;
+  confidence: number | null;
+  verified: boolean;
+  inferred: boolean;
+  corrected: boolean;
+  status: string;
+  answer_status: AnswerStatus;
+  page: number | null;
+  subjects: SubjectAssignment[];
+  created_at: string | null;
+}
+
+export interface QuestionListResponse {
+  questions: QuestionItem[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export interface EvidenceItem {
+  detector: string;
+  source_type: string;
+  value_normalized: string | null;
+  page_number: number | null;
+  detector_confidence: number | null;
+  artifact_ref: string | null;
+}
+
+export interface CorrectionItem {
+  id: string;
+  field_name: string;
+  old_value: string | null;
+  new_value: string | null;
+  reason: string | null;
+  created_at: string | null;
+}
+
+export interface QuestionDetail extends QuestionItem {
+  evidence: EvidenceItem[];
+  corrections: CorrectionItem[];
+}
+
+export interface DocumentQuestionsResponse {
+  document_id: string;
+  questions: QuestionItem[];
+  total: number;
+  limit: number;
+  offset: number;
+  counts: Record<string, number>;
+  qa_pairs: number;
+}
+
+export interface DocumentReport {
+  document_id: string;
+  job_id: string | null;
+  rule_set_version: string;
+  questions_extracted: number;
+  questions_missing_options: number;
+  uncertain_answers: number;
+  conflicting_answers: number;
+  unmatched_key_entries: number;
+  duplicates_found: number;
+  requires_review: boolean;
+  review_reasons: string[];
+  summary: Record<string, unknown>;
+  created_at: string | null;
+}
+
+export interface SubjectTopic {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+export interface SubjectItem {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  topics: SubjectTopic[];
+}
+
+export type BankStatus =
+  | "answered"
+  | "unknown"
+  | "pending"
+  | "inferred"
+  | "corrected"
+  | "conflicting";
+
+export const BANK_STATUSES: BankStatus[] = [
+  "answered",
+  "unknown",
+  "pending",
+  "inferred",
+  "corrected",
+  "conflicting",
+];
+
+/** Human label for an answer source, exactly as the engine reports it. */
+export function answerSourceLabel(source: string): string {
+  switch (source) {
+    case "manual":
+      return "Manual verification";
+    case "trailing-key":
+      return "Answer key";
+    case "inline":
+      return "Inline answer";
+    case "style":
+      return "Digital style";
+    case "visual":
+      return "Visual marking";
+    case "inferred":
+      return "Inferred";
+    default:
+      return "No source";
+  }
+}
+
+export async function listQuestions(
+  accessToken: string,
+  opts: {
+    q?: string;
+    document_id?: string;
+    status?: BankStatus;
+    subject_id?: string;
+    confidence_min?: number;
+    confidence_max?: number;
+    limit?: number;
+    offset?: number;
+  },
+): Promise<QuestionListResponse> {
+  const params = new URLSearchParams();
+  if (opts.q) params.set("q", opts.q);
+  if (opts.document_id) params.set("document_id", opts.document_id);
+  if (opts.status) params.set("status", opts.status);
+  if (opts.subject_id) params.set("subject_id", opts.subject_id);
+  if (opts.confidence_min !== undefined)
+    params.set("confidence_min", String(opts.confidence_min));
+  if (opts.confidence_max !== undefined)
+    params.set("confidence_max", String(opts.confidence_max));
+  params.set("limit", String(opts.limit ?? 20));
+  params.set("offset", String(opts.offset ?? 0));
+  return request<QuestionListResponse>(`/api/v1/questions?${params}`, accessToken);
+}
+
+export async function getQuestion(
+  accessToken: string,
+  questionId: string,
+): Promise<QuestionDetail> {
+  return request<QuestionDetail>(`/api/v1/questions/${questionId}`, accessToken);
+}
+
+export async function listDocumentQuestions(
+  accessToken: string,
+  documentId: string,
+  opts: { limit?: number; offset?: number } = {},
+): Promise<DocumentQuestionsResponse> {
+  const params = new URLSearchParams();
+  params.set("limit", String(opts.limit ?? 50));
+  params.set("offset", String(opts.offset ?? 0));
+  return request<DocumentQuestionsResponse>(
+    `/api/v1/documents/${documentId}/questions?${params}`,
+    accessToken,
+  );
+}
+
+export async function getDocumentReport(
+  accessToken: string,
+  documentId: string,
+): Promise<DocumentReport> {
+  return request<DocumentReport>(`/api/v1/documents/${documentId}/report`, accessToken);
+}
+
+export async function listCorrections(
+  accessToken: string,
+  documentId: string,
+  questionId: string,
+): Promise<{ question_id: string; corrections: CorrectionItem[]; total: number }> {
+  return request(
+    `/api/v1/documents/${documentId}/questions/${questionId}/corrections`,
+    accessToken,
+  );
+}
+
+export async function submitCorrection(
+  accessToken: string,
+  documentId: string,
+  questionId: string,
+  field: string,
+  newValue: string,
+  reason: string,
+): Promise<{
+  question_id: string;
+  number: string | null;
+  field: string;
+  old_value: string | null;
+  new_value: string;
+  validation_status: string;
+  validation_issues: { code: string; message: string }[];
+}> {
+  return request(
+    `/api/v1/documents/${documentId}/questions/${questionId}/corrections`,
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify({ field, new_value: newValue, reason }),
+    },
+  );
+}
+
+export async function listSubjects(
+  accessToken: string,
+): Promise<{ subjects: SubjectItem[]; total: number }> {
+  return request<{ subjects: SubjectItem[]; total: number }>(
+    "/api/v1/subjects",
+    accessToken,
+  );
+}
+
+export async function assignSubject(
+  accessToken: string,
+  questionId: string,
+  subjectId: string,
+): Promise<{
+  question_id: string;
+  subject_id: string;
+  subject_name: string;
+  subject_slug: string;
+  topic_id: string | null;
+  topic_name: string | null;
+  already_assigned: boolean;
+}> {
+  return request(
+    `/api/v1/questions/${questionId}/subjects`,
+    accessToken,
+    { method: "POST", body: JSON.stringify({ subject_id: subjectId }) },
+  );
+}
+
+export async function unassignSubject(
+  accessToken: string,
+  questionId: string,
+  subjectId: string,
+): Promise<{ question_id: string; subject_id: string; removed: boolean }> {
+  return request(
+    `/api/v1/questions/${questionId}/subjects/${subjectId}`,
+    accessToken,
+    { method: "DELETE" },
+  );
+}

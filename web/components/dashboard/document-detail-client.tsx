@@ -21,6 +21,7 @@ import { Modal } from "@/components/ui/modal";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { Spinner } from "@/components/ui/spinner";
 import { JobStatusBadge, isJobActive } from "@/components/dashboard/job-status-badge";
+import { DocumentResults } from "@/components/dashboard/document-results";
 import {
   ApiError,
   cancelJob,
@@ -212,8 +213,8 @@ export function DocumentDetailClient({ id }: { id: string }) {
                 </div>
               ) : null}
               <p className="text-sm text-slate-600">
-                Questions and answers for this document arrive in Milestone 5
-                — the question bank view.
+                Extracted questions and answers are below, exactly as the
+                engine returned them.
               </p>
             </>
           ) : null}
@@ -268,6 +269,19 @@ export function DocumentDetailClient({ id }: { id: string }) {
           </div>
         </dl>
       </Card>
+
+      {job?.status === "done" ? (
+        <Card className="p-5">
+          <CardTitle>Extraction results</CardTitle>
+          <CardDescription>
+            Questions, answers and evidence from the engine — nothing here
+            is guessed. Unknown answers stay unknown.
+          </CardDescription>
+          <div className="mt-4">
+            <DocumentResults documentId={id} />
+          </div>
+        </Card>
+      ) : null}
 
       <Modal
         open={confirmDelete}
