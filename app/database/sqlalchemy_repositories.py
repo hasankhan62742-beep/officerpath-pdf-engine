@@ -26,6 +26,7 @@ import uuid
 from datetime import UTC, datetime
 from uuid import UUID
 
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.db import models as db
@@ -51,6 +52,7 @@ def _document_row(doc: db.Document) -> dict:
         "page_count": doc.page_count,
         "content_hash": doc.content_hash,
         "metadata": doc.metadata_json,
+        "deleted_at": doc.deleted_at.isoformat() if doc.deleted_at else None,
         "created_at": doc.created_at.isoformat() if doc.created_at else None,
     }
 
@@ -97,6 +99,13 @@ class SqlAlchemyDocumentRepository:
     def __init__(self, session: Session) -> None:
         self._session = session
 
+    def find_by_id(self, document_id: str) -> dict | None:
+        doc_uuid = _as_uuid(document_id)
+        if doc_uuid is None:
+            return None
+        row = self._session.get(db.Document, doc_uuid)
+        return _document_row(row) if row is not None else None
+
     def find_by_user_and_path(self, user_id: str, storage_path: str) -> dict | None:
         user_uuid = _as_uuid(user_id)
         if user_uuid is None:
@@ -106,6 +115,10 @@ class SqlAlchemyDocumentRepository:
             .filter(
                 db.Document.user_id == user_uuid,
                 db.Document.storage_path == storage_path,
+                # A soft-deleted document does not block re-registration
+                # of the same path (M4): deleting then re-uploading the
+                # same file creates a fresh document.
+                db.Document.deleted_at.is_(None),
             )
             .first()
         )
@@ -113,7 +126,7 @@ class SqlAlchemyDocumentRepository:
 
     def find_by_user_and_sha256(self, user_id: str, sha256: str) -> dict | None:
         """SHA-256 dedup lookup (per user only — never reveal another
-        user's file)."""
+        user's file). Soft-deleted rows do not dedup (M4)."""
         user_uuid = _as_uuid(user_id)
         if user_uuid is None:
             return None
@@ -122,6 +135,7 @@ class SqlAlchemyDocumentRepository:
             .filter(
                 db.Document.user_id == user_uuid,
                 db.Document.content_hash == sha256,
+                db.Document.deleted_at.is_(None),
             )
             .first()
         )
@@ -141,6 +155,44 @@ class SqlAlchemyDocumentRepository:
             created_at=_now(),
         )
         self._session.add(row)
+        self._session.commit()
+        return _document_row(row)
+
+    def list_by_user(
+        self, user_id: str, *, limit: int, offset: int, status: str | None = None
+    ) -> tuple[list[dict], int]:
+        """The user's documents, newest first, excluding soft-deleted
+        rows. Returns (page, total) so the caller can paginate.
+        `status` filters by the document's job status (one job per
+        document — register/upload/async each create exactly one —
+        so the join is 1:1 in practice)."""
+        user_uuid = _as_uuid(user_id)
+        if user_uuid is None:
+            return [], 0
+        base = self._session.query(db.Document).filter(
+            db.Document.user_id == user_uuid,
+            db.Document.deleted_at.is_(None),
+        )
+        if status is not None:
+            base = base.join(db.Job, db.Job.document_id == db.Document.id).filter(
+                db.Job.status == status
+            )
+        total = base.count()
+        rows = base.order_by(db.Document.created_at.desc()).limit(limit).offset(offset).all()
+        return [_document_row(r) for r in rows], total
+
+    def soft_delete(self, document_id: str, user_id: str) -> dict | None:
+        """Set `deleted_at` on the caller's own, not-yet-deleted
+        document. Returns the row, or None (404 — unknown, another
+        user's, or already deleted)."""
+        doc_uuid = _as_uuid(document_id)
+        user_uuid = _as_uuid(user_id)
+        if doc_uuid is None or user_uuid is None:
+            return None
+        row = self._session.get(db.Document, doc_uuid)
+        if row is None or row.user_id != user_uuid or row.deleted_at is not None:
+            return None
+        row.deleted_at = _now()
         self._session.commit()
         return _document_row(row)
 
@@ -176,6 +228,48 @@ class SqlAlchemyJobRepository:
             return None
         row = self._session.query(db.Job).filter(db.Job.document_id == doc_uuid).first()
         return _job_row(row) if row is not None else None
+
+    def find_latest_by_document_ids(self, document_ids: list[str]) -> dict[str, dict]:
+        """Latest job per document (one row per document in practice;
+        newest by created_at wins). Keys are document ids as strings."""
+        uuids = [u for u in (_as_uuid(d) for d in document_ids) if u is not None]
+        if not uuids:
+            return {}
+        rows = (
+            self._session.query(db.Job)
+            .filter(db.Job.document_id.in_(uuids))
+            .order_by(db.Job.created_at.desc())
+            .all()
+        )
+        out: dict[str, dict] = {}
+        for row in rows:
+            key = str(row.document_id)
+            if key not in out:
+                out[key] = _job_row(row)
+        return out
+
+    def count_by_status_for_user(self, user_id: str) -> dict[str, int]:
+        """Job counts by status for the user's NOT-deleted documents.
+        Every vocabulary value is present (zeros are real counts,
+        not missing data)."""
+        user_uuid = _as_uuid(user_id)
+        counts = dict.fromkeys(JOB_STATUSES, 0)
+        if user_uuid is None:
+            return counts
+        rows = (
+            self._session.query(db.Job.status, func.count(db.Job.id))
+            .join(db.Document, db.Job.document_id == db.Document.id)
+            .filter(
+                db.Document.user_id == user_uuid,
+                db.Document.deleted_at.is_(None),
+            )
+            .group_by(db.Job.status)
+            .all()
+        )
+        for status, n in rows:
+            if status in counts:
+                counts[status] = int(n)
+        return counts
 
     def create(self, data: dict) -> dict:
         row = db.Job(

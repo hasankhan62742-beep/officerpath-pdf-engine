@@ -212,3 +212,73 @@ def test_alembic_upgrade_downgrade_sqlite(tmp_path, monkeypatch):
 
     command.upgrade(cfg, "head")
     assert "extracted_questions" in _tables()
+
+
+def test_alembic_head_db_accepts_profile_and_job_inserts(tmp_path, monkeypatch):
+    """M4 regression: a database built ONLY by `alembic upgrade head`
+    (not by create_all from the models) must accept the inserts the
+    M4 dashboard/upload flow performs.
+
+    0003 created student_profiles.created_at/updated_at NOT NULL
+    with NO server default, while the model declares one — so POST
+    /api/v1/me failed with `NOT NULL constraint failed:
+    student_profiles.created_at` on any migration-built database.
+    0004 adds the defaults. This test proves the fix at the DDL
+    level: it upgrades a scratch file, then inserts a profile (no
+    timestamps supplied, exactly as app/services/profiles.py does),
+    a document, a job and a processing stage, and asserts all four
+    commit with timestamps filled in by the database.
+    """
+    from alembic.config import Config
+
+    from alembic import command
+    from app.services import profiles as profile_service
+
+    db_file = tmp_path / "alembic-m4.db"
+    monkeypatch.setattr(settings, "database_url", f"sqlite:///{db_file}")
+
+    engine = create_engine(f"sqlite:///{db_file}")
+    Base.metadata.create_all(engine, tables=[Document.__table__, Job.__table__])
+    engine.dispose()
+
+    cfg = Config("alembic.ini")
+    command.upgrade(cfg, "head")
+
+    engine = create_engine(f"sqlite:///{db_file}")
+    try:
+        with Session(engine) as session:
+            user_id = str(uuid.uuid4())
+            row = profile_service.create_profile(
+                session,
+                user_id=user_id,
+                email="m4@example.com",
+                data={"full_name": "M4 Test"},
+            )
+            assert row["created_at"] is not None
+            assert row["updated_at"] is not None
+
+            doc = Document(
+                user_id=uuid.UUID(user_id),
+                title="CA40",
+                storage_path="u/ca40.pdf",
+                file_type="pdf",
+                file_size_bytes=1234,
+            )
+            session.add(doc)
+            session.flush()
+            assert doc.created_at is not None
+            job = Job(user_id=uuid.UUID(user_id), document_id=doc.id)
+            session.add(job)
+            session.flush()
+            assert job.created_at is not None
+            stage = ProcessingStage(
+                document_id=doc.id,
+                job_id=job.id,
+                stage="uploaded",
+                status="done",
+            )
+            session.add(stage)
+            session.commit()
+            assert stage.created_at is not None
+    finally:
+        engine.dispose()

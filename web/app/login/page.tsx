@@ -51,7 +51,7 @@ function LoginForm() {
       setAuthError(error.message);
       return;
     }
-    router.push(next && next.startsWith("/") ? next : "/dashboard/profile");
+    router.push(next && next.startsWith("/") ? next : "/dashboard");
     router.refresh();
   };
 

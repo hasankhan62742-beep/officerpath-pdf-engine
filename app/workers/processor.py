@@ -11,11 +11,11 @@
 # - The worker processes SQLAlchemy jobs (the async-jobs API +
 #   sync-parse jobs, and — since ADR-011, M3 — register/upload
 #   jobs too, now that all of them live in the engine DB). A
-#   register-source job is never claimed: its bytes live in the
-#   Supabase bucket, not on local disk, so it is skipped by
-#   claim_next_job until M4 wires bucket download. A sync-parse
-#   job has no stored bytes (storage_path="inline-parse") and
-#   fails fast with "no_stored_bytes" if ever queued.
+#   register-source job's bytes live in the Supabase bucket, so
+#   `process_job` downloads them into local storage first (M4
+#   bucket wiring); a sync-parse job has no stored bytes
+#   (storage_path="inline-parse") and fails fast with
+#   "no_stored_bytes" if ever queued.
 # - Stages: the parse path calls the worker's on_stage hook at
 #   every phase boundary (classify -> render -> ocr -> layout ->
 #   extract -> answers -> matching -> report). Each hook records
@@ -42,15 +42,16 @@ from __future__ import annotations
 
 import time
 import uuid
+from collections.abc import Callable
 from datetime import UTC, datetime
-from typing import Any
 
-from sqlalchemy import func, select, update
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
 from app.config import Settings
 from app.core.errors import ApiError
 from app.db import models as db
+from app.integrations.supabase_storage import download_bucket_bytes
 from app.pipeline.ingestion.service import SqlAlchemyStageRecorder
 from app.pipeline.interfaces import PipelineStage
 from app.pipeline.matching.service import parse_document_bytes, parse_image_bytes
@@ -99,31 +100,15 @@ def claim_next_job(session: Session) -> db.Job | None:
     makes the claim safe if two workers race — the loser updates
     zero rows and gets None. Returns the claimed job, or None.
 
-    ADR-011: register-source jobs are SKIPPED — their bytes live
-    in the Supabase bucket, not on local disk, so claiming one
-    would fail it with "no stored bytes". The source marker lives
-    in the job's result_summary ({"source": "register"}); the
-    predicate is null-safe (coalesce to '') so a missing marker —
-    async submits, and failed jobs retried with a summary that
-    carries no source — stays claimable. The same predicate guards
-    the UPDATE, so a concurrent change of the marker cannot
-    smuggle a register job into the claim.
-
-    NOTE (measured): `result_summary["source"].is_(None)` does NOT
-    work here — SQLAlchemy renders it as
-    `JSON_QUOTE(JSON_EXTRACT(...)) IS NULL`, and JSON_QUOTE turns
-    SQL NULL into JSON null, so the check is false even for NULL
-    summaries. The coalesce form below is the tested shape (see
-    test_job_store_unification)."""
-
-    def _claimable() -> Any:
-        source = db.Job.result_summary["source"].as_string()
-        return func.coalesce(source, "") != "register"
-
+    M4: register-source jobs ARE claimable now — `process_job`
+    downloads their bytes from the Supabase bucket before
+    parsing (ADR-011's M3 skip is retired with the download
+    wiring). A register job whose bytes cannot be downloaded
+    fails with a named storage error instead of being skipped.
+    """
     oldest_queued = (
         select(db.Job.id)
         .where(db.Job.status == "queued")
-        .where(_claimable())
         .order_by(db.Job.created_at)
         .limit(1)
         .scalar_subquery()
@@ -132,7 +117,6 @@ def claim_next_job(session: Session) -> db.Job | None:
     result = session.execute(
         update(db.Job)
         .where(db.Job.id == oldest_queued, db.Job.status == "queued")
-        .where(_claimable())
         .values(status="processing", started_at=now)
         .returning(db.Job.id)
     )
@@ -167,11 +151,18 @@ def process_job(
     *,
     storage: StorageBackend,
     settings: Settings,
+    bucket_downloader: Callable[[str], bytes] | None = None,
 ) -> dict:
     """Process one claimed (status='processing') job to done,
     failed, or cancelled. Returns a summary dict. Never raises
     for a job failure — the failure is recorded on the job row
-    (status + error + ProcessingError row) and returned."""
+    (status + error + ProcessingError row) and returned.
+
+    `bucket_downloader` fetches a register-source job's bytes
+    from the Supabase bucket (path -> bytes). The default is the
+    real download (`download_bucket_bytes`); tests inject a fake.
+    A download failure fails the job with the named storage error
+    — never a silent skip, never a crash."""
     started = time.monotonic()
     recorder = SqlAlchemyStageRecorder(session)
     document = session.get(db.Document, job.document_id)
@@ -222,7 +213,23 @@ def process_job(
     try:
         if document is None:
             raise ValueError(f"document {job.document_id} not found for job {job.id}")
-        if document.storage_path == "inline-parse" or not storage.exists(document.storage_path):
+        if document.storage_path == "inline-parse":
+            raise ValueError(
+                "no stored bytes for this job (sync-parse jobs are not re-processable)"
+            )
+        # M4: register-source jobs live in the Supabase bucket, not
+        # on local disk. Download them once into local storage (the
+        # write-once cache) before parsing; a download failure fails
+        # the job with the named storage error (see
+        # download_bucket_bytes) instead of "no stored bytes".
+        if (job.result_summary or {}).get("source") == "register" and not storage.exists(
+            document.storage_path
+        ):
+            downloader = bucket_downloader or (
+                lambda path: download_bucket_bytes(settings.documents_bucket, path)
+            )
+            storage.put(document.storage_path, downloader(document.storage_path))
+        if not storage.exists(document.storage_path):
             raise ValueError(
                 "no stored bytes for this job (sync-parse jobs are not re-processable)"
             )

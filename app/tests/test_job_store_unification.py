@@ -1,7 +1,8 @@
 # OfficerPath AI — Phase 2, M3 (ADR-011)
 # Dual job-store resolution proofs: one store, one vocabulary,
-# one job id visible from both read endpoints; the worker claims
-# upload-source jobs and skips register-source jobs (bucket bytes).
+# one job id visible from both read endpoints. M4: the worker
+# claims register-source jobs too — their bytes are downloaded
+# from the bucket by process_job (see test_bucket_download).
 
 import uuid
 
@@ -77,9 +78,11 @@ def test_terminal_status_is_done_not_completed(client, engine_db):
         assert body.get("status") == "done"
 
 
-def test_worker_claims_upload_job_but_skips_register_job(client, engine_db):
-    """ADR-011 claim filter: register-source jobs (bucket bytes)
-    are never claimed; upload-source jobs (local bytes) are."""
+def test_worker_claims_oldest_job_including_register(client, engine_db):
+    """M4: the ADR-011 claim skip is RETIRED — register-source jobs
+    are claimable now that process_job downloads their bytes from
+    the bucket before parsing. The oldest queued job is claimed
+    first, whatever its source."""
     register_id = _register(client, USER_A, "token-user-a")
     res = client.post(
         "/api/v1/async-jobs/parse",
@@ -89,18 +92,31 @@ def test_worker_claims_upload_job_but_skips_register_job(client, engine_db):
     assert res.status_code == 202, res.text
     async_id = res.json()["job_id"]
 
-    # The register job is skipped even though it is older.
+    # SQLite created_at has second precision and both jobs were
+    # created in the same second — backdate the register job so
+    # "oldest first" is deterministic in this test.
+    from datetime import UTC, datetime, timedelta
+
+    session = engine_db()
+    try:
+        job = session.get(db.Job, uuid.UUID(register_id))
+        job.created_at = datetime.now(UTC) - timedelta(minutes=1)
+        session.commit()
+    finally:
+        session.close()
+
+    # The register job is oldest, so it is claimed first.
     session = engine_db()
     try:
         claimed = claim_next_job(session)
     finally:
         session.close()
     assert claimed is not None
-    assert str(claimed.id) == async_id
+    assert str(claimed.id) == register_id
     assert claimed.status == "processing"
 
-    # The register job is still queued, untouched.
-    assert _job_row(engine_db, register_id)["status"] == "queued"
+    # The async job is still queued, untouched.
+    assert _job_row(engine_db, async_id)["status"] == "queued"
     assert _job_row(engine_db, register_id)["result_summary"] == {"source": "register"}
     assert _job_row(engine_db, async_id)["result_summary"] in (None, {})
 

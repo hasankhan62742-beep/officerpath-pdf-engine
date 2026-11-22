@@ -88,9 +88,15 @@ Auth. Body (JSON): document metadata — `title`, `storage_path`
 record + a durable processing job. Idempotent: the same
 idempotency key, or the same storage path + user, returns the
 original job (`idempotent_replay: true`). Ownership enforced.
-Rate-limited (10/minute). The job is marked register-source and
-is NOT claimed by the worker until M4 wires bucket download
-(its bytes live in the bucket, not on local disk).
+Rate-limited (10/minute). The job is marked register-source; since
+M4 the worker claims it and downloads the bytes once from the
+`pdf-documents` bucket (service-role client only, via
+`download_bucket_bytes`) into the local write-once cache before
+parsing. A missing bucket/object fails the job with a named
+storage error (`storage_bucket_missing` /
+`storage_object_missing`); without a service-role client the
+job fails with 503 `storage_unavailable`. Live-bucket status is
+UNVERIFIED-live (migration 016 not applied — owner step).
 
 ### `POST /api/v1/documents/upload` → 200
 Auth. Multipart `file`. Validates the file bytes (magic bytes,
@@ -113,6 +119,46 @@ Auth, owner-only (other user: **404**). Job status +
 ### `POST /api/v1/jobs/{job_id}/retry` → 200
 Auth, owner-only. Only from `failed`/`cancelled`; increments
 the retry count. Rate-limited (5/minute).
+
+## Documents — listing / detail / delete (Phase 2, M4)
+
+All owner-only (other user: **404**), all read the engine DB
+(ADR-011 single store). `questions`/`answered` come from the
+job's `result_summary` when the job is `done`; `null` while the
+job has not produced them.
+
+### `GET /api/v1/documents` → 200
+Auth. Query: `limit` (1–100, default 20), `offset` (≥ 0,
+default 0), optional `status` filter (one of
+`queued`, `uploading`, `processing`, `done`, `failed`,
+`cancelled`). Returns `{documents: [{id, title, file_type,
+file_size_bytes, page_count, created_at, job, questions,
+answered}], total, limit, offset}`. Soft-deleted documents are
+excluded; re-upload after delete creates a fresh document.
+
+### `GET /api/v1/documents/{document_id}` → 200
+Auth. Returns `{document, job, stages}` — the document, its
+latest job (with `result_summary`), and the job's stage
+history. Other user / unknown id: **404**.
+
+### `DELETE /api/v1/documents/{document_id}` → 200
+Auth. Soft delete (sets `deleted_at`): the document disappears
+from list/summary/detail (**404** afterwards). A queued or
+processing job is cancelled first (`job_cancelled: true` in the
+response). Local bytes are deleted best-effort; bucket bytes
+are never touched. Returns `{document_id, deleted: true,
+job_cancelled}`.
+
+## Dashboard — summary (Phase 2, M4)
+
+### `GET /api/v1/dashboard/summary` → 200
+Auth. Real numbers only, from the signed-in user's
+non-deleted documents: `{documents_total,
+jobs_by_status: {queued, uploading, processing, done, failed,
+cancelled} (all six keys, zeros included), recent_documents:
+[DashboardDocumentItem, newest 5]}`. No test-result numbers
+yet — no test rows exist until M7/M8, so the dashboard does
+not invent that section.
 
 ## Review — synchronous parse (M6/M7)
 

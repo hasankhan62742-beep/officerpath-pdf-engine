@@ -32,9 +32,13 @@ from app.workers.processor import claim_next_job, process_job
 log = get_logger(__name__)
 
 
-def run_once(session_factory: sessionmaker, *, storage=None, settings_obj=None) -> dict | None:
+def run_once(
+    session_factory: sessionmaker, *, storage=None, settings_obj=None, bucket_downloader=None
+) -> dict | None:
     """Claim and process one job. Returns its summary, or None
-    when the queue is empty."""
+    when the queue is empty. `bucket_downloader` is passed through
+    to `process_job` (tests inject a fake; the default is the real
+    Supabase bucket download)."""
     settings_obj = settings_obj or settings
     storage = storage or LocalDiskStorage(settings_obj.storage_root)
     session: Session = session_factory()
@@ -42,7 +46,13 @@ def run_once(session_factory: sessionmaker, *, storage=None, settings_obj=None) 
         job = claim_next_job(session)
         if job is None:
             return None
-        return process_job(session, job, storage=storage, settings=settings_obj)
+        return process_job(
+            session,
+            job,
+            storage=storage,
+            settings=settings_obj,
+            bucket_downloader=bucket_downloader,
+        )
     finally:
         session.close()
 
@@ -53,6 +63,7 @@ def run_forever(
     storage=None,
     settings_obj=None,
     stop_after_idle: int | None = None,
+    bucket_downloader=None,
 ) -> int:
     """Poll the queue until stopped. Returns the number of jobs
     processed. ``stop_after_idle`` (tests/benchmark only) stops
@@ -67,7 +78,12 @@ def run_forever(
     )
     while True:
         try:
-            summary = run_once(session_factory, storage=storage, settings_obj=settings_obj)
+            summary = run_once(
+                session_factory,
+                storage=storage,
+                settings_obj=settings_obj,
+                bucket_downloader=bucket_downloader,
+            )
         except Exception as exc:  # noqa: BLE001 — the runner must never die on one job
             log.info("worker run_once failed", extra={"fields": {"error": str(exc)[:200]}})
             summary = None
