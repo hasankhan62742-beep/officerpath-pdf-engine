@@ -382,16 +382,98 @@ remaining_seconds, saved: [ExamResponseItem]}`.
 Auth. Submit from `in_progress` (or from `expired` — an
 expired exam still grades what was saved). Computes marks
 server-side and writes one `test_results` row; sets the
-session `submitted`. Idempotent: a second submit returns the
-same row. Returns `{result_id, test_id, template_id, title,
+session `submitted`. In the SAME transaction (M8) it also
+computes the subject/topic breakdowns onto the result row
+and records a `mistake` collection row for every
+incorrectly-answered scored question (correct, unattempted
+and unknown questions create none). Idempotent: a second
+submit returns the same row. Returns `{result_id, test_id, template_id, title,
 status, total_questions, correct, incorrect, unattempted,
 unknown_count, total_marks, max_marks, percentage,
 time_taken_seconds, marking_config, submitted_at}`. Submitting
 a test that was never started: **409** `test_not_started`.
 
 ### `GET /api/v1/tests/{test_id}/result` → 200
-Auth. The stored `test_results` row only (the full
-results/analytics UI is M8). No result yet: **404**.
+Auth. The stored `test_results` row plus its analytics
+(M8): `{result_id, test_id, template_id, title, status,
+total_questions, correct, incorrect, unattempted,
+unknown_count, total_marks, max_marks, percentage,
+time_taken_seconds, marking_config, submitted_at,
+subject_breakdown, topic_breakdown, weak_areas,
+strong_areas, review}`. Breakdowns are per subject/topic
+`{scored, correct, incorrect, unattempted, marks,
+max_marks, accuracy}` — computed at submit from the saved
+attempt only; questions with no subject/topic link sit in an
+"Uncategorised" bucket, never a forced category.
+`weak_areas`/`strong_areas` are the lowest/highest-accuracy
+named subjects with ≥3 scored questions (Uncategorised
+excluded). `review` is stored truth only: snapshot
+text/options, `selected_index`, `correct_index`, evidence
+source, status; unknown snapshots carry `correct_index -1`
+and status `unknown`. No result yet: **404**. A result
+stored with NULL breakdowns (M7 rows) is backfilled on read
+and persisted.
+
+### `GET /api/v1/results` → 200
+Auth. The student's test history, newest first:
+`{results: [ExamResultDetail], total, limit, offset}`
+(limit 1–100, default 20). Each entry carries the same
+fields as the single-result endpoint. Owner-only.
+
+### `POST /api/v1/tests/{test_id}/retry` → 201
+Auth. A new attempt of the same test: new template (named
+`{original name} (retry)`), new session, and snapshots
+byte-identical to the original test's snapshots (question
+text/options/correct answer frozen — a bank correction after
+creation never changes them). Only a submitted test can be
+retried: **409** `test_not_submitted` otherwise. Returns the
+new `TestDetail` with `retried_from_test_id` set.
+
+### `POST /api/v1/tests/from-mistakes` → 201
+Auth. A practice test from the student's `mistake`
+collection: body `{name, question_ids?, time_limit_seconds?,
+marking_config_id?, marking?}`. Snapshots come from the
+ORIGINAL snapshots of the attempts where the question was
+answered incorrectly — never the live bank, so a later bank
+correction does not change the practice test. Questions with
+no usable original snapshot are listed in
+`skipped_question_ids` and left out. Empty notebook (or no
+usable mistakes): **422** `no_mistakes`. At most the 200 most
+recent mistakes are used. Returns the new `TestDetail` with
+`source_type: "mistakes"`.
+
+## Collections — bookmarks + mistake notebook (Phase 2, M8)
+
+`student_question_collections` (Alembic 0008):
+`collection_type` is `bookmark` / `mistake` / `custom`;
+UNIQUE(user_id, question_id, collection_type). Mistake rows
+are written ONLY by the submit flow, in the same transaction
+as the result row, for incorrectly-answered scored
+questions. Owner-only: a foreign question id is a **404**,
+never a leak.
+
+### `GET /api/v1/collections` → 200
+Auth. `{collections: [CollectionItem], total, limit,
+offset}`; filter with `?collection_type=bookmark|mistake|
+custom`. Each item carries the bank question's text, options
+and stored correct answer (or `question: null` when the
+question is gone). Paginated (limit 1–100, default 20).
+
+### `POST /api/v1/collections` → 201 / 200
+Auth. Body `{question_id, collection_type: "bookmark" |
+"custom", note?}`. First time: **201**. Bookmarking the same
+question twice: **200** with `already_exists: true` (same
+row, no duplicate). `collection_type: "mistake"`: **422**
+`invalid_collection_type` — only submit writes mistake rows.
+A question that is not the caller's: **404**.
+
+### `PATCH /api/v1/collections/{collection_id}` → 200
+Auth. Body `{note}` (null clears it). Updates the note on a
+bookmark/mistake/custom entry. Foreign id: **404**.
+
+### `DELETE /api/v1/collections/{collection_id}` → 200
+Auth. Removes the entry. Returns `{id, deleted: true}`.
+Foreign id: **404**.
 
 ## Dashboard — summary (Phase 2, M4)
 

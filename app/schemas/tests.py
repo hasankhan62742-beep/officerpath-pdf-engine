@@ -76,6 +76,10 @@ class TestDetailResponse(TestResponse):
     snapshots: list[SnapshotItem]
     excluded_unknown: int
     excluded_no_options: int
+    # M8 only: retry provenance / from-mistakes skips. Absent
+    # (None) on tests built the normal way.
+    retried_from_test_id: str | None = None
+    skipped_question_ids: list[str] | None = None
 
 
 class TestListResponse(BaseModel):

@@ -18,10 +18,12 @@ from fastapi.responses import JSONResponse
 from app.api import health as health_api
 from app.api import metrics as metrics_api
 from app.api.v1 import async_jobs as async_jobs_routes
+from app.api.v1 import collections as collections_routes
 from app.api.v1 import dashboard as dashboard_routes
 from app.api.v1 import documents as documents_routes
 from app.api.v1 import me as me_routes
 from app.api.v1 import questions as questions_routes
+from app.api.v1 import results as results_routes
 from app.api.v1 import review as review_routes
 from app.api.v1 import routes as v1_routes
 from app.api.v1 import tests as tests_routes
@@ -188,6 +190,8 @@ app.include_router(documents_routes.router)
 app.include_router(dashboard_routes.router)
 app.include_router(questions_routes.router)
 app.include_router(tests_routes.router)
+app.include_router(results_routes.router)
+app.include_router(collections_routes.router)
 
 # CORS (M3, ADR-011): the browser frontend calls this API. Origins
 # come from CORS_ALLOWED_ORIGINS (dev default http://localhost:3000);

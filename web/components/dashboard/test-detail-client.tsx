@@ -26,6 +26,7 @@ import {
   getSessionToken,
   getTest,
   markingLabel,
+  retryTest,
   startTest,
   type QuestionItem,
   type TestSnapshot,
@@ -65,6 +66,8 @@ export function TestDetailClient({ id }: { id: string }) {
   const [deleting, setDeleting] = useState(false);
   const [starting, setStarting] = useState(false);
   const [startError, setStartError] = useState("");
+  const [retrying, setRetrying] = useState(false);
+  const [retryError, setRetryError] = useState("");
 
   const testQuery = useQuery({
     queryKey: ["test", id],
@@ -95,6 +98,26 @@ export function TestDetailClient({ id }: { id: string }) {
       );
     } finally {
       setStarting(false);
+    }
+  }
+
+  async function handleRetry() {
+    setRetrying(true);
+    setRetryError("");
+    try {
+      const token = await getSessionToken();
+      if (!token) throw new Error("Your session has expired. Please log in again.");
+      const retried = await retryTest(token, id);
+      await queryClient.invalidateQueries({ queryKey: ["tests"] });
+      router.push(`/dashboard/tests/${retried.test_id}`);
+    } catch (err) {
+      setRetryError(
+        err instanceof ApiError
+          ? err.message
+          : "Could not retry this test. Please try again.",
+      );
+    } finally {
+      setRetrying(false);
     }
   }
 
@@ -172,6 +195,12 @@ export function TestDetailClient({ id }: { id: string }) {
         </Alert>
       ) : null}
 
+      {retryError ? (
+        <Alert tone="danger" title="Could not retry the test">
+          {retryError}
+        </Alert>
+      ) : null}
+
       {test.excluded_unknown > 0 || test.excluded_no_options > 0 ? (
         <p className="text-sm text-slate-600">
           When this test was built, {test.excluded_unknown} question
@@ -187,9 +216,14 @@ export function TestDetailClient({ id }: { id: string }) {
 
       <div className="flex flex-wrap gap-2">
         {test.status === "submitted" ? (
-          <Button disabled title="This test is already submitted.">
-            Already submitted
-          </Button>
+          <>
+            <Link href={`/dashboard/tests/${id}/result`}>
+              <Button>View result</Button>
+            </Link>
+            <Button loading={retrying} onClick={handleRetry}>
+              Retry this test
+            </Button>
+          </>
         ) : test.status === "expired" || test.status === "abandoned" ? (
           <Button disabled title="This test has ended.">
             This test has ended

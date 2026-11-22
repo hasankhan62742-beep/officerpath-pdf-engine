@@ -900,3 +900,171 @@ export async function submitTest(accessToken: string, id: string): Promise<ExamR
 export async function getTestResult(accessToken: string, id: string): Promise<ExamResult> {
   return request<ExamResult>(`/api/v1/tests/${id}/result`, accessToken);
 }
+
+// ---------------------------------------------------------------------------
+// Results + analytics (Phase 2, M8, GAP-7) and question collections
+// (GAP-8: bookmarks + mistake notebook). Every number shown comes
+// from the stored test_results row — the frontend never computes
+// marks, breakdowns, or trends.
+// ---------------------------------------------------------------------------
+
+export interface BreakdownItem {
+  key: string;
+  name: string;
+  slug: string | null;
+  scored: number;
+  correct: number;
+  incorrect: number;
+  unattempted: number;
+  marks: number;
+  max_marks: number;
+  accuracy: number | null;
+}
+
+export interface WeakStrongArea {
+  subject_name: string;
+  accuracy: number | null;
+  scored: number;
+}
+
+export interface ReviewItem {
+  snapshot_id: string;
+  question_id: string | null;
+  position: number;
+  question_text: string;
+  options: { label: string; text: string }[];
+  correct_index: number;
+  selected_index: number | null;
+  marked_for_review: boolean;
+  status: "correct" | "incorrect" | "unattempted" | "unknown";
+  answer_source: string | null;
+  source_document_id: string | null;
+  source_page: number | null;
+  is_bookmarked: boolean;
+  bookmark_id: string | null;
+  is_mistake: boolean;
+}
+
+export interface ExamResultDetail extends ExamResult {
+  subject_breakdown: BreakdownItem[] | null;
+  topic_breakdown: BreakdownItem[] | null;
+  weak_areas: WeakStrongArea[];
+  strong_areas: WeakStrongArea[];
+  review: ReviewItem[];
+}
+
+export interface ResultsListResponse {
+  results: ExamResultDetail[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export async function getTestResultDetail(
+  accessToken: string,
+  id: string,
+): Promise<ExamResultDetail> {
+  return request<ExamResultDetail>(`/api/v1/tests/${id}/result`, accessToken);
+}
+
+export async function listResults(
+  accessToken: string,
+  opts: { limit?: number; offset?: number },
+): Promise<ResultsListResponse> {
+  const params = new URLSearchParams();
+  params.set("limit", String(opts.limit ?? 20));
+  params.set("offset", String(opts.offset ?? 0));
+  return request<ResultsListResponse>(`/api/v1/results?${params}`, accessToken);
+}
+
+export async function retryTest(accessToken: string, id: string): Promise<TestDetail> {
+  return request<TestDetail>(`/api/v1/tests/${id}/retry`, accessToken, {
+    method: "POST",
+  });
+}
+
+export async function createTestFromMistakes(
+  accessToken: string,
+  input: {
+    name: string;
+    question_ids?: string[] | null;
+    time_limit_seconds?: number | null;
+    marking_config_id?: string | null;
+    marking?: MarkingConfigInput | null;
+  },
+): Promise<TestDetail> {
+  return request<TestDetail>("/api/v1/tests/from-mistakes", accessToken, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export interface CollectionQuestion {
+  question_id: string;
+  document_id: string;
+  document_title: string;
+  number: string | null;
+  text: string;
+  options: string[];
+  correct_index: number;
+  answer_source: string;
+}
+
+export interface CollectionItem {
+  id: string;
+  question_id: string;
+  collection_type: string;
+  note: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+  question: CollectionQuestion | null;
+  already_exists?: boolean | null;
+}
+
+export interface CollectionListResponse {
+  collections: CollectionItem[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export async function listCollections(
+  accessToken: string,
+  opts: { collection_type?: string; limit?: number; offset?: number },
+): Promise<CollectionListResponse> {
+  const params = new URLSearchParams();
+  if (opts.collection_type) params.set("collection_type", opts.collection_type);
+  params.set("limit", String(opts.limit ?? 20));
+  params.set("offset", String(opts.offset ?? 0));
+  return request<CollectionListResponse>(`/api/v1/collections?${params}`, accessToken);
+}
+
+export async function createCollection(
+  accessToken: string,
+  input: { question_id: string; collection_type: "bookmark" | "custom"; note?: string | null },
+): Promise<CollectionItem> {
+  return request<CollectionItem>("/api/v1/collections", accessToken, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export async function updateCollectionNote(
+  accessToken: string,
+  id: string,
+  note: string | null,
+): Promise<CollectionItem> {
+  return request<CollectionItem>(`/api/v1/collections/${id}`, accessToken, {
+    method: "PATCH",
+    body: JSON.stringify({ note }),
+  });
+}
+
+export async function deleteCollection(
+  accessToken: string,
+  id: string,
+): Promise<{ id: string; deleted: boolean }> {
+  return request<{ id: string; deleted: boolean }>(`/api/v1/collections/${id}`, accessToken, {
+    method: "DELETE",
+  });
+}

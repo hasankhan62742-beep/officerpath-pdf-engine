@@ -119,6 +119,9 @@ def engine_db(tmp_path, monkeypatch):
     monkeypatch.setattr(dashboard_api, "get_session", lambda: factory())
     monkeypatch.setattr(questions_api, "get_session", lambda: factory())
     monkeypatch.setattr(tests_api, "get_session", lambda: factory())
+    # results_api / collections_api reuse tests_api._session_or_503,
+    # which reads the patched tests_api.get_session above — no
+    # separate patch needed (they define no get_session of their own).
     monkeypatch.setattr(settings, "storage_root", str(tmp_path / "storage"))
     yield factory
     engine.dispose()

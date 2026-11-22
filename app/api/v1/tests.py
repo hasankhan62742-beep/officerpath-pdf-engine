@@ -27,6 +27,7 @@ from app.schemas.exam import (
     StartTestResponse,
     TestResultResponse,
 )
+from app.schemas.results import FromMistakesRequest, TestResultDetailResponse
 from app.schemas.tests import (
     AvailabilityResponse,
     MarkingConfigCreate,
@@ -40,6 +41,7 @@ from app.schemas.tests import (
 )
 from app.security.dependencies import get_current_user
 from app.services import exam as exam_service
+from app.services import results as results_service
 from app.services import tests as test_service
 
 router = APIRouter(prefix="/api/v1", tags=["tests"])
@@ -144,6 +146,26 @@ async def list_tests(
     return TestListResponse(**result)
 
 
+@router.post("/tests/from-mistakes", response_model=TestDetailResponse, status_code=201)
+async def create_test_from_mistakes(
+    payload: FromMistakesRequest,
+    user: dict = Depends(get_current_user),
+) -> TestDetailResponse:
+    with _session_or_503() as session:
+        result = results_service.create_test_from_mistakes(session, user, payload.model_dump())
+    return TestDetailResponse(**result)
+
+
+@router.post("/tests/{test_id}/retry", response_model=TestDetailResponse, status_code=201)
+async def retry_test(
+    test_id: str,
+    user: dict = Depends(get_current_user),
+) -> TestDetailResponse:
+    with _session_or_503() as session:
+        result = results_service.retry_test(session, user, test_id)
+    return TestDetailResponse(**result)
+
+
 @router.get("/tests/{test_id}", response_model=TestDetailResponse)
 async def get_test(
     test_id: str,
@@ -222,11 +244,13 @@ async def submit_test(
     return TestResultResponse(**result)
 
 
-@router.get("/tests/{test_id}/result", response_model=TestResultResponse)
+@router.get("/tests/{test_id}/result", response_model=TestResultDetailResponse)
 async def get_test_result(
     test_id: str,
     user: dict = Depends(get_current_user),
-) -> TestResultResponse:
+) -> TestResultDetailResponse:
+    # M8: the stored row + breakdowns (backfilled when an M7
+    # row stored NULL) + weak/strong areas + per-question review.
     with _session_or_503() as session:
-        result = exam_service.get_result(session, user, test_id)
-    return TestResultResponse(**result)
+        result = results_service.get_result_detail(session, user, test_id)
+    return TestResultDetailResponse(**result)

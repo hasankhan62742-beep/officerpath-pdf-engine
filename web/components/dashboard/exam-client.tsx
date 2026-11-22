@@ -398,9 +398,14 @@ export function ExamClient({ id }: { id: string }) {
             {shown.marking_config.correct_marks} / {shown.marking_config.incorrect_marks} /{" "}
             {shown.marking_config.unattempted_marks})
           </p>
-          <p className="mt-2 text-sm text-slate-500">
-            Detailed review, per-subject breakdown and history arrive in Milestone 8.
-          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Link href={`/dashboard/tests/${id}/result`}>
+              <Button>View full result</Button>
+            </Link>
+            <Link href="/dashboard/mistakes">
+              <Button variant="secondary">Mistake notebook</Button>
+            </Link>
+          </div>
         </div>
         <Link href="/dashboard/tests">
           <Button variant="secondary">Back to my tests</Button>

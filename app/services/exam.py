@@ -42,6 +42,7 @@ from sqlalchemy.orm import Session
 from app.core.errors import ApiError
 from app.db import models as db
 from app.services.questions import _parse_uuid
+from app.services.results import compute_breakdowns, record_mistakes
 from app.services.tests import (
     _load_template_and_marking,
     _marking_to_dict,
@@ -390,6 +391,21 @@ def submit_test(session: Session, user: dict, test_id: str) -> dict:
         incorrect_marks=marking.incorrect_marks,
         unattempted_marks=marking.unattempted_marks,
     )
+    # M8: subject/topic breakdowns from the SAVED attempt, and
+    # mistake rows for incorrectly-answered scored questions —
+    # both in the SAME transaction as the result row, so a submit
+    # never leaves a result without its breakdowns or its
+    # mistakes.
+    breakdowns = compute_breakdowns(session, snapshots, list(responses.values()), marking)
+    incorrect_question_ids = [
+        snap.question_id
+        for snap in snapshots
+        if snap.correct_index >= 0
+        and (responses.get(str(snap.id)) is not None)
+        and responses[str(snap.id)].selected_index is not None
+        and responses[str(snap.id)].selected_index != snap.correct_index
+    ]
+    record_mistakes(session, user_uuid, incorrect_question_ids)
     total_marks = Decimal(str(score["total_marks"]))
     max_marks = Decimal(str(score["max_marks"]))
     if max_marks > 0:
@@ -419,8 +435,8 @@ def submit_test(session: Session, user: dict, test_id: str) -> dict:
         max_marks=max_marks,
         percentage=percentage,
         time_taken_seconds=time_taken,
-        subject_breakdown=None,
-        topic_breakdown=None,
+        subject_breakdown=breakdowns["subject_breakdown"],
+        topic_breakdown=breakdowns["topic_breakdown"],
         marking_config_id=marking.id,
         submitted_at=now,
     )

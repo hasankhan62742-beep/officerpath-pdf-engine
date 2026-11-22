@@ -29,6 +29,7 @@ from typing import Any
 from sqlalchemy import (
     JSON,
     Boolean,
+    CheckConstraint,
     DateTime,
     Float,
     ForeignKey,
@@ -901,8 +902,9 @@ class TestResult(Base):
     never raise into a 500. ``percentage`` is total/max clamped
     to [0, 100] (negative marking can make total_marks negative;
     a negative percentage is meaningless to a student).
-    ``subject_breakdown`` / ``topic_breakdown`` stay NULL in M7
-    (M8 analytics fills them).
+    ``subject_breakdown`` / ``topic_breakdown`` are computed at
+    submit time from the saved attempt (M8); M7 rows stored NULL
+    and are backfilled on read (see services/results.py).
     """
 
     __tablename__ = "test_results"
@@ -930,3 +932,51 @@ class TestResult(Base):
     created_at: Mapped[datetime] = _created_at()
 
     __table_args__ = (Index("ix_test_results_user_created", "user_id", "created_at"),)
+
+
+class StudentQuestionCollection(Base):
+    """One bookmark / mistake / custom entry in a student's
+    question collection (doc 03 §2.3, M8, GAP-8).
+
+    ONE table serves bookmarks and the mistake notebook,
+    distinguished by ``collection_type`` — no second table.
+    A "mistake" row is created by the submit flow (M8) when a
+    student answers a scored question incorrectly; it is the
+    same table as bookmarks so one query serves both lists.
+    ``question_id`` is a live link to the bank question
+    (ON DELETE CASCADE): the notebook shows the CURRENT bank
+    text. The PRACTICE test built from mistakes does NOT use
+    the live bank — its snapshots are copied from the ORIGINAL
+    attempt snapshots (see services/results.py), so a later
+    bank correction never changes a practice test.
+    UNIQUE(user, question, type): a student bookmarks a
+    question once; the submit flow never writes a duplicate
+    mistake row for the same question.
+    """
+
+    __tablename__ = "student_question_collections"
+
+    id: Mapped[uuid.UUID] = _uuid_pk()
+    user_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
+    question_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("extracted_questions.id", ondelete="CASCADE"), nullable=False
+    )
+    collection_type: Mapped[str] = mapped_column(String(32), nullable=False)
+    note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = _created_at()
+    updated_at: Mapped[datetime] = _updated_at()
+
+    __table_args__ = (
+        UniqueConstraint(
+            "user_id",
+            "question_id",
+            "collection_type",
+            name="uq_collection_user_question_type",
+        ),
+        CheckConstraint(
+            "collection_type IN ('bookmark', 'mistake', 'custom')",
+            name="ck_collection_type",
+        ),
+        Index("ix_collections_user_type_created", "user_id", "collection_type", "created_at"),
+        Index("ix_collections_question", "question_id", "created_at"),
+    )
