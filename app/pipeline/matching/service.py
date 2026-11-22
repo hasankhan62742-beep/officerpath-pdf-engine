@@ -21,7 +21,9 @@ from __future__ import annotations
 import json
 import uuid
 from collections import deque
+from collections.abc import Callable
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from app.config import Settings
 from app.pipeline.answers.models import ResolvedAnswer
@@ -30,13 +32,17 @@ from app.pipeline.answers.service import (
     apply_resolution,
     resolve_document_answers,
 )
-from app.pipeline.extract.models import ParseResult
+from app.pipeline.extract.models import ExtractedQuestion, ParseResult
 from app.pipeline.matching import calibration as calibration_mod
 from app.pipeline.matching.key_region import parse_key_entries_in_region
 from app.pipeline.matching.models import MatchedDocument, ResolvedMCQ
 from app.pipeline.matching.promotion import PromotionReport, promote_pending
 from app.pipeline.matching.report import build_document_report
 from app.pipeline.matching.validate import validate_matched_document
+
+if TYPE_CHECKING:
+    from app.pipeline.layout.analyzer import GeometryLayoutAnalyzer
+    from app.pipeline.pdf.quality import PageQuality
 
 #: Fitted calibration written by scripts/benchmark_m6.py; the parse
 #: endpoint loads it when present so served confidences are
@@ -238,6 +244,226 @@ def _lines_from_blocks(blocks: list) -> list[str]:
     return lines
 
 
+def _render_scanned_page(pdf_bytes: bytes, page_number: int) -> tuple[bytes, PageQuality]:
+    """Render one scanned PDF page at 200 DPI and measure its
+    quality. Returns (png_bytes, quality). The caller serialises
+    the quality with .to_dict() where a plain dict is needed
+    (debug) and passes the object to select_psm (which takes a
+    PageQuality, not a dict)."""
+    from app.pipeline.pdf.quality import measure_quality, png_to_gray
+    from app.pipeline.pdf.renderer import render_pdf_page
+
+    rendered = render_pdf_page(pdf_bytes, page_number, dpi=200)
+    quality = measure_quality(png_to_gray(rendered.png_bytes))
+    return rendered.png_bytes, quality
+
+
+def _ocr_page(
+    png_bytes: bytes,
+    page_number: int,
+    settings: Settings,
+    *,
+    psm: int,
+    use_layout: bool,
+    analyzer: GeometryLayoutAnalyzer | None = None,
+) -> list:
+    """OCR one rendered page with Tesseract at the given PSM.
+    With ``use_layout`` the geometry layout analyzer orders the
+    blocks (two-column reading order); without it the blocks keep
+    Tesseract's order ("raw" variant). A failed OCR contributes no
+    blocks — per-page failure isolation (M2), never a document
+    failure."""
+    import uuid as _uuid
+
+    from app.pipeline.interfaces import PageContext
+    from app.pipeline.ocr.tesseract import TesseractAdapter
+
+    adapter = TesseractAdapter(
+        languages=settings.tesseract_languages,
+        psm=psm,
+        timeout=settings.tesseract_timeout_seconds,
+    )
+    context = PageContext(
+        document_id=_uuid.uuid4(),
+        page_number=page_number,
+        storage_path="",
+        classification="scanned",
+        image_png=png_bytes,
+    )
+    try:
+        blocks = adapter.recognize(context)
+    except Exception:
+        blocks = []
+    if use_layout:
+        if analyzer is None:
+            from app.pipeline.layout.analyzer import GeometryLayoutAnalyzer
+
+            analyzer = GeometryLayoutAnalyzer()
+        layout = analyzer.analyze(context, blocks)
+        for region in layout.get("regions", []):
+            idx = region["block_index"]
+            if 0 <= idx < len(blocks):
+                blocks[idx].reading_order = region["reading_order"]
+    return sorted(blocks, key=lambda b: b.reading_order if b.reading_order is not None else 10**6)
+
+
+def _question_merge_key(question: ExtractedQuestion) -> tuple:
+    """Identity of a question across OCR variants: (number,
+    stem-prefix). Same number + same stem = the same question
+    recovered twice; same number + different stem = a different
+    question (multi-section papers restart numbers) and both are
+    kept."""
+    import re
+
+    stem = re.sub(r"\s+", "", (question.text or "").lower())[:60]
+    return (question.number, stem)
+
+
+def _merge_parse_results(
+    results: list[ParseResult], *, labels: list[str]
+) -> tuple[ParseResult, dict]:
+    """Union-merge ParseResults from OCR variants (M7 multi-pass
+    mode). Variant order is priority order: the first variant's
+    version of a question wins. Returns (merged, merge_report)
+    with per-variant counts and how many questions each later
+    variant added. Counters that belong to extraction internals
+    (key sections applied, etc.) are taken from the base (first)
+    variant and the report says so — the merge only unions
+    questions / pending / Q&A pairs."""
+    import copy
+
+    base = results[0]
+    merged = ParseResult(
+        questions=list(base.questions),
+        qa_pairs=list(base.qa_pairs),
+        pending=list(base.pending),
+        skipped=list(base.skipped),
+        excluded=list(base.excluded),
+        format_counts=dict(base.format_counts),
+        answer_sources=dict(base.answer_sources),
+        key_sections_found=base.key_sections_found,
+        key_entries_applied=base.key_entries_applied,
+        unmatched_key_entries=list(base.unmatched_key_entries),
+        conflicts=list(base.conflicts),
+        number_gaps=list(base.number_gaps),
+        number_duplicates=list(base.number_duplicates),
+        notes=list(base.notes),
+        noise_lines_filtered=base.noise_lines_filtered,
+        five_option_normalised=base.five_option_normalised,
+    )
+    seen_questions = {_question_merge_key(q) for q in merged.questions}
+    seen_pending = {
+        (p.number, (p.text or "")[:60].replace(" ", "").lower()) for p in merged.pending
+    }
+    seen_qa = {
+        (p.number, (p.question or "")[:60].replace(" ", "").lower()) for p in merged.qa_pairs
+    }
+    added_by_variant: dict[str, int] = {}
+    for label, variant in zip(labels[1:], results[1:], strict=True):
+        added = 0
+        for question in variant.questions:
+            key = _question_merge_key(question)
+            if key not in seen_questions:
+                seen_questions.add(key)
+                merged.questions.append(copy.copy(question))
+                added += 1
+        for pending in variant.pending:
+            key = (pending.number, (pending.text or "")[:60].replace(" ", "").lower())
+            if key not in seen_pending:
+                seen_pending.add(key)
+                merged.pending.append(copy.copy(pending))
+                added += 1
+        for pair in variant.qa_pairs:
+            key = (pair.number, (pair.question or "")[:60].replace(" ", "").lower())
+            if key not in seen_qa:
+                seen_qa.add(key)
+                merged.qa_pairs.append(copy.copy(pair))
+                added += 1
+        added_by_variant[label] = added
+    # Recompute gaps/duplicates from the merged set (the base
+    # variant's lists no longer describe it).
+    numbers = [q.number for q in merged.questions if q.number is not None]
+    numbers += [p.number for p in merged.pending if p.number is not None]
+    distinct = sorted(set(numbers))
+    merged.number_gaps = [
+        str(n) for n in range(1, (max(distinct) + 1 if distinct else 1)) if n not in distinct
+    ]
+    from collections import Counter
+
+    merged.number_duplicates = [str(n) for n, c in sorted(Counter(numbers).items()) if c > 1]
+    merge_report = {
+        "mode": "multi-pass-union",
+        "variants": list(labels),
+        "variant_questions": [len(r.questions) for r in results],
+        "variant_pending": [len(r.pending) for r in results],
+        "added_by_variant": added_by_variant,
+        "merged_questions": len(merged.questions),
+        "merged_pending": len(merged.pending),
+        "counters_from_base_variant": labels[0],
+    }
+    return merged, merge_report
+
+
+def _finish_parse(
+    result: ParseResult,
+    lines: list[str],
+    source_document_id: str,
+    *,
+    promote: bool = True,
+    debug_extra: dict | None = None,
+    on_stage: Callable[[str, dict], None] | None = None,
+) -> tuple[MatchedDocument, dict, dict]:
+    """The shared tail of every parse path (PDF, multi-pass,
+    image): key-region-located key detection -> resolution ->
+    promotion -> matching -> validation -> report. Returns
+    (matched, report, debug). ``on_stage`` (M7) is called with
+    (stage_name, detail) at each phase boundary so the background
+    worker can record real stage progress and enforce timeouts /
+    cancellation; it is never called with file contents or OCR
+    text."""
+    if on_stage is not None:
+        on_stage("answers", {"questions": len(result.questions)})
+    resolution, key_report = resolve_with_key_detection(result, lines, source_document_id)
+    apply_resolution(result, resolution)
+    if promote:
+        promotion_report = promote_pending(result, resolution)
+    else:
+        promotion_report = PromotionReport()
+    if on_stage is not None:
+        on_stage(
+            "matching",
+            {"answered": resolution.answered, "promoted": len(promotion_report.promoted)},
+        )
+    promoted_numbers = set(promotion_report.promoted)
+    calibrator = load_calibration()
+    matched = match_document(
+        result,
+        resolution,
+        calibrator=calibrator,
+        promoted_numbers=promoted_numbers,
+        promotion_report=promotion_report,
+    )
+    if on_stage is not None:
+        on_stage("report", {"questions": len(matched.questions)})
+    if calibrator is not None:
+        matched.notes.append("confidences calibrated (m6-calibration.json)")
+    else:
+        matched.notes.append("no fitted calibration found — raw confidences reported")
+    report = build_document_report(
+        matched,
+        document_label=source_document_id,
+        promotion=promotion_report.to_dict(),
+        key_region=key_report["region"],
+    )
+    debug = {
+        "key": key_report,
+        "promotion": promotion_report.to_dict(),
+    }
+    if debug_extra:
+        debug.update(debug_extra)
+    return matched, report, debug
+
+
 def parse_document_bytes(
     pdf_bytes: bytes,
     source_document_id: str,
@@ -245,6 +471,8 @@ def parse_document_bytes(
     settings: Settings | None = None,
     psm_override: int | None = None,
     promote: bool = True,
+    multi_pass: bool = False,
+    on_stage: Callable[[str, dict], None] | None = None,
 ) -> tuple[MatchedDocument, dict, dict]:
     """Parse one PDF's bytes end to end (in-process, synchronous):
     digital text layer first, else per-page Tesseract OCR with
@@ -259,7 +487,12 @@ def parse_document_bytes(
     only — the parse API never sets it). ``promote=False`` skips
     pending-question promotion (benchmarking only — the parse API
     always promotes); the promotion report is then empty and
-    pendings stay pending."""
+    pendings stay pending. ``multi_pass=True`` (M7, optional,
+    never the default) runs three OCR variants — PSM 3 + layout,
+    PSM 3 raw, PSM 4 raw — and union-merges the recovered
+    questions (M5 measured 59/100 vs 41/100 single-path, at 2–3x
+    OCR cost); the key is still detected on the layout variant's
+    lines only."""
     import fitz
 
     from app.pipeline.extract.service import (
@@ -267,11 +500,8 @@ def parse_document_bytes(
         extract_from_ocr_blocks,
     )
     from app.pipeline.interfaces import PageContext
-    from app.pipeline.layout.analyzer import GeometryLayoutAnalyzer
+    from app.pipeline.ocr.digital import DigitalExtractor
     from app.pipeline.ocr.psm import select_psm
-    from app.pipeline.ocr.tesseract import TesseractAdapter
-    from app.pipeline.pdf.quality import measure_quality, png_to_gray
-    from app.pipeline.pdf.renderer import render_pdf_page
 
     settings = settings or Settings()
     doc = fitz.open(stream=pdf_bytes, filetype="pdf")
@@ -283,14 +513,20 @@ def parse_document_bytes(
     # text, CA40 carries thousands). Below that the text layer is
     # furniture, not content: OCR the renders instead.
     is_digital = total_chars >= 100
+    if on_stage is not None:
+        on_stage("classify", {"is_digital": is_digital, "page_count": page_count})
     all_blocks: list = []
     lines: list[str] = []
     psm_by_page: dict[int, int] = {}
     quality_by_page: dict[int, dict] = {}
+    merge_report: dict | None = None
     if is_digital:
         result = extract_from_digital_pdf(pdf_bytes, source_document_id)
-        from app.pipeline.ocr.digital import DigitalExtractor
-
+        if on_stage is not None:
+            on_stage(
+                "extract",
+                {"questions": len(result.questions), "pending": len(result.pending)},
+            )
         extractor = DigitalExtractor()
         for page_number in range(1, page_count + 1):
             context = PageContext(
@@ -304,71 +540,199 @@ def parse_document_bytes(
             except ValueError:
                 blocks = []
             lines.extend(_lines_from_blocks(blocks))
+    elif multi_pass:
+        # Three OCR variants, same pages: (PSM 3 + layout), (PSM 3
+        # raw), (PSM 4 raw) — the M5 full-run experiment's variants.
+        # M7 optimisation (measured: render is ~8.5s of a 130s
+        # parse, and the old code paid it 3x): each page is rendered
+        # ONCE and the same PNG bytes are OCR'd by all three
+        # variants. Identical OCR input per variant, so the union
+        # is unchanged — only the two wasted renders are gone.
+        from app.pipeline.layout.analyzer import GeometryLayoutAnalyzer
+
+        analyzer = GeometryLayoutAnalyzer()
+        variants: list[tuple[str, int, bool]] = [
+            ("psm3-layout", 3, True),
+            ("psm3-raw", 3, False),
+            ("psm4-raw", 4, False),
+        ]
+        renders: dict[int, bytes] = {}
+        for page_number in range(1, page_count + 1):
+            png_bytes, quality = _render_scanned_page(pdf_bytes, page_number)
+            renders[page_number] = png_bytes
+            quality_by_page[page_number] = quality.to_dict()
+            psm_by_page[page_number] = variants[0][1]
+            if on_stage is not None:
+                on_stage("render", {"page": page_number})
+        variant_results: list[ParseResult] = []
+        variant_labels: list[str] = []
+        variant_seconds: dict[str, float] = {}
+        for label, psm, use_layout in variants:
+            import time as _time
+
+            started = _time.monotonic()
+            v_blocks: list = []
+            v_lines: list[str] = []
+            for page_number in range(1, page_count + 1):
+                blocks = _ocr_page(
+                    renders[page_number],
+                    page_number,
+                    settings,
+                    psm=psm,
+                    use_layout=use_layout,
+                    analyzer=analyzer,
+                )
+                if on_stage is not None:
+                    on_stage("ocr", {"page": page_number, "psm": psm, "variant": label})
+                    if use_layout:
+                        on_stage("layout", {"page": page_number, "variant": label})
+                v_blocks.extend(blocks)
+                v_lines.extend(_lines_from_blocks(blocks))
+            variant_results.append(extract_from_ocr_blocks(v_blocks, source_document_id))
+            variant_labels.append(label)
+            variant_seconds[label] = round(_time.monotonic() - started, 1)
+            if label == "psm3-layout":
+                all_blocks = v_blocks
+                lines = v_lines
+        result, merge_report = _merge_parse_results(variant_results, labels=variant_labels)
+        merge_report["variant_seconds"] = variant_seconds
+        if on_stage is not None:
+            on_stage(
+                "extract",
+                {"questions": len(result.questions), "pending": len(result.pending)},
+            )
     else:
+        from app.pipeline.layout.analyzer import GeometryLayoutAnalyzer
+
         analyzer = GeometryLayoutAnalyzer()
         for page_number in range(1, page_count + 1):
-            rendered = render_pdf_page(pdf_bytes, page_number, dpi=200)
-            quality = measure_quality(png_to_gray(rendered.png_bytes))
+            png_bytes, quality = _render_scanned_page(pdf_bytes, page_number)
             quality_by_page[page_number] = quality.to_dict()
             psm = psm_override if psm_override is not None else select_psm(quality)
             psm_by_page[page_number] = psm
-            adapter = TesseractAdapter(languages=settings.tesseract_languages, psm=psm)
-            context = PageContext(
-                document_id=uuid.uuid4(),
-                page_number=page_number,
-                storage_path="",
-                classification="scanned",
-                image_png=rendered.png_bytes,
+            if on_stage is not None:
+                on_stage("render", {"page": page_number})
+            blocks = _ocr_page(
+                png_bytes,
+                page_number,
+                settings,
+                psm=psm,
+                use_layout=True,
+                analyzer=analyzer,
             )
-            try:
-                blocks = adapter.recognize(context)
-            except Exception:
-                blocks = []
-            layout = analyzer.analyze(context, blocks)
-            for region in layout.get("regions", []):
-                idx = region["block_index"]
-                if 0 <= idx < len(blocks):
-                    blocks[idx].reading_order = region["reading_order"]
-            ordered = sorted(
-                blocks,
-                key=lambda b: b.reading_order if b.reading_order is not None else 10**6,
-            )
-            all_blocks.extend(ordered)
-            lines.extend(_lines_from_blocks(ordered))
+            if on_stage is not None:
+                on_stage("ocr", {"page": page_number, "psm": psm})
+                on_stage("layout", {"page": page_number})
+            all_blocks.extend(blocks)
+            lines.extend(_lines_from_blocks(blocks))
         result = extract_from_ocr_blocks(all_blocks, source_document_id)
-    resolution, key_report = resolve_with_key_detection(result, lines, source_document_id)
-    apply_resolution(result, resolution)
-    if promote:
-        promotion_report = promote_pending(result, resolution)
-    else:
-        promotion_report = PromotionReport()
-    promoted_numbers = set(promotion_report.promoted)
-    calibrator = load_calibration()
-    matched = match_document(
+        if on_stage is not None:
+            on_stage(
+                "extract",
+                {"questions": len(result.questions), "pending": len(result.pending)},
+            )
+    matched, report, debug = _finish_parse(
         result,
-        resolution,
-        calibrator=calibrator,
-        promoted_numbers=promoted_numbers,
-        promotion_report=promotion_report,
+        lines,
+        source_document_id,
+        promote=promote,
+        on_stage=on_stage,
+        debug_extra={
+            "is_digital": is_digital,
+            "total_text_chars": total_chars,
+            "page_count": page_count,
+            "psm_override": psm_override,
+            "psm_by_page": {str(k): v for k, v in psm_by_page.items()},
+            "quality_by_page": quality_by_page,
+            "multi_pass": multi_pass,
+            "merge": merge_report,
+        },
     )
-    if calibrator is not None:
-        matched.notes.append("confidences calibrated (m6-calibration.json)")
-    else:
-        matched.notes.append("no fitted calibration found — raw confidences reported")
-    report = build_document_report(
-        matched,
-        document_label=source_document_id,
-        promotion=promotion_report.to_dict(),
-        key_region=key_report["region"],
+    return matched, report, debug
+
+
+#: Image magic bytes accepted by the image parse path.
+IMAGE_MAGIC = (b"\x89PNG", b"\xff\xd8\xff")
+
+
+def parse_image_bytes(
+    image_bytes: bytes,
+    source_document_id: str,
+    *,
+    settings: Settings | None = None,
+    psm_override: int | None = None,
+    promote: bool = True,
+    on_stage: Callable[[str, dict], None] | None = None,
+) -> tuple[MatchedDocument, dict, dict]:
+    """Parse one photo's bytes end to end (JPEG/PNG): the image is
+    one scanned page — decode, measure quality, Tesseract OCR,
+    layout, extraction, key detection, resolution, promotion,
+    matching, validation. Returns the same (matched, report,
+    debug) shape as :func:`parse_document_bytes` (``is_digital``
+    False, ``page_count`` 1). Raises ValueError on undecodable or
+    non-image bytes. This is the server side of the Flutter
+    ``importImage`` path (M7); the photo itself is never stored,
+    only the parsed MCQs."""
+    from app.pipeline.extract.service import extract_from_ocr_blocks
+    from app.pipeline.layout.analyzer import GeometryLayoutAnalyzer
+    from app.pipeline.ocr.psm import select_psm
+    from app.pipeline.pdf.quality import measure_quality, png_to_gray
+
+    settings = settings or Settings()
+    if not image_bytes.startswith(IMAGE_MAGIC):
+        raise ValueError("Upload must be a JPEG or PNG image.")
+    # Normalise to PNG bytes (Tesseract takes PNG); Pillow decodes
+    # both JPEG and PNG. A corrupt image raises here -> ValueError.
+    try:
+        import io
+
+        from PIL import Image
+
+        with Image.open(io.BytesIO(image_bytes)) as image:
+            image.load()
+            buffer = io.BytesIO()
+            image.convert("RGB").save(buffer, format="PNG")
+            png_bytes = buffer.getvalue()
+    except Exception as exc:
+        raise ValueError(f"Image could not be decoded: {exc}") from exc
+    quality = measure_quality(png_to_gray(png_bytes))
+    psm = psm_override if psm_override is not None else select_psm(quality)
+    if on_stage is not None:
+        on_stage("classify", {"is_digital": False, "page_count": 1})
+        on_stage("render", {"page": 1})
+    blocks = _ocr_page(
+        png_bytes,
+        1,
+        settings,
+        psm=psm,
+        use_layout=True,
+        analyzer=GeometryLayoutAnalyzer(),
     )
-    debug = {
-        "is_digital": is_digital,
-        "total_text_chars": total_chars,
-        "page_count": page_count,
-        "psm_override": psm_override,
-        "psm_by_page": {str(k): v for k, v in psm_by_page.items()},
-        "quality_by_page": quality_by_page,
-        "key": key_report,
-        "promotion": promotion_report.to_dict(),
-    }
+    if on_stage is not None:
+        on_stage("ocr", {"page": 1, "psm": psm})
+        on_stage("layout", {"page": 1})
+    lines = _lines_from_blocks(blocks)
+    result = extract_from_ocr_blocks(blocks, source_document_id)
+    if on_stage is not None:
+        on_stage(
+            "extract",
+            {"questions": len(result.questions), "pending": len(result.pending)},
+        )
+    matched, report, debug = _finish_parse(
+        result,
+        lines,
+        source_document_id,
+        promote=promote,
+        on_stage=on_stage,
+        debug_extra={
+            "is_digital": False,
+            "total_text_chars": 0,
+            "page_count": 1,
+            "psm_override": psm_override,
+            "psm_by_page": {"1": psm},
+            "quality_by_page": {1: quality.to_dict()},
+            "multi_pass": False,
+            "merge": None,
+        },
+    )
     return matched, report, debug

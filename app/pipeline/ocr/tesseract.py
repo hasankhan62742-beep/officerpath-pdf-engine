@@ -92,10 +92,15 @@ class TesseractAdapter:
         languages: str = "eng+urd",
         psm: int = 3,
         binary: str = "tesseract",
+        timeout: int = 300,
     ) -> None:
         self.languages = languages
         self.psm = psm
         self.binary = binary
+        # Per-page OCR timeout (M7): pytesseract raises on timeout
+        # and recognize() converts it to a per-page failure, so a
+        # hung Tesseract can never hang a job (or a parse) forever.
+        self.timeout = timeout
         self._info: TesseractInfo | None = None
 
     @property
@@ -127,6 +132,7 @@ class TesseractAdapter:
                 lang=self.languages,
                 config=config,
                 output_type=pytesseract.Output.DICT,
+                timeout=self.timeout,
             )
         except Exception as exc:
             raise RuntimeError(f"tesseract failed on page {page.page_number}: {exc}") from exc

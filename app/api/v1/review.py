@@ -28,7 +28,7 @@ from app.config import settings
 from app.core.errors import ApiError
 from app.db import models as db
 from app.db.session import get_session
-from app.pipeline.matching.service import parse_document_bytes
+from app.pipeline.matching.service import IMAGE_MAGIC, parse_document_bytes, parse_image_bytes
 from app.pipeline.matching.store import (
     apply_manual_correction,
     get_document_report,
@@ -45,6 +45,7 @@ from app.schemas.review import (
 )
 from app.security.dependencies import get_current_user
 from app.security.rate_limit import rate_limiter
+from app.utils import metrics
 
 router = APIRouter(prefix="/api/v1", tags=["review"])
 
@@ -94,6 +95,7 @@ def _persist_parse(
     data: bytes,
     page_count: int,
     matched,
+    file_type: str = "pdf",
 ) -> uuid.UUID:
     """Create Document + Job rows (completed) and persist the
     matched result under ``document_id``. Returns the job id."""
@@ -102,7 +104,7 @@ def _persist_parse(
         user_id=user_id,
         title=filename,
         storage_path="inline-parse",
-        file_type="pdf",
+        file_type=file_type,
         file_size_bytes=len(data),
         page_count=page_count,
         content_hash=hashlib.sha256(data).hexdigest(),
@@ -129,6 +131,7 @@ def _persist_parse(
 @router.post("/documents/parse", response_model=ParseResponse)
 def parse_document(
     file: UploadFile = File(...),
+    multi_pass: bool = False,
     user: dict = Depends(get_current_user),
 ) -> ParseResponse:
     # Plain `def` (not async): FastAPI runs it in a threadpool, so
@@ -140,6 +143,12 @@ def parse_document(
         settings.rate_limit_window_seconds,
     )
     data = file.file.read()
+    if len(data) > settings.max_file_size_bytes:
+        raise ApiError(
+            status_code=422,
+            code="file_too_large",
+            message=f"File is {len(data)} bytes; limit is {settings.max_file_size_bytes}.",
+        )
     if not data.startswith(PDF_MAGIC):
         raise ApiError(
             status_code=422,
@@ -148,9 +157,18 @@ def parse_document(
         )
     document_id = uuid.uuid4()
     try:
-        matched, report, debug = parse_document_bytes(data, str(document_id))
+        matched, report, debug = parse_document_bytes(data, str(document_id), multi_pass=multi_pass)
     except ValueError as exc:
         raise ApiError(status_code=422, code="invalid_file", message=str(exc)) from exc
+    # M7 metrics: one documents_parsed sample + one OCR-call sample
+    # per parsed page (digital = 1 "digital" call for the whole doc).
+    engine = "digital" if debug["is_digital"] else "tesseract"
+    metrics.inc("documents_parsed_total", {"engine": engine})
+    metrics.inc(
+        "ocr_calls_total",
+        {"engine": engine},
+        amount=debug["page_count"] if not debug["is_digital"] else 1,
+    )
     job_id: uuid.UUID | None = None
     persisted = False
     session = get_session()
@@ -177,6 +195,79 @@ def parse_document(
         job_id=str(job_id) if job_id is not None else None,
         persisted=persisted,
         filename=file.filename or "upload.pdf",
+        is_digital=debug["is_digital"],
+        page_count=debug["page_count"],
+        matched=matched.to_dict(),
+        report=report,
+        debug=debug,
+    )
+
+
+@router.post("/documents/parse-image", response_model=ParseResponse)
+def parse_image(
+    file: UploadFile = File(...),
+    user: dict = Depends(get_current_user),
+) -> ParseResponse:
+    """Parse one photo (JPEG/PNG) — the server side of the Flutter
+    ``importImage`` path (M7). The image is one scanned page: same
+    OCR -> layout -> extract -> answers -> matching pipeline as a
+    scanned PDF page, same resolved-MCQ response shape. The photo
+    itself is never stored, only the parsed MCQs (like the PDF
+    path). A non-image upload answers 422; an oversize upload 422
+    (code file_too_large, same as the M1 upload contract).
+    """
+    rate_limiter.check(
+        f"parse:{user['id']}",
+        settings.rate_limit_register_per_minute,
+        settings.rate_limit_window_seconds,
+    )
+    data = file.file.read()
+    if len(data) > settings.max_file_size_bytes:
+        raise ApiError(
+            status_code=422,
+            code="file_too_large",
+            message=f"File is {len(data)} bytes; limit is {settings.max_file_size_bytes}.",
+        )
+    if not data.startswith(IMAGE_MAGIC):
+        raise ApiError(
+            status_code=422,
+            code="invalid_file",
+            message="Upload must be a JPEG or PNG image.",
+        )
+    file_type = "png" if data.startswith(b"\x89PNG") else "jpg"
+    document_id = uuid.uuid4()
+    try:
+        matched, report, debug = parse_image_bytes(data, str(document_id))
+    except ValueError as exc:
+        raise ApiError(status_code=422, code="invalid_file", message=str(exc)) from exc
+    metrics.inc("documents_parsed_total", {"engine": "tesseract"})
+    metrics.inc("ocr_calls_total", {"engine": "tesseract"})
+    job_id: uuid.UUID | None = None
+    persisted = False
+    session = get_session()
+    if session is not None:
+        try:
+            job_id = _persist_parse(
+                session,
+                document_id=document_id,
+                user_id=uuid.UUID(user["id"]),
+                filename=file.filename or "upload.jpg",
+                data=data,
+                page_count=debug["page_count"],
+                matched=matched,
+                file_type=file_type,
+            )
+            persisted = True
+        except Exception:
+            session.rollback()
+            matched.notes.append("persistence failed — result returned unpersisted")
+        finally:
+            session.close()
+    return ParseResponse(
+        document_id=str(document_id),
+        job_id=str(job_id) if job_id is not None else None,
+        persisted=persisted,
+        filename=file.filename or "upload.jpg",
         is_digital=debug["is_digital"],
         page_count=debug["page_count"],
         matched=matched.to_dict(),

@@ -30,7 +30,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
-from app.pipeline.answers.models import AnswerEvidence, DetectorResult
+from app.pipeline.answers.models import AnswerEvidence, DetectorResult, section_key
 from app.pipeline.extract.keys import (
     decide_key_match,
     is_unknown_key_token,
@@ -197,6 +197,12 @@ def detect_trailing_key(
                 confidence=1.0,
                 evidence=f"key entry {number} -> ({chr(65 + resolved)}) from {token!r}",
                 detail={"key_token": token, "key_decision": decision["confidence"]},
+                # Section-aware join (M7): the evidence belongs to
+                # the section of the question it joined (first
+                # occurrence of the number). A same-numbered
+                # question in another section must never inherit
+                # this key entry.
+                section=section_key(question),
             )
         )
     return detection

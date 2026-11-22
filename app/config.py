@@ -129,6 +129,24 @@ class Settings(BaseSettings):
     gemini_api_key: str | None = None
     gemini_max_calls_per_day: int = 0  # 0 = advisory disabled entirely
     gemini_max_output_tokens: int = 2048
+    # --- M7: background worker (ADR-009) ---
+    # In-process background worker (no Redis/celery — Render free
+    # is one 0.1-CPU instance; a separate process would need its
+    # own memory). Disabled by default: the API serves without it,
+    # and the worker is enabled on Render via WORKER_ENABLED=true
+    # or run as its own process (python -m app.workers.runner).
+    worker_enabled: bool = False
+    worker_poll_seconds: float = 5.0
+    # Per-stage timeout: a stage that runs longer than this is
+    # failed with the stage named, never left hanging. PPSC-66
+    # single-path OCR takes ~130 s on the VM; 600 s leaves ample
+    # headroom while still bounding a hung job.
+    worker_stage_timeout_seconds: int = 600
+    # Per-page Tesseract timeout (seconds): a page whose OCR hangs
+    # longer than this contributes no blocks (per-page failure
+    # isolation, M2) instead of hanging the job.
+    tesseract_timeout_seconds: int = 300
+
     # Golden dataset version used by the benchmark harness.
     benchmark_dataset_version: str = "golden-v2"
 
