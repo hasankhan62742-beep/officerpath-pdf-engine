@@ -33,15 +33,18 @@ ENV PYTHONUNBUFFERED=1 \
     PORT=8000
 WORKDIR /app
 # M3 note (ADR-005): Tesseract needs its binary + language data at
-# runtime (eng+urd+ara for Urdu/Arabic-script pages). The builder
-# stage does not need it (pytesseract is a thin wrapper). PaddleOCR
-# models are NOT baked into the image — they download on first use
+# runtime (eng+urd+ara for Urdu/Arabic-script pages, osd for the
+# orientation data PSM 3 uses). The language list matches the set
+# the M7 suite passes against on the VM (tesseract-ocr-eng/urd/osd
+# installed explicitly — the base tesseract-ocr package alone is
+# not relied on to pull eng). The builder stage does not need it
+# (pytesseract is a thin wrapper). PaddleOCR models are NOT baked into the image — they download on first use
 # into ~/.paddlex (network, ~50-100 MB); a slim build omits paddleocr
 # from requirements.txt instead. (UNVERIFIED in Docker itself — no
 # Docker on the dev VM; the first CI Docker build after the push
 # verifies it, as with M2.)
 RUN apt-get update && apt-get install -y --no-install-recommends curl \
-    tesseract-ocr tesseract-ocr-urd tesseract-ocr-ara \
+    tesseract-ocr tesseract-ocr-eng tesseract-ocr-urd tesseract-ocr-ara tesseract-ocr-osd \
     && rm -rf /var/lib/apt/lists/* \
     && groupadd -r appuser && useradd -r -g appuser appuser
 COPY --from=builder /opt/venv /opt/venv

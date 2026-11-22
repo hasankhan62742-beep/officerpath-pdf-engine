@@ -34,3 +34,15 @@ ignore_missing_imports = true
 module = ["app.db.*", "app.pipeline.*", "app.storage.*"]
 disallow_untyped_defs = true
 disallow_incomplete_defs = true
+
+# M8: coverage (pytest-cov, see requirements-dev.txt). Measures the
+# shipped code only — tests and migrations are excluded. Run:
+# `.venv/bin/python -m pytest --cov=app --cov-report=term-missing -q`
+[tool.coverage.run]
+source = ["app"]
+omit = ["app/tests/*", "alembic/*", "*/__init__.py"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
+

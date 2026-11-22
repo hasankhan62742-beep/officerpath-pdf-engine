@@ -29,6 +29,23 @@ services:
         value: render-free
       - key: PADDLEOCR_ENABLED
         value: "false"
+      # M7 (ADR-009): background jobs run in-process on Render free
+      # (Background Workers are not free). Without WORKER_ENABLED
+      # the async-jobs endpoints accept jobs that never run.
+      - key: WORKER_ENABLED
+        value: "true"
+      # M7 measured: a 7-page OCR stage is ~120 s on the dev VM
+      # (1.5 CPUs) and ~20 min at Render free's 0.1 CPU. The 600 s
+      # default would fail every long job with the stage named, so
+      # the Render value is 1800 s (30 min). Sync parse calls are
+      # NOT subject to this timeout — it only bounds worker stages.
+      - key: WORKER_STAGE_TIMEOUT_SECONDS
+        value: "1800"
+      # M7: a hung Tesseract page fails per-page instead of hanging
+      # the job. 300 s is the code default; set explicitly so the
+      # Render value is visible here, not hidden in code.
+      - key: TESSERACT_TIMEOUT_SECONDS
+        value: "300"
       # Secrets below are set in the Render Dashboard (never in this
       # file, never in the repo). The service starts without them and
       # /health reports `degraded` until they are set — that is the
