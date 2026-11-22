@@ -97,7 +97,7 @@ def _persist_parse(
     matched,
     file_type: str = "pdf",
 ) -> uuid.UUID:
-    """Create Document + Job rows (completed) and persist the
+    """Create Document + Job rows (done — ADR-011) and persist the
     matched result under ``document_id``. Returns the job id."""
     document = db.Document(
         id=document_id,
@@ -114,7 +114,7 @@ def _persist_parse(
     job = db.Job(
         user_id=user_id,
         document_id=document.id,
-        status="completed",
+        status="done",  # ADR-011: the live 015 constraint rejects "completed".
         idempotency_key=None,
     )
     session.add(job)

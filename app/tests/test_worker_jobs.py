@@ -57,13 +57,14 @@ def test_async_parse_queued_then_worker_completes(client, db_factory) -> None:
     # The worker claims and processes it in-process.
     summary = run_once(db_factory)
     assert summary is not None
-    assert summary["status"] == "completed"
+    # ADR-011: terminal job status is "done" now.
+    assert summary["status"] == "done"
     assert summary["questions"] == 40
     assert summary["answered"] >= 30
     # Stage history: the real phases ran, with timings.
     res = client.get(f"/api/v1/async-jobs/{job_id}", headers=auth_headers("token-user-a"))
     status = res.json()
-    assert status["status"] == "completed"
+    assert status["status"] == "done"
     stage_names = {s["stage"] for s in status["stages"]}
     for expected in (
         "queued",
@@ -106,7 +107,8 @@ def test_worker_failure_then_retry_recovers(client, db_factory) -> None:
     LocalDiskStorage(settings.storage_root).put(document.storage_path, CA40.read_bytes())
     session.close()
     summary = run_once(db_factory)
-    assert summary["status"] == "completed"
+    # ADR-011: terminal job status is "done" now.
+    assert summary["status"] == "done"
     assert summary["questions"] == 40
 
 

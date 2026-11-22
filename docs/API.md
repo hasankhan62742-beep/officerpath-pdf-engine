@@ -71,7 +71,15 @@ when no database is configured, never faked),
 `jobs_total{status}`, `http_requests_total{status}`,
 `errors_total{code}`.
 
-## Documents — register / upload (M1)
+## Documents — register / upload (M1; ADR-011, M3)
+
+M3 note: these endpoints now read/write the ENGINE DB (the same
+Postgres Supabase hosts, via `DATABASE_URL`) — the PostgREST
+repositories are deleted (ADR-011). `GET /api/v1/jobs/{id}` and
+`GET /api/v1/async-jobs/{id}` read the same row. The terminal job
+status is `done` (the live 015 check constraint rejects
+`completed`). `DATABASE_URL` is required; without it these
+endpoints answer 503 `database_unavailable`.
 
 ### `POST /api/v1/documents/register` → 201
 Auth. Body (JSON): document metadata — `title`, `storage_path`
@@ -80,7 +88,9 @@ Auth. Body (JSON): document metadata — `title`, `storage_path`
 record + a durable processing job. Idempotent: the same
 idempotency key, or the same storage path + user, returns the
 original job (`idempotent_replay: true`). Ownership enforced.
-Rate-limited (10/minute).
+Rate-limited (10/minute). The job is marked register-source and
+is NOT claimed by the worker until M4 wires bucket download
+(its bytes live in the bucket, not on local disk).
 
 ### `POST /api/v1/documents/upload` → 200
 Auth. Multipart `file`. Validates the file bytes (magic bytes,
@@ -202,9 +212,9 @@ in the failure). Poll `GET` below for the result.
 ### `GET /api/v1/async-jobs/{job_id}` → 200
 Auth, owner-only (**404** for another user). Response
 (`AsyncJobStatusResponse`): `job_id`, `document_id`,
-`status` (`queued` / `processing` / `completed` / `failed` /
+`status` (`queued` / `processing` / `done` / `failed` /
 `cancelled`), `retry_count`, `error`, `result_summary`
-(`{ "questions", "answered", ... }` when completed),
+(`{ "questions", "answered", ... }` when done),
 `created_at`, `started_at`, `completed_at`, `stages` (each:
 `stage`, `status`, `detail` with per-stage seconds,
 `created_at`).
@@ -225,7 +235,7 @@ Auth, owner-only. Re-queues a `failed` or `cancelled` job
 |---|---|
 | `queued` | Submitted, waiting for the worker. |
 | `processing` | Claimed by the worker, a stage is running. |
-| `completed` | All stages done; `result_summary` has the counts. |
+| `done` | All stages done; `result_summary` has the counts. |
 | `failed` | A stage failed (reason in `error`, stage named); retryable. |
 | `cancelled` | Cancel requested (queued or at a stage boundary); retryable. |
 

@@ -11,10 +11,10 @@
 # ORIGINAL document + job instead of creating duplicates.
 
 from app.core.errors import ApiError
-from app.database.repositories import (
+from app.database.sqlalchemy_repositories import (
     RETRYABLE_STATUSES,
-    DocumentRepository,
-    JobRepository,
+    SqlAlchemyDocumentRepository,
+    SqlAlchemyJobRepository,
 )
 from app.schemas.documents import DocumentRegisterRequest
 from app.utils.logging import get_logger
@@ -29,9 +29,17 @@ def _owns_storage_path(user_id: str, storage_path: str) -> bool:
 def register_document(
     user: dict,
     payload: DocumentRegisterRequest,
-    documents: DocumentRepository,
-    jobs: JobRepository,
+    documents: SqlAlchemyDocumentRepository,
+    jobs: SqlAlchemyJobRepository,
+    *,
+    source: str = "register",
 ) -> tuple[dict, dict, bool]:
+    """Register a document + job. `source` records where the bytes
+    live (ADR-011): "register" = client-uploaded to the Supabase
+    bucket (the worker must NOT claim it — no local bytes — until
+    M4 wires bucket download); "upload" = bytes on local disk (the
+    worker may claim it). Stored in the job's result_summary so the
+    worker's claim filter can read it without a schema change."""
     user_id = user["id"]
 
     # Ownership: the storage path must live under the caller's own folder.
@@ -90,6 +98,9 @@ def register_document(
             "document_id": document["id"],
             "status": "queued",
             "idempotency_key": payload.idempotency_key,
+            # ADR-011: marks register-source jobs so the worker skips
+            # them (bucket bytes, not local disk) until M4.
+            "result_summary": {"source": source},
         }
     )
     log.info(
@@ -105,7 +116,7 @@ def register_document(
     return document, job, False
 
 
-def get_job(user: dict, job_id: str, jobs: JobRepository) -> dict:
+def get_job(user: dict, job_id: str, jobs: SqlAlchemyJobRepository) -> dict:
     job = jobs.find_by_id(job_id)
     if job is None or job.get("user_id") != user["id"]:
         # 404 for other users' jobs too — never leak existence.
@@ -113,7 +124,7 @@ def get_job(user: dict, job_id: str, jobs: JobRepository) -> dict:
     return job
 
 
-def retry_job(user: dict, job_id: str, jobs: JobRepository) -> dict:
+def retry_job(user: dict, job_id: str, jobs: SqlAlchemyJobRepository) -> dict:
     job = get_job(user, job_id, jobs)
     if job.get("status") not in RETRYABLE_STATUSES:
         raise ApiError(

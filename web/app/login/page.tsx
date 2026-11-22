@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -9,6 +10,7 @@ import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { createClient } from "@/lib/supabase/client";
 
 const loginSchema = z.object({
   email: z.string().trim().email("Please enter a valid email address."),
@@ -17,18 +19,40 @@ const loginSchema = z.object({
 
 type LoginValues = z.infer<typeof loginSchema>;
 
-export default function LoginPage() {
-  const [notConnected, setNotConnected] = useState(false);
+function LoginForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const next = searchParams.get("next");
+  const linkError = searchParams.get("error");
+  const [authError, setAuthError] = useState<string | null>(
+    linkError === "invalid_link"
+      ? "That confirmation or reset link is invalid or has expired. Request a new one below."
+      : linkError === "missing_code"
+        ? "The link was missing its confirmation code. Request a new one below."
+        : null,
+  );
+
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<LoginValues>({ resolver: zodResolver(loginSchema) });
 
-  const onSubmit = () => {
-    // Authentication lands in M3. Nothing is sent, no session is
-    // created, and no login is faked — the state below says so plainly.
-    setNotConnected(true);
+  const onSubmit = async (values: LoginValues) => {
+    setAuthError(null);
+    const supabase = createClient();
+    const { error } = await supabase.auth.signInWithPassword({
+      email: values.email,
+      password: values.password,
+    });
+    if (error) {
+      // Supabase's own message, shown as-is: "Invalid login
+      // credentials", "Email not confirmed", and so on.
+      setAuthError(error.message);
+      return;
+    }
+    router.push(next && next.startsWith("/") ? next : "/dashboard/profile");
+    router.refresh();
   };
 
   return (
@@ -38,12 +62,17 @@ export default function LoginPage() {
         <CardDescription>
           Enter your email and password to continue to your dashboard.
         </CardDescription>
-        {notConnected ? (
-          <Alert tone="warning" title="Authentication is not connected yet" className="mt-5">
-            This form is real and validated, but sign-in is not wired up yet
-            — no credentials were sent anywhere and no session was created.
-            Authentication (real email verification and login) arrives in
-            Milestone 3.
+        {authError ? (
+          <Alert tone="danger" title="Could not log you in" className="mt-5">
+            {authError}
+            {authError.toLowerCase().includes("not confirmed") ? (
+              <>
+                {" "}
+                Check your inbox for the confirmation email we sent when you
+                registered — your account is created but not active until you
+                confirm it.
+              </>
+            ) : null}
           </Alert>
         ) : null}
         <form onSubmit={handleSubmit(onSubmit)} noValidate className="mt-6 space-y-5">
@@ -67,15 +96,26 @@ export default function LoginPage() {
             Log in
           </Button>
         </form>
-        <div className="mt-5 flex items-center justify-between text-sm">
+        <p className="mt-5 text-center text-sm text-slate-600">
           <Link href="/forgot-password" className="font-medium text-brand-700 hover:underline">
-            Forgot password?
+            Forgot your password?
           </Link>
+        </p>
+        <p className="mt-3 text-center text-sm text-slate-600">
+          Don&apos;t have an account?{" "}
           <Link href="/register" className="font-medium text-brand-700 hover:underline">
-            Create an account
+            Create one — it&apos;s free
           </Link>
-        </div>
+        </p>
       </Card>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   );
 }

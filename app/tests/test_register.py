@@ -1,9 +1,11 @@
 # Register endpoint: validation, auth, ownership, idempotency.
+# ADR-011 (M3): register writes the engine DB — every test takes
+# the throwaway SQLite engine_db fixture.
 
 from app.tests.conftest import USER_A, USER_B, auth_headers, register_payload
 
 
-def test_register_success_creates_document_and_job(client):
+def test_register_success_creates_document_and_job(client, engine_db):
     res = client.post(
         "/api/v1/documents/register",
         json=register_payload(USER_A),
@@ -19,13 +21,13 @@ def test_register_success_creates_document_and_job(client):
     assert body["idempotent_replay"] is False
 
 
-def test_register_requires_auth(client):
+def test_register_requires_auth(client, engine_db):
     res = client.post("/api/v1/documents/register", json=register_payload(USER_A))
     assert res.status_code == 401
     assert res.json()["error"]["code"] == "unauthorized"
 
 
-def test_register_rejects_invalid_token(client):
+def test_register_rejects_invalid_token(client, engine_db):
     res = client.post(
         "/api/v1/documents/register",
         json=register_payload(USER_A),
@@ -35,7 +37,7 @@ def test_register_rejects_invalid_token(client):
     assert res.json()["error"]["code"] == "invalid_token"
 
 
-def test_register_validation_errors(client):
+def test_register_validation_errors(client, engine_db):
     h = auth_headers("token-user-a")
     # bad file type
     res = client.post(
@@ -68,7 +70,7 @@ def test_register_validation_errors(client):
     assert "traceback" not in res.text.lower()
 
 
-def test_register_ownership_other_users_folder_forbidden(client):
+def test_register_ownership_other_users_folder_forbidden(client, engine_db):
     res = client.post(
         "/api/v1/documents/register",
         json=register_payload(USER_B),  # storage path under USER_B
@@ -78,7 +80,7 @@ def test_register_ownership_other_users_folder_forbidden(client):
     assert res.json()["error"]["code"] == "forbidden"
 
 
-def test_register_idempotent_same_key_returns_same_job(client):
+def test_register_idempotent_same_key_returns_same_job(client, engine_db):
     h = auth_headers("token-user-a")
     first = client.post("/api/v1/documents/register", json=register_payload(USER_A), headers=h)
     assert first.status_code == 201
@@ -89,7 +91,7 @@ def test_register_idempotent_same_key_returns_same_job(client):
     assert second.json()["document"]["id"] == first.json()["document"]["id"]
 
 
-def test_register_idempotent_same_path_no_key_returns_same_job(client):
+def test_register_idempotent_same_path_no_key_returns_same_job(client, engine_db):
     h = auth_headers("token-user-a")
     payload = register_payload(USER_A)
     del payload["idempotency_key"]
@@ -100,7 +102,7 @@ def test_register_idempotent_same_path_no_key_returns_same_job(client):
     assert second.json()["job"]["id"] == first.json()["job"]["id"]
 
 
-def test_register_same_key_different_user_is_not_a_replay(client):
+def test_register_same_key_different_user_is_not_a_replay(client, engine_db):
     # User A registers with key-1; user B with the same key gets their
     # own job (idempotency is scoped per user).
     res_a = client.post(

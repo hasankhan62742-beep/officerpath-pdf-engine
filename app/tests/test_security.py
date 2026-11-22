@@ -7,7 +7,7 @@ import os
 from app.tests.conftest import USER_A, auth_headers, register_payload
 
 
-def test_no_secret_leakage_any_endpoint(client, monkeypatch):
+def test_no_secret_leakage_any_endpoint(client, engine_db, monkeypatch):
     # Plant recognisable fake secret values in the environment and
     # assert none of them ever appears in any response body.
     monkeypatch.setenv("SUPABASE_SERVICE_ROLE_KEY", "SECRET-ROLE-VALUE-12345")
@@ -31,7 +31,7 @@ def test_no_secret_leakage_any_endpoint(client, monkeypatch):
         assert "sbp_" not in res.text
 
 
-def test_error_bodies_are_structured_and_generic(client):
+def test_error_bodies_are_structured_and_generic(client, engine_db):
     res = client.get("/api/v1/jobs/does-not-exist", headers=auth_headers("token-user-a"))
     assert res.status_code == 404
     body = res.json()

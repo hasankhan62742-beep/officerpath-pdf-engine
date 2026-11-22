@@ -7,6 +7,17 @@ go-ahead for migration 015 is given separately (the ADR approval on
 2026-11-21 covered ADR-001 + ADR-002 and starting M1; migration 015
 live apply still needs its own explicit go-ahead).
 
+**M3 CORRECTION (2026-11-22, live-verified): the TABLES from 015
+(`public.documents`, `public.jobs`) already exist live — the
+"not applied" status above is stale for the tables. What is
+still missing is the `pdf-documents` BUCKET (404 `NoSuchBucket`
+on 2026-11-22). Do NOT re-run this file to create the tables
+(they exist); apply migration **016**
+(`supabase/migrations/016_pdf_documents_bucket.sql`) instead,
+which creates only the bucket + its storage policies. The rest
+of this document is kept as the record of how the tables got
+there.
+
 ## What 015 does
 
 Creates two NEW tables (`public.documents`, `public.jobs`) with RLS,

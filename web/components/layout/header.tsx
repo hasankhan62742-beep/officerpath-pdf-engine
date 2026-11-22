@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { NAV_LINKS, SITE_NAME } from "@/lib/site";
-import { Button } from "@/components/ui/button";
+import { AuthSection } from "@/components/layout/auth-section";
 import { cn } from "@/lib/utils";
 
 function Logo() {
@@ -55,12 +55,7 @@ export function Header() {
           ))}
         </nav>
         <div className="hidden items-center gap-2 lg:flex">
-          <Button href="/login" variant="ghost">
-            Log in
-          </Button>
-          <Button href="/register" size="md">
-            Start Your Preparation
-          </Button>
+          <AuthSection variant="desktop" />
         </div>
         <button
           type="button"
@@ -101,12 +96,7 @@ export function Header() {
             ))}
           </ul>
           <div className="mt-3 flex flex-col gap-2">
-            <Button href="/login" variant="secondary" className="w-full">
-              Log in
-            </Button>
-            <Button href="/register" className="w-full">
-              Start Your Preparation
-            </Button>
+            <AuthSection variant="mobile" />
           </div>
         </nav>
       ) : null}

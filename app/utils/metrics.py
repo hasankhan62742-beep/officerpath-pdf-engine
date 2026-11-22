@@ -27,7 +27,7 @@ def _key(name: str, labels: dict[str, str] | None) -> tuple[str, tuple[tuple[str
 
 
 def inc(name: str, labels: dict[str, str] | None = None, amount: int = 1) -> None:
-    """Increment a counter (e.g. inc("jobs_total", {"status": "completed"}))."""
+    """Increment a counter (e.g. inc("jobs_total", {"status": "done"}))."""
     with _lock:
         _counters[_key(name, labels)] += amount
 

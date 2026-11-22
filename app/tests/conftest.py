@@ -1,9 +1,12 @@
 # OfficerPath AI — PDF Engine (Phase 1A) — tests
 # In-memory fake of the small Supabase surface the app uses:
-# client.table(name).select/insert/update .eq(...).limit(n).execute()
-# and client.auth.get_user(token). No network, no live Supabase.
+# client.auth.get_user(token). No network, no live Supabase.
+#
+# ADR-011 (M3): the engine DB is the single access path for
+# documents + jobs, so the fake no longer emulates PostgREST
+# tables — tests that need documents/jobs use the `engine_db`
+# fixture (throwaway SQLite) instead.
 
-import copy
 import os
 
 # Dummy Supabase config for tests — set BEFORE importing the app, so
@@ -15,17 +18,20 @@ os.environ.setdefault("SUPABASE_SERVICE_ROLE_KEY", "test-service-role-key")
 
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
+import app.api.v1.async_jobs as async_jobs_api
+import app.api.v1.me as me_api
+import app.api.v1.review as review_api
+import app.api.v1.routes as routes_api
+from app.config import settings
+from app.db.models import Base
 from app.main import app
 from app.security.rate_limit import rate_limiter
 
 USER_A = "11111111-1111-1111-1111-111111111111"
 USER_B = "22222222-2222-2222-2222-222222222222"
-
-
-class _FakeResponse:
-    def __init__(self, data):
-        self.data = data
 
 
 class _FakeUser:
@@ -51,67 +57,63 @@ class _FakeAuth:
 
 
 class _FakeTable:
-    def __init__(self, store):
-        self._store = store  # list of row dicts
-        self._filters = []
-        self._limit = None
-        self._op = None
-        self._payload = None
+    """Health-probe stub only (ADR-011): the /health endpoint probes
+    the Supabase client with
+    ``client.table("documents").select("id").limit(1).execute()``.
+    This stub answers that chain with empty rows so the probe can
+    verify the client object is usable. It is NOT a PostgREST
+    emulation — documents/jobs live in the engine DB now, and no
+    test may use this stub as a data store (use engine_db)."""
 
     def select(self, *args, **kwargs):
-        self._op = "select"
-        return self
-
-    def insert(self, payload):
-        self._op = "insert"
-        self._payload = payload
-        return self
-
-    def update(self, payload):
-        self._op = "update"
-        self._payload = payload
-        return self
-
-    def eq(self, column, value):
-        self._filters.append((column, value))
         return self
 
     def limit(self, n):
-        self._limit = n
         return self
 
-    def _matches(self, row):
-        return all(row.get(col) == val for col, val in self._filters)
-
     def execute(self):
-        if self._op == "insert":
-            row = copy.deepcopy(self._payload)
-            self._store.append(row)
-            return _FakeResponse([copy.deepcopy(row)])
-        rows = [r for r in self._store if self._matches(r)]
-        if self._op == "update":
-            for row in rows:
-                row.update(copy.deepcopy(self._payload))
-            return _FakeResponse([copy.deepcopy(r) for r in rows])
-        if self._limit is not None:
-            rows = rows[: self._limit]
-        return _FakeResponse([copy.deepcopy(r) for r in rows])
+        return _FakeResponse([])
+
+
+class _FakeResponse:
+    def __init__(self, data):
+        self.data = data
 
 
 class FakeSupabaseClient:
-    """Minimal fake: tables 'documents' and 'jobs', plus auth tokens."""
+    """Minimal fake: auth tokens + the health-probe table stub
+    (ADR-011 — the engine DB owns documents/jobs now; use the
+    engine_db fixture for those)."""
 
     def __init__(self):
-        self.tables = {"documents": [], "jobs": []}
         self.auth = _FakeAuth({"token-user-a": USER_A, "token-user-b": USER_B})
 
     def table(self, name):
-        return _FakeTable(self.tables[name])
+        return _FakeTable()
 
 
 @pytest.fixture()
 def fake_client():
     return FakeSupabaseClient()
+
+
+@pytest.fixture()
+def engine_db(tmp_path, monkeypatch):
+    """Throwaway SQLite engine DB (all tables) + the API modules'
+    get_session patched to it, so register/upload/jobs/profile
+    endpoints run against the same store the async-jobs path uses
+    (ADR-011 unification proof lives in test_job_store_unification).
+    Yields the session factory for direct row assertions."""
+    engine = create_engine(f"sqlite:///{tmp_path}/engine.db")
+    Base.metadata.create_all(engine)
+    factory = sessionmaker(bind=engine)
+    monkeypatch.setattr(routes_api, "get_session", lambda: factory())
+    monkeypatch.setattr(me_api, "get_session", lambda: factory())
+    monkeypatch.setattr(async_jobs_api, "get_session", lambda: factory())
+    monkeypatch.setattr(review_api, "get_session", lambda: factory())
+    monkeypatch.setattr(settings, "storage_root", str(tmp_path / "storage"))
+    yield factory
+    engine.dispose()
 
 
 @pytest.fixture()

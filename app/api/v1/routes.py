@@ -11,12 +11,17 @@
 # per-file result for every file — including rejections — so one bad
 # file never blocks the batch and no file is silently skipped.
 
+from contextlib import contextmanager
+
 from fastapi import APIRouter, Depends, File, Request, UploadFile
 from fastapi.responses import JSONResponse
 
 from app.config import settings
 from app.core.errors import ApiError
-from app.database.repositories import DocumentRepository, JobRepository
+from app.database.sqlalchemy_repositories import (
+    SqlAlchemyDocumentRepository,
+    SqlAlchemyJobRepository,
+)
 from app.db.session import get_session
 from app.pipeline.ingestion.service import (
     NullStageRecorder,
@@ -35,10 +40,7 @@ from app.schemas.documents import (
     UploadResponse,
     ValidationIssueResponse,
 )
-from app.security.dependencies import (
-    get_current_user,
-    get_service_client_from_state,
-)
+from app.security.dependencies import get_current_user
 from app.security.rate_limit import rate_limiter
 from app.services import jobs as job_service
 from app.storage.base import StorageBackend
@@ -104,22 +106,26 @@ def _upload_response(outcome) -> UploadResponse:
     )
 
 
-def _repos(request: Request) -> tuple[DocumentRepository, JobRepository]:
-    # Server-side writes use the service-role client when available
-    # (it bypasses RLS for job bookkeeping); the anon client is the
-    # fallback so the API still works before the service key is set.
-    client = get_service_client_from_state(request)
-    if client is None:
-        from app.security.dependencies import get_anon_client_from_state
-
-        client = get_anon_client_from_state(request)
-    if client is None:
+@contextmanager
+def _repositories():
+    """Engine-DB repositories for one request (ADR-011). The engine
+    DB is the single access path for documents + jobs; the session
+    is opened here and closed by the caller. 503 when DATABASE_URL
+    is unset — the PostgREST-only degraded mode is retired."""
+    session = get_session()
+    if session is None:
         raise ApiError(
             status_code=503,
             code="database_unavailable",
             message="The database is not configured on this server.",
         )
-    return DocumentRepository(client), JobRepository(client)
+    try:
+        yield (
+            SqlAlchemyDocumentRepository(session),
+            SqlAlchemyJobRepository(session),
+        )
+    finally:
+        session.close()
 
 
 @router.post(
@@ -137,8 +143,8 @@ async def register_document(
         settings.rate_limit_register_per_minute,
         settings.rate_limit_window_seconds,
     )
-    documents, jobs = _repos(request)
-    document, job, replay = job_service.register_document(user, payload, documents, jobs)
+    with _repositories() as (documents, jobs):
+        document, job, replay = job_service.register_document(user, payload, documents, jobs)
     response = RegisterResponse(
         document=DocumentResponse(**document),
         job=JobResponse(**job),
@@ -161,20 +167,20 @@ async def upload_document(
         settings.rate_limit_window_seconds,
     )
     data = await file.read()
-    documents, jobs = _repos(request)
     recorder = _stage_recorder()
     try:
-        outcome = ingest_file(
-            user=user,
-            filename=file.filename or "upload",
-            data=data,
-            settings=settings,
-            storage=_storage_backend(),
-            documents=documents,
-            jobs=jobs,
-            recorder=recorder,
-            correlation_id=getattr(request.state, "request_id", None),
-        )
+        with _repositories() as (documents, jobs):
+            outcome = ingest_file(
+                user=user,
+                filename=file.filename or "upload",
+                data=data,
+                settings=settings,
+                storage=_storage_backend(),
+                documents=documents,
+                jobs=jobs,
+                recorder=recorder,
+                correlation_id=getattr(request.state, "request_id", None),
+            )
     finally:
         _close_recorder(recorder)
     if outcome.status == "rejected":
@@ -204,22 +210,22 @@ async def upload_batch(
         settings.rate_limit_register_per_minute,
         settings.rate_limit_window_seconds,
     )
-    documents, jobs = _repos(request)
     recorder = _stage_recorder()
     try:
-        payloads: list[tuple[str, bytes]] = []
-        for upload in files:
-            payloads.append((upload.filename or "upload", await upload.read()))
-        outcomes = ingest_batch(
-            user=user,
-            files=payloads,
-            settings=settings,
-            storage=_storage_backend(),
-            documents=documents,
-            jobs=jobs,
-            recorder=recorder,
-            correlation_id=getattr(request.state, "request_id", None),
-        )
+        with _repositories() as (documents, jobs):
+            payloads: list[tuple[str, bytes]] = []
+            for upload in files:
+                payloads.append((upload.filename or "upload", await upload.read()))
+            outcomes = ingest_batch(
+                user=user,
+                files=payloads,
+                settings=settings,
+                storage=_storage_backend(),
+                documents=documents,
+                jobs=jobs,
+                recorder=recorder,
+                correlation_id=getattr(request.state, "request_id", None),
+            )
     finally:
         _close_recorder(recorder)
     results = [_upload_response(o) for o in outcomes]
@@ -237,8 +243,8 @@ async def get_job(
     job_id: str,
     user: dict = Depends(get_current_user),
 ) -> JobResponse:
-    _, jobs = _repos(request)
-    job = job_service.get_job(user, job_id, jobs)
+    with _repositories() as (_, jobs):
+        job = job_service.get_job(user, job_id, jobs)
     return JobResponse(**job)
 
 
@@ -253,6 +259,6 @@ async def retry_job(
         settings.rate_limit_retry_per_minute,
         settings.rate_limit_window_seconds,
     )
-    _, jobs = _repos(request)
-    job = job_service.retry_job(user, job_id, jobs)
+    with _repositories() as (_, jobs):
+        job = job_service.retry_job(user, job_id, jobs)
     return JobResponse(**job)

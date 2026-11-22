@@ -26,10 +26,12 @@ the code win.
   `app/config.py:36-40`). In-memory, per process; resets on restart.
 - **Every response** carries an `X-Request-Id` header
   (`app/main.py:83-87`).
-- **Job-status vocabulary split — read first:** the M1 register/jobs
-  path uses `done`; the async-jobs path uses `completed`
-  (see `01-repository-findings.md` §2.2). The frontend must map both
-  until Phase 2 unifies them (M3, see `03-database-extension-plan.md` §5).
+- **Job-status vocabulary — RESOLVED in M3 (ADR-011):** the split
+  is gone. The engine DB is the single access path for documents +
+  jobs and the terminal status is `done` everywhere (the live 015
+  check constraint rejects `completed`). `GET /api/v1/jobs/{id}`
+  and `GET /api/v1/async-jobs/{id}` read the same row. See
+  `docs/adr/ADR-011-dual-job-store-resolution.md`.
 
 ## 1. Operational endpoints (no auth)
 
@@ -43,10 +45,10 @@ the code win.
 
 | Method + path | Request | Response | Consumed by |
 |---|---|---|---|
-| `POST /api/v1/documents/register` → 201 (200 on idempotent replay) | JSON: `title`, `storage_path` (Supabase `pdf-documents` path), `file_size_bytes`, `page_count`, optional `idempotency_key` (`app/schemas/documents.py:34-51`) | `RegisterResponse`: `document` + `job` + `idempotent_replay: bool` | Upload flow alternative: client uploads the file to the `pdf-documents` bucket directly (signed URL via `app/integrations/supabase_storage.py` — defined but unused; M4 must wire or replace it), then registers metadata. Idempotent on same key or same storage path + user. |
+| `POST /api/v1/documents/register` → 201 (200 on idempotent replay) | JSON: `title`, `storage_path` (Supabase `pdf-documents` path), `file_size_bytes`, `page_count`, optional `idempotency_key` (`app/schemas/documents.py:34-51`) | `RegisterResponse`: `document` + `job` + `idempotent_replay: bool` | Upload flow alternative: client uploads the file to the `pdf-documents` bucket directly (signed URL via `app/integrations/supabase_storage.py` — defined but unused; M4 must wire or replace it), then registers metadata. Idempotent on same key or same storage path + user. **M3 (ADR-011): writes the engine DB now; the job is register-source and is not claimed by the worker until M4 wires bucket download.** |
 | `POST /api/v1/documents/upload` → 200 | Multipart `file` | `UploadResponse`: document + job + per-page classification; rejected files → 422 with machine code (`magic_bytes_mismatch`, `pdf_encrypted`, `file_too_large`) | **Primary upload path (M4).** Validates magic bytes, rejects encrypted PDFs, SHA-256 dedup per user (`idempotent_replay: true` on repeat). Limits: 100 MB/file, 100 pages/job, 5 MB/page image, images ≤ 25 MP. |
 | `POST /api/v1/documents/upload/batch` → 200 | Multipart, up to 20 files | `BatchUploadResponse`: per-file stored / replay / rejected with reasons; one bad file never blocks the batch | Multi-upload (M4). |
-| `GET /api/v1/jobs/{job_id}` → 200 | — | `JobResponse`: job status + `result_summary` (M1 vocabulary: `queued/uploading/processing/done/failed/cancelled`) | Job status polling for the register/upload path. **Note:** reads Supabase, not the engine DB — it cannot see async-jobs rows. |
+| `GET /api/v1/jobs/{job_id}` → 200 | — | `JobResponse`: job status + `result_summary` (vocabulary: `queued/uploading/processing/done/failed/cancelled`) | Job status polling for the register/upload path. **M3 (ADR-011): reads the engine DB — the same row `GET /api/v1/async-jobs/{id}` reads.** |
 | `POST /api/v1/jobs/{job_id}/retry` → 200 | — | Re-queues a `failed`/`cancelled` job (`retry_count` +1); other states → 409. Rate-limited 5/min. | Retry from the document list (M4/M5). |
 
 ## 3. Review — synchronous parse (M6/M7, engine-DB path)
@@ -87,7 +89,7 @@ stage boundary (`cancelled`, never `failed`).
 | Method + path | Request | Response | Consumed by |
 |---|---|---|---|
 | `POST /api/v1/async-jobs/parse` → 202 | Multipart `file` (PDF) | `AsyncJobCreatedResponse`: `{job_id, document_id, status: "queued", filename, page_count}` | **The main upload path for scans (M4).** Returns immediately; the frontend polls `GET` below. Worker runs in-process when `WORKER_ENABLED=true` (Render) or as `python -m app.workers.runner` (VPS). |
-| `GET /api/v1/async-jobs/{job_id}` → 200 | — | `AsyncJobStatusResponse`: `job_id`, `document_id`, `status` (`queued` / `processing` / `completed` / `failed` / `cancelled`), `retry_count`, `error`, `result_summary` (`{questions, answered, ...}` when completed), `created_at`, `started_at`, `completed_at`, `stages[]` (stage, status, detail with per-stage seconds, created_at). | Polling (M4/M5). Poll interval: 5 s while `queued`/`processing` (matches `worker_poll_seconds`); back off to 15 s after 2 min; stop on terminal state. **No webhook/push exists** — polling is the only mechanism. |
+| `GET /api/v1/async-jobs/{job_id}` → 200 | — | `AsyncJobStatusResponse`: `job_id`, `document_id`, `status` (`queued` / `processing` / `done` / `failed` / `cancelled`), `retry_count`, `error`, `result_summary` (`{questions, answered, ...}` when done), `created_at`, `started_at`, `completed_at`, `stages[]` (stage, status, detail with per-stage seconds, created_at). | Polling (M4/M5). Poll interval: 5 s while `queued`/`processing` (matches `worker_poll_seconds`); back off to 15 s after 2 min; stop on terminal state. **No webhook/push exists** — polling is the only mechanism. **M3 (ADR-011): reads the same row `GET /api/v1/jobs/{id}` reads.** |
 | `POST /api/v1/async-jobs/{job_id}/cancel` → 200 | — | Cancels queued/processing job → `cancelled`. Second cancel → 409. | Cancel button on a processing document (M4). |
 | `POST /api/v1/async-jobs/{job_id}/retry` → 200 | — | Re-queues `failed`/`cancelled` (`retry_count` +1); other states → 409. | Retry button (M4/M5). |
 
@@ -99,7 +101,7 @@ they already exist.
 
 | GAP | Needed for | Milestone | Notes |
 |---|---|---|---|
-| **GAP-1: student profile endpoints** (`GET/PATCH /api/v1/me`, profile fields: full name, phone, preferred exam, education level) | M3 auth/profile, M8 dashboard | M3 | Supabase Auth owns identity (email/password); the profile is engine-DB data. No `profiles` table exists in the engine schema — new table, see doc 03. Must not duplicate or write the Flutter app's Supabase `profiles` table. |
+| **GAP-1: student profile endpoints** (`GET/POST/PATCH /api/v1/me`, profile fields: full name, phone, preferred exam, education level) | M3 auth/profile, M8 dashboard | M3 | **DONE in M3:** `student_profiles` table (Alembic 0003) + `GET/POST/PATCH /api/v1/me` (JWT user id only, per-user 404s). Supabase Auth owns identity (email/password); the profile is engine-DB data. Does not duplicate or write the Flutter app's Supabase `profiles` table. |
 | **GAP-2: document listing for a student** (`GET /api/v1/documents` — paginated, owner-only, with status/counts) | M4 dashboard + My Documents | M4 | No list endpoint exists. `register`/`upload` return single documents only. Must read the unified job/document view (see §6). |
 | **GAP-3: question-bank endpoints** (`GET /api/v1/questions` — search/filter by subject/topic/source/status/bookmark; `GET /api/v1/questions/{id}`) | M5 question bank | M5 | Extracted questions exist in the engine DB but have no read API except via parse response / review list / report. |
 | **GAP-4: subjects/topics endpoints** (CRUD-lite: list, create, assign to question) | M5 | M5 | No subject/topic model exists anywhere. New tables, see doc 03. |
@@ -109,7 +111,7 @@ they already exist.
 | **GAP-8: bookmarks + mistake notebook endpoints** (`POST/DELETE /api/v1/questions/{id}/bookmark`, `GET /api/v1/mistakes`, notes) | M8 | M8 | Private per student. |
 | **GAP-9: notifications endpoints** (`GET /api/v1/notifications`, mark-read) | M9 (in-app only) | M9 | In-app only in Phase 2. Email only when a provider is configured and confirms delivery. |
 | **GAP-10: admin endpoints** (`GET /api/v1/admin/users`, `/admin/documents`, `/admin/jobs`, `/admin/questions`) | M9 admin foundation | M9 | Backend-enforced admin role. **No admin role exists anywhere today** — no `is_admin` in the engine; the Flutter app's admin concept lives in its own Supabase tables. New design required (doc 05). |
-| **GAP-11: unified job/document view** (one endpoint that resolves the dual-store split in doc 01 §2.2) | M4 (blocks document listing) | M3 (design) / M4 (build) | The highest-risk integration item. Options: (a) make the engine the single writer for jobs and treat Supabase rows as the register record; (b) mirror rows. Decided in M3; see doc 03 §5. |
+| **GAP-11: unified job/document view** (one endpoint that resolves the dual-store split in doc 01 §2.2) | M4 (blocks document listing) | M3 (design) / M4 (build) | **RESOLVED in M3 (ADR-011):** the engine DB is the single access path; `GET /api/v1/jobs/{id}` and `GET /api/v1/async-jobs/{id}` read the same row; vocabulary unified on `done`. No new endpoint was needed — the unified view IS the single store. M4 builds the document listing on top of it. |
 | **GAP-12: per-question image/asset serving** (signed URL for `question_assets` crops) | M5 (questions with figures) | M5 | `question_assets` rows exist; no endpoint serves them. Must go through signed, owner-checked URLs — never public. |
 
 ## 6. Endpoints the frontend must NOT use

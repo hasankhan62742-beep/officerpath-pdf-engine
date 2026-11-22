@@ -9,11 +9,13 @@
 #   worker process is still possible — `python -m app.workers.runner`
 #   — for the VPS stage, where it runs beside the API.
 # - The worker processes SQLAlchemy jobs (the async-jobs API +
-#   sync-parse jobs). M1 Supabase-repository jobs are a different
-#   store and are NOT processed here; the split is documented in
-#   ADR-009. A sync-parse job has no stored bytes
-#   (storage_path="inline-parse") and fails fast with
-#   "no_stored_bytes" if ever queued.
+#   sync-parse jobs, and — since ADR-011, M3 — register/upload
+#   jobs too, now that all of them live in the engine DB). A
+#   register-source job is never claimed: its bytes live in the
+#   Supabase bucket, not on local disk, so it is skipped by
+#   claim_next_job until M4 wires bucket download. A sync-parse
+#   job has no stored bytes (storage_path="inline-parse") and
+#   fails fast with "no_stored_bytes" if ever queued.
 # - Stages: the parse path calls the worker's on_stage hook at
 #   every phase boundary (classify -> render -> ocr -> layout ->
 #   extract -> answers -> matching -> report). Each hook records
@@ -41,8 +43,9 @@ from __future__ import annotations
 import time
 import uuid
 from datetime import UTC, datetime
+from typing import Any
 
-from sqlalchemy import select, update
+from sqlalchemy import func, select, update
 from sqlalchemy.orm import Session
 
 from app.config import Settings
@@ -94,10 +97,33 @@ def claim_next_job(session: Session) -> db.Job | None:
     """Claim the oldest queued job atomically: UPDATE ... WHERE
     id = (oldest queued) AND status='queued'. The status guard
     makes the claim safe if two workers race — the loser updates
-    zero rows and gets None. Returns the claimed job, or None."""
+    zero rows and gets None. Returns the claimed job, or None.
+
+    ADR-011: register-source jobs are SKIPPED — their bytes live
+    in the Supabase bucket, not on local disk, so claiming one
+    would fail it with "no stored bytes". The source marker lives
+    in the job's result_summary ({"source": "register"}); the
+    predicate is null-safe (coalesce to '') so a missing marker —
+    async submits, and failed jobs retried with a summary that
+    carries no source — stays claimable. The same predicate guards
+    the UPDATE, so a concurrent change of the marker cannot
+    smuggle a register job into the claim.
+
+    NOTE (measured): `result_summary["source"].is_(None)` does NOT
+    work here — SQLAlchemy renders it as
+    `JSON_QUOTE(JSON_EXTRACT(...)) IS NULL`, and JSON_QUOTE turns
+    SQL NULL into JSON null, so the check is false even for NULL
+    summaries. The coalesce form below is the tested shape (see
+    test_job_store_unification)."""
+
+    def _claimable() -> Any:
+        source = db.Job.result_summary["source"].as_string()
+        return func.coalesce(source, "") != "register"
+
     oldest_queued = (
         select(db.Job.id)
         .where(db.Job.status == "queued")
+        .where(_claimable())
         .order_by(db.Job.created_at)
         .limit(1)
         .scalar_subquery()
@@ -106,6 +132,7 @@ def claim_next_job(session: Session) -> db.Job | None:
     result = session.execute(
         update(db.Job)
         .where(db.Job.id == oldest_queued, db.Job.status == "queued")
+        .where(_claimable())
         .values(status="processing", started_at=now)
         .returning(db.Job.id)
     )
@@ -219,7 +246,9 @@ def process_job(
             matched=matched,
         )
         total_seconds = round(time.monotonic() - started, 1)
-        job.status = "completed"
+        # ADR-011: terminal job status is "done" (the live 015 check
+        # constraint rejects "completed").
+        job.status = "done"
         job.completed_at = _utcnow()
         job.result_summary = {
             "questions": matched.counts["questions"],
@@ -238,11 +267,11 @@ def process_job(
             status="done",
             detail={"seconds": total_seconds},
         )
-        metrics.inc("jobs_total", {"status": "completed"})
+        metrics.inc("jobs_total", {"status": "done"})
         session.commit()
         summary.update(
             {
-                "status": "completed",
+                "status": "done",
                 "seconds": total_seconds,
                 "questions": matched.counts["questions"],
                 "answered": matched.answered,

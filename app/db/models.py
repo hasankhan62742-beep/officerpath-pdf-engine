@@ -1,11 +1,15 @@
 # OfficerPath AI — PDF Engine (Phase 1, M1)
 # SQLAlchemy 2.x models for the prompt §14 schema.
 #
-# Ownership split (ADR-003):
+# Ownership split (ADR-003, ADR-011):
 # - `documents` + `jobs` are created by Supabase migration 015
 #   (supabase/migrations/015_documents_jobs.sql). The models below
 #   MIRROR those two tables (read/write through SQLAlchemy where the
 #   engine needs joins) but Alembic revision 0001 does NOT create them.
+#   Since ADR-011 (Phase 2 M3) the engine is the SINGLE access path
+#   for both tables — the PostgREST repositories are deleted; the
+#   Supabase tables stay live and untouched, and the same Postgres
+#   database is used through DATABASE_URL.
 # - Every other table here IS created by Alembic 0001. Its foreign keys
 #   reference documents.id / jobs.id, so apply 015 BEFORE Alembic 0001.
 # - Original content and normalized content are stored separately
@@ -127,6 +131,39 @@ class Job(Base):
         Index("ix_jobs_user_created", "user_id", "created_at"),
         Index("ix_jobs_active", "status"),
     )
+
+
+# ---------------------------------------------------------------------------
+# Tables created by Alembic 0003 (Phase 2, M3 — student profiles)
+# ---------------------------------------------------------------------------
+
+
+class StudentProfile(Base):
+    """One profile per Supabase Auth user (web student).
+
+    Lives in the ENGINE DB (doc 03 §2.1), not in Supabase
+    migrations: the engine owns it and migrates it with Alembic.
+    Do NOT confuse it with the Flutter app's Supabase `profiles`
+    table (plan/premium/admin — the engine never writes those).
+
+    `user_id` is the Supabase Auth user id. A foreign key to
+    auth.users is NOT enforceable from the engine DB (different
+    connection path); uniqueness + ownership are enforced in code
+    (`app/services/profiles.py` — one row per user, JWT user id
+    only, never a client-supplied user_id)."""
+
+    __tablename__ = "student_profiles"
+
+    id: Mapped[uuid.UUID] = _uuid_pk()
+    user_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False, unique=True)
+    full_name: Mapped[str] = mapped_column(Text, nullable=False)
+    phone: Mapped[str | None] = mapped_column(Text, nullable=True)
+    preferred_exam: Mapped[str | None] = mapped_column(Text, nullable=True)
+    education_level: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = _created_at()
+    updated_at: Mapped[datetime] = _updated_at()
+
+    __table_args__ = (Index("ix_student_profiles_user_created", "user_id", "created_at"),)
 
 
 # ---------------------------------------------------------------------------

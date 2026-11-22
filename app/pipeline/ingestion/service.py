@@ -23,7 +23,10 @@ from typing import Any, Protocol
 from sqlalchemy.orm import Session
 
 from app.config import Settings
-from app.database.repositories import DocumentRepository, JobRepository
+from app.database.sqlalchemy_repositories import (
+    SqlAlchemyDocumentRepository,
+    SqlAlchemyJobRepository,
+)
 from app.db.models import DocumentPage, ProcessingError, ProcessingStage
 from app.db.models import OCRBlock as OCRBlockRow
 from app.pipeline.ingestion.classifier import PageClassification, classify_pages
@@ -339,8 +342,8 @@ def ingest_file(
     data: bytes,
     settings: Settings,
     storage: StorageBackend,
-    documents: DocumentRepository,
-    jobs: JobRepository,
+    documents: SqlAlchemyDocumentRepository,
+    jobs: SqlAlchemyJobRepository,
     recorder: StageRecorder,
     correlation_id: str | None = None,
 ) -> IngestionOutcome:
@@ -421,7 +424,12 @@ def ingest_file(
             "warnings": [w.code for w in report.warnings],
         },
     )
-    document, job, _replay = job_service.register_document(user, payload, documents, jobs)
+    # ADR-011: upload bytes live on local disk, so the worker may
+    # claim this job (unlike register-source jobs, whose bytes are in
+    # the bucket until M4 wires bucket download).
+    document, job, _replay = job_service.register_document(
+        user, payload, documents, jobs, source="upload"
+    )
     document_id = uuid.UUID(document["id"])
     job_id = uuid.UUID(job["id"])
     recorder.record(
@@ -470,8 +478,8 @@ def ingest_batch(
     files: list[tuple[str, bytes]],
     settings: Settings,
     storage: StorageBackend,
-    documents: DocumentRepository,
-    jobs: JobRepository,
+    documents: SqlAlchemyDocumentRepository,
+    jobs: SqlAlchemyJobRepository,
     recorder: StageRecorder,
     correlation_id: str | None = None,
 ) -> list[IngestionOutcome]:

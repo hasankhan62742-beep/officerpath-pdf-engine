@@ -12,11 +12,13 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.api import health as health_api
 from app.api import metrics as metrics_api
 from app.api.v1 import async_jobs as async_jobs_routes
+from app.api.v1 import me as me_routes
 from app.api.v1 import review as review_routes
 from app.api.v1 import routes as v1_routes
 from app.config import settings
@@ -177,3 +179,18 @@ app.include_router(metrics_api.router)
 app.include_router(v1_routes.router)
 app.include_router(review_routes.router)
 app.include_router(async_jobs_routes.router)
+app.include_router(me_routes.router)
+
+# CORS (M3, ADR-011): the browser frontend calls this API. Origins
+# come from CORS_ALLOWED_ORIGINS (dev default http://localhost:3000);
+# credentials are allowed only with an explicit origin list — never
+# "*". Added after the routers so the request-id / size-limit
+# middlewares still run on cross-origin requests; preflight OPTIONS
+# is answered here before any route reads a body.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[o.strip() for o in settings.cors_allowed_origins.split(",") if o.strip()],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type"],
+)

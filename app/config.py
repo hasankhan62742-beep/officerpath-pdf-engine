@@ -39,12 +39,22 @@ class Settings(BaseSettings):
 
     # --- M1: engine-owned database (SQLAlchemy + Alembic, ADR-003) ---
     # DATABASE_URL is the SQLAlchemy URL for the SAME Postgres database
-    # that Supabase hosts (e.g. postgresql+psycopg://...). It is None by
-    # default: the engine runs without it (PostgREST register/jobs flow
-    # still works), and stage history is then recorded in-memory only
-    # (NullStageRecorder). Alembic migrations need it set. NEVER put the
-    # Supabase Postgres password in code; set it as an env var / secret.
+    # that Supabase hosts (e.g. postgresql+psycopg://...). Since ADR-011
+    # (Phase 2 M3) it is REQUIRED for the document/job/profile
+    # endpoints — the engine is the single access path for documents
+    # + jobs, and the PostgREST-only degraded mode is retired. Without
+    # it those endpoints answer 503 database_unavailable; /health,
+    # /version and /metrics still serve. NEVER put the Supabase
+    # Postgres password in code; set it as an env var / secret.
     database_url: str | None = None
+
+    # --- M3: CORS (ADR-011) ---
+    # Browser origins allowed to call this API. Comma-separated list;
+    # dev default is the Next.js frontend. Never "*" with
+    # credentials — allow_credentials=True only ever pairs with an
+    # explicit origin list. Production sets this to the deployed
+    # frontend domain (see docs/phase2/06-deployment-plan.md).
+    cors_allowed_origins: str = "http://localhost:3000"
 
     # --- M1: storage backend (abstraction; local disk first) ---
     # "local" only for now. S3-compatible backends are added in later

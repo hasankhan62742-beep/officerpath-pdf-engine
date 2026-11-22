@@ -218,11 +218,16 @@ in M3, not decided unilaterally here):
   (violates the 015 check constraint), and letting the frontend talk
   to two job endpoints and reconcile them in the browser.
 
-Whichever option M3 picks, the migration that implements it gets its
-own ADR (ADR-011 or later) and its own Alembic revision with
-upgrade + downgrade. The `JobStatus` enum
-(`app/schemas/documents.py:25-31`) and the 015 check constraint must
-be changed together, never one without the other.
+**M3 DECISION (2026-11-22, ADR-011): Option A, full form — the
+engine DB (SQLAlchemy) is the single access path for documents +
+jobs; the PostgREST repositories are deleted; the vocabulary is
+unified on `done` (the live 015 check constraint rejects
+`completed`).** The `JobStatus` enum and the 015 check constraint
+now agree on `done` with no constraint change needed. Migration
+016 (written, not applied) creates only the missing
+`pdf-documents` bucket. No Alembic revision was needed for the
+job tables themselves (they are 015-owned mirrors); Alembic 0003
+in M3 creates `student_profiles` only.
 
 ## 6. Migration strategy
 

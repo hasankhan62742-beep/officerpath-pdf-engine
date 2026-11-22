@@ -26,6 +26,11 @@ class JobStatus(str, Enum):
     queued = "queued"
     uploading = "uploading"
     processing = "processing"
+    # ADR-011 (M3): terminal status is `done`, matching the live
+    # 015 check constraint. The engine used `completed` in M6/M7,
+    # which the constraint rejects — no job could complete in
+    # production. `completed` is gone from the job vocabulary
+    # (PipelineStage.COMPLETED is a stage NAME, not a job status).
     done = "done"
     failed = "failed"
     cancelled = "cancelled"
