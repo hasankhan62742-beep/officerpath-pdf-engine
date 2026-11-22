@@ -116,13 +116,21 @@ export function AnswerLine({ item }: { item: QuestionItem }) {
   );
 }
 
-/** One extracted question, rendered with the truth rules. */
+/** One extracted question, rendered with the truth rules.
+ *
+ * ``detailsHref`` overrides the "Evidence, corrections &
+ * details" link (default: the bank question page). Pass null
+ * to hide the link — e.g. for a test snapshot whose source
+ * question was deleted, where the bank page no longer exists.
+ */
 export function QuestionResultCard({
   item,
   showDocument = false,
+  detailsHref,
 }: {
   item: QuestionItem;
   showDocument?: boolean;
+  detailsHref?: string | null;
 }) {
   return (
     <article className="rounded-2xl border border-slate-200 bg-white p-5">
@@ -153,14 +161,16 @@ export function QuestionResultCard({
       </p>
       <QuestionOptions item={item} />
       <AnswerLine item={item} />
-      <p className="mt-3">
-        <Link
-          href={`/dashboard/questions/${item.question_id}`}
-          className="text-sm font-medium text-brand-700 hover:underline"
-        >
-          Evidence, corrections &amp; details →
-        </Link>
-      </p>
+      {detailsHref === null ? null : (
+        <p className="mt-3">
+          <Link
+            href={detailsHref ?? `/dashboard/questions/${item.question_id}`}
+            className="text-sm font-medium text-brand-700 hover:underline"
+          >
+            Evidence, corrections &amp; details →
+          </Link>
+        </p>
+      )}
     </article>
   );
 }

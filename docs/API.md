@@ -135,6 +135,11 @@ default 0), optional `status` filter (one of
 file_size_bytes, page_count, created_at, job, questions,
 answered}], total, limit, offset}`. Soft-deleted documents are
 excluded; re-upload after delete creates a fresh document.
+(M6 fix: the (user_id, content_hash) unique index is PARTIAL —
+`WHERE deleted_at IS NULL` — in the model, Alembic 0006, and
+Supabase migration 017. Before M6 the plain unique index made
+delete → re-upload 500 on Alembic-built and live databases,
+because the soft-deleted row still held the unique slot.)
 
 ### `GET /api/v1/documents/{document_id}` → 200
 Auth. Returns `{document, job, stages}` — the document, its
@@ -220,6 +225,92 @@ another user's question: **404**.
 ### `DELETE /api/v1/questions/{question_id}/subjects/{subject_id}` → 200
 Auth. Remove a subject assignment. Returns `{question_id,
 subject_id, removed: true}`. Missing assignment: **404**.
+
+## Test builder (Phase 2, M6)
+
+All owner-only (other user: **404**), all read/write the engine DB
+(ADR-011 single store). A test freezes its own copy of every
+question — **snapshots, not foreign keys**: creating a test copies
+the question text, options, correct answer and evidence state
+into `test_question_snapshots`, plus the marking config id, so a
+later bank correction never changes the test (proven by the M6
+unit test and the M6 E2E snapshot-immutability check). Marking
+is backend-only: `score_answers` (Decimal, 2dp) is a pure service
+function — the frontend never computes a score. Taking a test is
+M7; these endpoints only build and manage tests.
+
+**Selection rules:** no duplicates in a test unless
+`allow_repetition: true` (recorded on the test; explicit picks
+without the flag: **422** `duplicate_questions`). Unknown answers
+(`correct_index = -1`) are excluded from filter-based selection
+by default and reported as `excluded_unknown`; explicit picks of
+an unknown question without `include_unknown: true` are
+**422**. Q&A pairs (no options) can never be scored and are
+always excluded, reported as `excluded_no_options`. Asking for
+more questions than the pool holds is **422**
+`insufficient_questions` (never a silently short test).
+Question counts are 1–200; the UI offers 25/50/100/150/200 as
+quick picks. Marking ranges: correct 0.25–10, incorrect −5–0,
+unattempted −1–0; anything outside is **422**.
+
+### `GET /api/v1/marking-configs` → 200
+Auth. All marking configs, the PPSC default
+(`PPSC default`, +1 / −0.25 / 0, `is_default: true`, seeded by
+Alembic 0006) first. Returns `{marking_configs, total}`.
+
+### `POST /api/v1/marking-configs` → 201
+Auth. Create a custom marking config. Body: `{name,
+correct_marks, incorrect_marks, unattempted_marks}` (ranges
+above). Returns the created config.
+
+### `GET /api/v1/tests/availability` → 200
+Auth. How many questions a source can supply, before building.
+Query: `source_type` (`all` / `documents` / `subjects` /
+`topics` / `mixed`), `document_ids` / `subject_ids` /
+`topic_ids`, `include_unknown` (default false). Returns
+`{available, excluded_unknown, excluded_no_options, sample:
+[{question_id, document_id, document_title, number, text,
+correct_index}]}` (5-question sample). The three counts always
+partition the pool.
+
+### `POST /api/v1/tests` → 201
+Auth. Create a test. Body: `{name, description?,
+question_count, source_type, source_ids?, marking_config_id?
+| marking?, allow_repetition?, include_unknown?,
+time_limit_seconds?}`. `source_type` `all` ignores
+`source_ids`; `documents` / `subjects` / `topics` take id
+lists; `mixed` takes `{document_ids, subject_ids}`;
+`explicit` takes the question ids in order. Selection is a
+random sample with a saved `selection_seed` (reproducible);
+explicit mode keeps the given order. Returns the full test
+with `snapshots: [{snapshot_id, question_id, position,
+question_text, options: [{label, text}], correct_index,
+answer_source, source_document_id, source_page}]` (a
+`correct_index` of −1 means explicitly included as unknown),
+`marking_config`, `excluded_unknown`, `excluded_no_options`.
+Unknown source / bad count / duplicate or unknown picks
+without their flags: **422**. `server_started_at` is null
+until M7 starts the test.
+
+### `GET /api/v1/tests` → 200
+Auth. The caller's tests, newest first. Query: `limit`
+(1–100, default 20), `offset`. Returns `{tests:
+[TestResponse], total, limit, offset}`.
+
+### `GET /api/v1/tests/{test_id}` → 200
+Auth. One test with its snapshots + marking config + exclusion
+counts (same shape as the create response). Other user: **404**.
+
+### `PATCH /api/v1/tests/{test_id}` → 200
+Auth. Rename / re-describe a test (`{name?, description?}`).
+Only while `status == "created"` — after an attempt exists
+(M7) the test is frozen: **409** `test_already_started`.
+
+### `DELETE /api/v1/tests/{test_id}` → 200
+Auth. Delete a test, only while `status == "created"` (no
+attempts yet — the M6 rule; attempts arrive in M7). After an
+attempt exists: **409** `test_already_started`. Missing test:
+**404** on re-read.
 
 ## Dashboard — summary (Phase 2, M4)
 

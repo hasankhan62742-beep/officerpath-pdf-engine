@@ -9,6 +9,7 @@ const LINKS = [
   { href: "/dashboard/upload", label: "Upload", exact: false },
   { href: "/dashboard/documents", label: "Documents", exact: false },
   { href: "/dashboard/questions", label: "Questions", exact: false },
+  { href: "/dashboard/tests", label: "Tests", exact: false },
   { href: "/dashboard/profile", label: "Profile", exact: true },
 ];
 

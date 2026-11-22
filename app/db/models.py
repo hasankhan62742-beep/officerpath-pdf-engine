@@ -37,6 +37,7 @@ from sqlalchemy import (
     Text,
     Uuid,
     func,
+    text,
 )
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
@@ -104,7 +105,24 @@ class Document(Base):
 
     __table_args__ = (
         Index("ix_documents_user_created", "user_id", "created_at"),
-        Index("ix_documents_user_hash", "user_id", "content_hash"),
+        # M6: partial UNIQUE index — the dedup rule (same user +
+        # same SHA-256 -> same document) applies only to LIVE rows.
+        # The plain unique index in 015 made delete-then-re-upload
+        # of the same file fail with a 500 (UNIQUE constraint
+        # failed: documents.user_id, documents.content_hash),
+        # because the soft-deleted row still held the unique slot
+        # while the dedup lookup correctly ignored it (M4). A
+        # deleted row must never block a fresh upload of the same
+        # file. Mirrored by Alembic 0006 and Supabase migration 017
+        # (live 015 still has the plain index until 017 is applied).
+        Index(
+            "ix_documents_user_hash",
+            "user_id",
+            "content_hash",
+            unique=True,
+            sqlite_where=text("deleted_at IS NULL"),
+            postgresql_where=text("deleted_at IS NULL"),
+        ),
     )
 
 
@@ -684,3 +702,147 @@ class RuleSetVersion(Base):
     created_at: Mapped[datetime] = _created_at()
 
     __table_args__ = (Index("ix_rulesets_name_version", "name", "version", unique=True),)
+
+
+# ---------------------------------------------------------------------------
+# Tables created by Alembic 0006 (Phase 2, M6 — test builder)
+# ---------------------------------------------------------------------------
+
+
+class MarkingConfig(Base):
+    """One marking scheme (doc 03 §2.4).
+
+    Seeded with the PPSC default (+1 / −0.25 / 0). A test stores
+    its marking_config_id, so the scheme travels with the test
+    session and survives later edits. Custom configs are created
+    by the test builder (validated ranges — see
+    app/services/tests.py); marking is always computed on the
+    backend (M7/M8), never trusted from the frontend.
+    """
+
+    __tablename__ = "marking_configs"
+
+    id: Mapped[uuid.UUID] = _uuid_pk()
+    name: Mapped[str] = mapped_column(Text, nullable=False, unique=True)
+    correct_marks: Mapped[float] = mapped_column(Float, nullable=False, default=1.0)
+    incorrect_marks: Mapped[float] = mapped_column(Float, nullable=False, default=-0.25)
+    unattempted_marks: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+    is_default: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    created_at: Mapped[datetime] = _created_at()
+    updated_at: Mapped[datetime] = _updated_at()
+
+
+class TestTemplate(Base):
+    """One saved test definition (doc 03 §2.4).
+
+    The template records HOW the test was built (source, count,
+    repetition/unknown flags, selection seed, marking config) so
+    the build is reproducible and auditable. The frozen content
+    lives in the session's snapshots, not here.
+    """
+
+    __tablename__ = "test_templates"
+
+    id: Mapped[uuid.UUID] = _uuid_pk()
+    user_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
+    name: Mapped[str] = mapped_column(Text, nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    question_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    source_type: Mapped[str] = mapped_column(String(32), nullable=False)
+    source_ids: Mapped[dict[str, Any] | None] = mapped_column(JSONVariant, nullable=True)
+    allow_repetition: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    include_unknown: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    selection_seed: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    # Creation-time exclusion counts (how many bank questions were
+    # left out of the pool and why) — stored so the test view can
+    # explain its own selection honestly, forever.
+    excluded_unknown: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    excluded_no_options: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    marking_config_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid, ForeignKey("marking_configs.id", ondelete="SET NULL"), nullable=True
+    )
+    created_at: Mapped[datetime] = _created_at()
+    updated_at: Mapped[datetime] = _updated_at()
+
+    __table_args__ = (Index("ix_test_templates_user_created", "user_id", "created_at"),)
+
+
+class TestSession(Base):
+    """One concrete test instance (doc 03 §2.4).
+
+    A test IS a session in M6: creating a test creates a
+    template + a session in status ``created`` in one transaction,
+    plus its frozen snapshots. Taking the test (M7) moves the
+    status to ``in_progress`` and populates ``server_started_at``
+    (nullable in M6 — no exam has started yet; M7 sets it at
+    start, never from the browser clock).
+    """
+
+    __tablename__ = "test_sessions"
+
+    id: Mapped[uuid.UUID] = _uuid_pk()
+    user_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
+    template_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid, ForeignKey("test_templates.id", ondelete="SET NULL"), nullable=True
+    )
+    title: Mapped[str] = mapped_column(Text, nullable=False)
+    question_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    marking_config_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("marking_configs.id", ondelete="SET NULL"), nullable=False
+    )
+    status: Mapped[str] = mapped_column(String(32), nullable=False, default="created")
+    started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    submitted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    time_limit_seconds: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    server_started_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    created_at: Mapped[datetime] = _created_at()
+    updated_at: Mapped[datetime] = _updated_at()
+
+    snapshots: Mapped[list[TestQuestionSnapshot]] = relationship(
+        back_populates="session", cascade="all, delete-orphan"
+    )
+
+    __table_args__ = (Index("ix_test_sessions_user_created", "user_id", "created_at"),)
+
+
+class TestQuestionSnapshot(Base):
+    """One frozen question inside a test session (doc 03 §2.4).
+
+    SNAPSHOT RULE (hard): the text, options, correct answer and
+    evidence state are COPIED here at creation time. A later bank
+    edit, correction, or question deletion never changes this
+    row — ``question_id`` is a link for review/navigation only
+    (SET NULL if the source question is later deleted; the
+    snapshot still stands). ``correct_index = -1`` means the
+    question was explicitly included as UNKNOWN (only possible
+    with ``include_unknown`` at creation); such a question must
+    never be offered as a scored question (M7 enforces this).
+    """
+
+    __tablename__ = "test_question_snapshots"
+
+    id: Mapped[uuid.UUID] = _uuid_pk()
+    session_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("test_sessions.id", ondelete="CASCADE"), nullable=False
+    )
+    question_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid, ForeignKey("extracted_questions.id", ondelete="SET NULL"), nullable=True
+    )
+    position: Mapped[int] = mapped_column(Integer, nullable=False)
+    question_text: Mapped[str] = mapped_column(Text, nullable=False)
+    options: Mapped[list[dict[str, Any]]] = mapped_column(JSONVariant, nullable=False)
+    correct_index: Mapped[int] = mapped_column(Integer, nullable=False)
+    answer_source: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    source_document_id: Mapped[uuid.UUID | None] = mapped_column(Uuid, nullable=True)
+    source_page: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    created_at: Mapped[datetime] = _created_at()
+
+    session: Mapped[TestSession] = relationship(back_populates="snapshots")
+
+    __table_args__ = (
+        Index("ix_snapshots_session_position", "session_id", "position", unique=True),
+        Index("ix_snapshots_session", "session_id", "created_at"),
+    )

@@ -615,3 +615,193 @@ export async function unassignSubject(
     { method: "DELETE" },
   );
 }
+
+// ---------------------------------------------------------------------------
+// Test builder (Phase 2, M6). A test is a frozen snapshot: the
+// questions, options, answers and marking travel with the test,
+// and a later bank edit never changes them. Marking is stored
+// with the test and computed on the backend (M7/M8) — the
+// frontend never computes or supplies marks.
+// ---------------------------------------------------------------------------
+
+export interface MarkingConfig {
+  id: string;
+  name: string;
+  correct_marks: number;
+  incorrect_marks: number;
+  unattempted_marks: number;
+  is_default: boolean;
+}
+
+export interface MarkingConfigInput {
+  name: string;
+  correct_marks: number;
+  incorrect_marks: number;
+  unattempted_marks: number;
+}
+
+export interface TestSnapshot {
+  snapshot_id: string;
+  question_id: string | null;
+  position: number;
+  question_text: string;
+  options: { label: string; text: string }[];
+  correct_index: number; // -1 = UNKNOWN (explicit opt-in only)
+  answer_source: string | null;
+  source_document_id: string | null;
+  source_page: number | null;
+}
+
+export type TestSourceType =
+  | "all"
+  | "documents"
+  | "subjects"
+  | "topics"
+  | "mixed"
+  | "explicit";
+
+export interface TestSummary {
+  test_id: string;
+  template_id: string;
+  title: string;
+  description: string | null;
+  question_count: number;
+  source_type: string;
+  source_ids: Record<string, unknown> | null;
+  allow_repetition: boolean;
+  include_unknown: boolean;
+  status: string;
+  marking_config: MarkingConfig;
+  created_at: string | null;
+  updated_at: string | null;
+}
+
+export interface TestDetail extends TestSummary {
+  snapshots: TestSnapshot[];
+  excluded_unknown: number;
+  excluded_no_options: number;
+}
+
+export interface TestListResponse {
+  tests: TestSummary[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export interface TestCreateInput {
+  name: string;
+  description?: string | null;
+  question_count: number;
+  source_type: TestSourceType;
+  source_ids?: Record<string, unknown> | string[] | null;
+  marking_config_id?: string | null;
+  marking?: MarkingConfigInput | null;
+  allow_repetition?: boolean;
+  include_unknown?: boolean;
+  time_limit_seconds?: number | null;
+}
+
+export interface AvailabilitySample {
+  question_id: string;
+  document_id: string;
+  document_title: string;
+  number: string | null;
+  text: string;
+  correct_index: number;
+}
+
+export interface Availability {
+  available: number;
+  excluded_unknown: number;
+  excluded_no_options: number;
+  sample: AvailabilitySample[];
+}
+
+export const QUICK_COUNTS = [25, 50, 100, 150, 200] as const;
+
+export function markingLabel(config: MarkingConfig): string {
+  const fmt = (n: number) => (n > 0 ? `+${n}` : `${n}`);
+  return `${fmt(config.correct_marks)} / ${fmt(config.incorrect_marks)} / ${fmt(config.unattempted_marks)}`;
+}
+
+export async function listMarkingConfigs(accessToken: string): Promise<MarkingConfig[]> {
+  const res = await request<{ marking_configs: MarkingConfig[]; total: number }>(
+    "/api/v1/marking-configs",
+    accessToken,
+  );
+  return res.marking_configs;
+}
+
+export async function createMarkingConfig(
+  accessToken: string,
+  input: MarkingConfigInput,
+): Promise<MarkingConfig> {
+  return request<MarkingConfig>("/api/v1/marking-configs", accessToken, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export async function getTestAvailability(
+  accessToken: string,
+  opts: {
+    source_type: TestSourceType;
+    document_ids?: string[];
+    subject_ids?: string[];
+    topic_ids?: string[];
+    include_unknown?: boolean;
+  },
+): Promise<Availability> {
+  const params = new URLSearchParams();
+  params.set("source_type", opts.source_type);
+  for (const id of opts.document_ids ?? []) params.append("document_ids", id);
+  for (const id of opts.subject_ids ?? []) params.append("subject_ids", id);
+  for (const id of opts.topic_ids ?? []) params.append("topic_ids", id);
+  if (opts.include_unknown) params.set("include_unknown", "true");
+  return request<Availability>(`/api/v1/tests/availability?${params}`, accessToken);
+}
+
+export async function createTest(
+  accessToken: string,
+  input: TestCreateInput,
+): Promise<TestDetail> {
+  return request<TestDetail>("/api/v1/tests", accessToken, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export async function listTests(
+  accessToken: string,
+  opts: { limit?: number; offset?: number },
+): Promise<TestListResponse> {
+  const params = new URLSearchParams();
+  params.set("limit", String(opts.limit ?? 20));
+  params.set("offset", String(opts.offset ?? 0));
+  return request<TestListResponse>(`/api/v1/tests?${params}`, accessToken);
+}
+
+export async function getTest(accessToken: string, id: string): Promise<TestDetail> {
+  return request<TestDetail>(`/api/v1/tests/${id}`, accessToken);
+}
+
+export async function updateTest(
+  accessToken: string,
+  id: string,
+  input: { name?: string; description?: string | null },
+): Promise<TestSummary> {
+  return request<TestSummary>(`/api/v1/tests/${id}`, accessToken, {
+    method: "PATCH",
+    body: JSON.stringify(input),
+  });
+}
+
+export async function deleteTest(
+  accessToken: string,
+  id: string,
+): Promise<{ test_id: string; deleted: boolean }> {
+  return request<{ test_id: string; deleted: boolean }>(`/api/v1/tests/${id}`, accessToken, {
+    method: "DELETE",
+  });
+}

@@ -28,6 +28,7 @@ import app.api.v1.me as me_api
 import app.api.v1.questions as questions_api
 import app.api.v1.review as review_api
 import app.api.v1.routes as routes_api
+import app.api.v1.tests as tests_api
 from app.config import settings
 from app.db.models import Base
 from app.main import app
@@ -117,6 +118,7 @@ def engine_db(tmp_path, monkeypatch):
     monkeypatch.setattr(documents_api, "get_session", lambda: factory())
     monkeypatch.setattr(dashboard_api, "get_session", lambda: factory())
     monkeypatch.setattr(questions_api, "get_session", lambda: factory())
+    monkeypatch.setattr(tests_api, "get_session", lambda: factory())
     monkeypatch.setattr(settings, "storage_root", str(tmp_path / "storage"))
     yield factory
     engine.dispose()
