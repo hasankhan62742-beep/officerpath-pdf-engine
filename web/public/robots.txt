@@ -1,0 +1,9 @@
+# OfficerPath AI — public robots file.
+# Only public pages are listed in the sitemap. Student dashboards, exam
+# sessions and user documents must never be indexed (none exist yet in
+# M2; this rule is enforced again when those routes land).
+User-agent: *
+Allow: /
+Disallow: /api/
+
+Sitemap: https://officerpath.ai/sitemap.xml

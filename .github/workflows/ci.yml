@@ -1,19 +1,42 @@
-# OfficerPath AI — PDF Engine CI (Phase 1, M1)
-# Runs on every push / pull request to main or officerpath-phase1-engine.
+# OfficerPath AI — PDF Engine CI (Phase 1, M1; Phase 2 M2 adds the web job)
+# Runs on every push / pull request to main, officerpath-phase1-engine
+# or officerpath-phase2-web.
 # Gates: ruff (lint + format), mypy (new M1 packages), pytest, pip-audit
 # (dependency audit), detect-secrets (secret scan), Alembic up/down on
-# SQLite, Docker image build.
-# Does NOT deploy, does NOT touch live Supabase, does NOT push any image.
-# Deploy is a separate, owner-approved step (docs/deploy-render.md).
+# SQLite, Docker image build, and the Next.js web job (typecheck, lint,
+# build). Does NOT deploy, does NOT touch live Supabase, does NOT push
+# any image. Deploy is a separate, owner-approved step
+# (docs/deploy-render.md, docs/phase2/06-deployment-plan.md).
 name: CI
 
 on:
   push:
-    branches: [main, officerpath-phase1-engine]
+    branches: [main, officerpath-phase1-engine, officerpath-phase2-web]
   pull_request:
-    branches: [main, officerpath-phase1-engine]
+    branches: [main, officerpath-phase1-engine, officerpath-phase2-web]
 
 jobs:
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Typecheck
+        run: npx tsc --noEmit
+      - name: Lint
+        run: npm run lint
+      - name: Production build
+        run: npm run build
+
   lint:
     runs-on: ubuntu-latest
     steps:

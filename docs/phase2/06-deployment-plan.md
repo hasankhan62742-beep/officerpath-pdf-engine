@@ -159,3 +159,33 @@ vars exist):
   review list loads. The Phase 1 STOP CONDITION (live phone
   verification on the three acceptance files) still applies to the
   engine and extends to the web upload flow in M10.
+
+## 7. M2 decision note (2026-11-22) — Vercel free CONFIRMED
+
+**Decision: Vercel free tier is confirmed as the frontend hosting
+recommendation.** Reasons, measured against the M2 build rather than
+assumed:
+
+- The M2 app is a standard Next.js 16 App Router build (Turbopack,
+  static public pages, no custom server, no Node-only runtime code
+  outside the framework). It builds cleanly with `npm run build` and
+  needs nothing Vercel-specific — the same output deploys on any
+  Next.js host, so the choice is reversible.
+- Vercel is the reference Next.js host: App Router, ISR, edge
+  middleware (needed in M3 for the auth guard via `proxy.ts`) and
+  preview deployments per PR work with zero configuration.
+- The free tier requires no card and covers Phase 2 traffic; nothing
+  in Phase 2 needs a paid Vercel feature.
+- Alternatives reconsidered: Netlify free remains the fallback (good
+  Next.js support, second choice); Render for the frontend is rejected
+  for now because Next.js SSR on Render free would sleep after 15 min
+  idle like the backend, and iteration is slower; the Hostinger VPS
+  does not exist yet (owner-funded, Stage 2).
+
+**What this decision does NOT do:** no Vercel account was created, no
+project was connected, nothing was deployed, and no charge was incurred
+in M2. The owner still confirms the choice before any account is
+connected (M10 executes the deploy, with the owner's explicit
+approval). If the owner prefers Netlify or a single provider, the app
+moves without code changes — the only Vercel-specific surface is the
+hosting configuration, not the application.
