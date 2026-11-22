@@ -1,12 +1,12 @@
 "use client";
 
-// OfficerPath AI — test view / preview (Phase 2, M6).
+// OfficerPath AI — test view / preview (Phase 2, M6; Start wired in M7).
 //
 // Read-only preview of a test's frozen snapshots, rendered with
 // the shared truth-rule component (QuestionResultCard): an
 // unknown answer renders as "Answer: unknown." and never as a
-// correct option. Taking the test is M7 — the Start button here
-// is honestly disabled and labelled as coming in M7.
+// correct option. The Start button activates the test on the
+// server and routes to the exam page (M7).
 
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -26,6 +26,7 @@ import {
   getSessionToken,
   getTest,
   markingLabel,
+  startTest,
   type QuestionItem,
   type TestSnapshot,
 } from "@/lib/api";
@@ -62,6 +63,8 @@ export function TestDetailClient({ id }: { id: string }) {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteError, setDeleteError] = useState("");
   const [deleting, setDeleting] = useState(false);
+  const [starting, setStarting] = useState(false);
+  const [startError, setStartError] = useState("");
 
   const testQuery = useQuery({
     queryKey: ["test", id],
@@ -71,6 +74,29 @@ export function TestDetailClient({ id }: { id: string }) {
       return getTest(token, id);
     },
   });
+
+  async function handleStart() {
+    if (testQuery.data?.status === "in_progress") {
+      router.push(`/dashboard/tests/${id}/take`);
+      return;
+    }
+    setStarting(true);
+    setStartError("");
+    try {
+      const token = await getSessionToken();
+      if (!token) throw new Error("Your session has expired. Please log in again.");
+      await startTest(token, id);
+      router.push(`/dashboard/tests/${id}/take`);
+    } catch (err) {
+      setStartError(
+        err instanceof ApiError
+          ? err.message
+          : "Could not start this test. Please try again.",
+      );
+    } finally {
+      setStarting(false);
+    }
+  }
 
   async function confirmDelete() {
     setDeleting(true);
@@ -135,10 +161,16 @@ export function TestDetailClient({ id }: { id: string }) {
         <span>Created {formatDateTime(test.created_at)}</span>
       </div>
 
-      <Alert tone="info" title="Preview — taking this test arrives in Milestone 7">
+      <Alert tone="info" title="Preview — start the test to answer">
         These are the frozen questions this test will ask. Nothing here is an exam yet:
-        your answers are not recorded and no score is calculated.
+        your answers are not recorded and no score is calculated until you start the test.
       </Alert>
+
+      {startError ? (
+        <Alert tone="danger" title="Could not start the test">
+          {startError}
+        </Alert>
+      ) : null}
 
       {test.excluded_unknown > 0 || test.excluded_no_options > 0 ? (
         <p className="text-sm text-slate-600">
@@ -154,9 +186,19 @@ export function TestDetailClient({ id }: { id: string }) {
       ) : null}
 
       <div className="flex flex-wrap gap-2">
-        <Button disabled title="Taking a test arrives in Milestone 7.">
-          Start test (coming in M7)
-        </Button>
+        {test.status === "submitted" ? (
+          <Button disabled title="This test is already submitted.">
+            Already submitted
+          </Button>
+        ) : test.status === "expired" || test.status === "abandoned" ? (
+          <Button disabled title="This test has ended.">
+            This test has ended
+          </Button>
+        ) : (
+          <Button loading={starting} onClick={handleStart}>
+            {test.status === "in_progress" ? "Resume test" : "Start test"}
+          </Button>
+        )}
         <Button
           variant="secondary"
           disabled={test.status !== "created"}

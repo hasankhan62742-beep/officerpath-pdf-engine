@@ -308,9 +308,90 @@ Only while `status == "created"` — after an attempt exists
 
 ### `DELETE /api/v1/tests/{test_id}` → 200
 Auth. Delete a test, only while `status == "created"` (no
-attempts yet — the M6 rule; attempts arrive in M7). After an
-attempt exists: **409** `test_already_started`. Missing test:
+attempts yet — an attempt exists once the test is started,
+M7). After an attempt exists: **409** `test_already_started`. Missing test:
 **404** on re-read.
+
+## Examination interface (Phase 2, M7)
+
+All owner-only (other user: **404**), all read/write the engine DB
+(ADR-011 single store). A test IS its session (M6 creates
+template + session 1:1 at build time); `start` activates that
+same session — no new session row per attempt, a retake is a
+new test (M8 handles retakes).
+
+**Timer (server truth):** `server_started_at` is set from the
+SERVER clock at start, never from the browser. Remaining time
+is computed on the server from that anchor + the time limit
+and returned as `remaining_seconds` (and `server_time`) on
+every session read; the exam page re-syncs by polling and
+never ticks from the browser clock. A test with no time limit
+returns `remaining_seconds: null`, honestly. A session past
+its deadline flips to `expired` on the next server read.
+
+**Answers:** stored against SNAPSHOT ids, never live bank
+question ids — one row per (session, snapshot), every save an
+upsert. `selected_index: null` clears the answer (the row is
+kept, so a mark-for-review flag survives a clear).
+
+**Scoring (backend-only):** submit computes marks with M6's
+`score_answers` (Decimal, 2dp) and writes exactly ONE
+`test_results` row. Unknown snapshots (`correct_index = -1`)
+are EXCLUDED from correct/incorrect/unattempted AND from
+`max_marks`, and counted as `unknown_count` on the result —
+never scored as wrong, never a 500. `percentage` is
+total/max clamped to [0, 100]. `time_taken_seconds` comes
+from server timestamps (`submitted_at − server_started_at`),
+never the browser. A second submit returns the SAME result
+row (same id, same marks) — enforced by the UNIQUE
+(`session_id`) constraint plus a re-read on conflict.
+
+### `POST /api/v1/tests/{test_id}/start` → 200
+Auth. Activate a created test: status `created` →
+`in_progress`, `server_started_at` + `started_at` from the
+server clock, `expires_at` = start + time limit when the test
+has one. Returns `{test_id, title, status,
+time_limit_seconds, server_started_at, expires_at,
+remaining_seconds, marking_config}`. Starting an
+already-started or submitted test: **409**
+`test_already_started`.
+
+### `GET /api/v1/tests/{test_id}/session` → 200
+Auth. The exam state: snapshots in test order, saved
+responses, session status, `remaining_seconds` (server
+computed) and `server_time`. Returns `{test_id, title,
+status, time_limit_seconds, server_started_at, expires_at,
+remaining_seconds, server_time, marking_config, snapshots:
+[SnapshotItem], responses: [{snapshot_id, selected_index,
+marked_for_review, answered_at, updated_at}]}`. A session past
+its deadline reads as `expired` with `remaining_seconds: 0`.
+
+### `POST /api/v1/tests/{test_id}/answers` → 200
+Auth. Upsert one or more answers. Body: `{answers:
+[{snapshot_id, selected_index, marked_for_review?}]}` —
+`selected_index` is required but may be null (clear). Only
+while status is `in_progress` AND within the time limit: a
+save after expiry is **409** `time_expired` and NOTHING is
+stored; a save before start is **409** `test_not_started`;
+after submit **409** `test_already_submitted`. A snapshot
+that is not in this test: **404**. `selected_index` outside
+the snapshot's options: **422**. Returns `{test_id, status,
+remaining_seconds, saved: [ExamResponseItem]}`.
+
+### `POST /api/v1/tests/{test_id}/submit` → 200
+Auth. Submit from `in_progress` (or from `expired` — an
+expired exam still grades what was saved). Computes marks
+server-side and writes one `test_results` row; sets the
+session `submitted`. Idempotent: a second submit returns the
+same row. Returns `{result_id, test_id, template_id, title,
+status, total_questions, correct, incorrect, unattempted,
+unknown_count, total_marks, max_marks, percentage,
+time_taken_seconds, marking_config, submitted_at}`. Submitting
+a test that was never started: **409** `test_not_started`.
+
+### `GET /api/v1/tests/{test_id}/result` → 200
+Auth. The stored `test_results` row only (the full
+results/analytics UI is M8). No result yet: **404**.
 
 ## Dashboard — summary (Phase 2, M4)
 

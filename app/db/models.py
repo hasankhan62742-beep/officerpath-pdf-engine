@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
+from decimal import Decimal
 from typing import Any
 
 from sqlalchemy import (
@@ -33,8 +34,10 @@ from sqlalchemy import (
     ForeignKey,
     Index,
     Integer,
+    Numeric,
     String,
     Text,
+    UniqueConstraint,
     Uuid,
     func,
     text,
@@ -846,3 +849,84 @@ class TestQuestionSnapshot(Base):
         Index("ix_snapshots_session_position", "session_id", "position", unique=True),
         Index("ix_snapshots_session", "session_id", "created_at"),
     )
+
+
+class StudentResponse(Base):
+    """One saved answer inside an exam attempt (doc 03 §2.5, M7).
+
+    One row per (session, snapshot) — the UNIQUE constraint makes
+    every periodic save an upsert, never a second row. Responses
+    are stored against SNAPSHOT ids, never live bank question
+    ids, so a later bank edit cannot rewrite an attempt.
+    ``selected_index`` NULL means unattempted (including a cleared
+    response — the row is kept, so a mark-for-review flag survives
+    a clear). A response on an UNKNOWN snapshot (correct_index
+    -1) is stored but never scored (submit excludes it).
+    """
+
+    __tablename__ = "student_responses"
+
+    id: Mapped[uuid.UUID] = _uuid_pk()
+    session_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("test_sessions.id", ondelete="CASCADE"), nullable=False
+    )
+    snapshot_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("test_question_snapshots.id", ondelete="CASCADE"), nullable=False
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
+    selected_index: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    marked_for_review: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    answered_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    updated_at: Mapped[datetime] = _updated_at()
+
+    __table_args__ = (
+        UniqueConstraint("session_id", "snapshot_id", name="uq_response_session_snapshot"),
+        Index("ix_student_responses_session", "session_id", "updated_at"),
+        Index("ix_student_responses_user_created", "user_id", "updated_at"),
+    )
+
+
+class TestResult(Base):
+    """One stored result row per submitted session (doc 03 §2.5, M7).
+
+    Computed on the backend at submit time from
+    ``student_responses`` + snapshots + the session's marking
+    config, and stored. The frontend never computes or supplies
+    marks. ``session_id`` is UNIQUE: a duplicate submit returns
+    this same row, never a second one. ``unknown_count`` is an
+    M7 addition to doc 03's table (doc 03 lists no unknown
+    count): snapshots with correct_index -1 are excluded from
+    correct/incorrect/unattempted AND from max_marks, and are
+    counted here instead — they are never scored as wrong and
+    never raise into a 500. ``percentage`` is total/max clamped
+    to [0, 100] (negative marking can make total_marks negative;
+    a negative percentage is meaningless to a student).
+    ``subject_breakdown`` / ``topic_breakdown`` stay NULL in M7
+    (M8 analytics fills them).
+    """
+
+    __tablename__ = "test_results"
+
+    id: Mapped[uuid.UUID] = _uuid_pk()
+    session_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("test_sessions.id", ondelete="CASCADE"), nullable=False, unique=True
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
+    total_questions: Mapped[int] = mapped_column(Integer, nullable=False)
+    correct_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    incorrect_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    unattempted_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    unknown_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    total_marks: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
+    max_marks: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
+    percentage: Mapped[Decimal] = mapped_column(Numeric(5, 2), nullable=False)
+    time_taken_seconds: Mapped[int] = mapped_column(Integer, nullable=False)
+    subject_breakdown: Mapped[dict[str, Any] | None] = mapped_column(JSONVariant, nullable=True)
+    topic_breakdown: Mapped[dict[str, Any] | None] = mapped_column(JSONVariant, nullable=True)
+    marking_config_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("marking_configs.id", ondelete="SET NULL"), nullable=False
+    )
+    submitted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    created_at: Mapped[datetime] = _created_at()
+
+    __table_args__ = (Index("ix_test_results_user_created", "user_id", "created_at"),)

@@ -22,7 +22,14 @@ from app.db.models import Base  # noqa: E402
 config = context.config
 
 if config.config_file_name is not None:
-    fileConfig(config.config_file_name)
+    # disable_existing_loggers=False: fileConfig's default (True) disables
+    # every logger created before this call — in tests that silently
+    # killed app.main's request log for the rest of the process, so
+    # test_observability failed whenever a migration test ran first
+    # (M7: test_exam.py sorts before it; M6's migration tests only
+    # escaped it because test_tests.py sorts after). Alembic still
+    # configures its own loggers from the ini.
+    fileConfig(config.config_file_name, disable_existing_loggers=False)
 
 target_metadata = Base.metadata
 

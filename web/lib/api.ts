@@ -805,3 +805,98 @@ export async function deleteTest(
     method: "DELETE",
   });
 }
+
+// ---------------------------------------------------------------------------
+// Examination interface (Phase 2, M7, GAP-6). The timer is server
+// truth: remaining_seconds comes from the server (server_started_at
+// + time limit) and the page re-syncs it by polling — it never
+// trusts the browser clock.
+// ---------------------------------------------------------------------------
+
+export interface StartTestResponse {
+  test_id: string;
+  title: string;
+  status: string;
+  time_limit_seconds: number | null;
+  server_started_at: string;
+  expires_at: string | null;
+  remaining_seconds: number | null;
+  marking_config: MarkingConfig;
+}
+
+export interface ExamResponseItem {
+  snapshot_id: string;
+  selected_index: number | null;
+  marked_for_review: boolean;
+  answered_at: string | null;
+  updated_at: string | null;
+}
+
+export interface ExamSession {
+  test_id: string;
+  title: string;
+  status: string;
+  time_limit_seconds: number | null;
+  server_started_at: string | null;
+  expires_at: string | null;
+  remaining_seconds: number | null;
+  server_time: string;
+  marking_config: MarkingConfig;
+  snapshots: TestSnapshot[];
+  responses: ExamResponseItem[];
+}
+
+export interface ExamResult {
+  result_id: string;
+  test_id: string;
+  template_id: string | null;
+  title: string;
+  status: string;
+  total_questions: number;
+  correct: number;
+  incorrect: number;
+  unattempted: number;
+  unknown_count: number;
+  total_marks: number;
+  max_marks: number;
+  percentage: number;
+  time_taken_seconds: number;
+  marking_config: MarkingConfig;
+  submitted_at: string | null;
+}
+
+export async function startTest(accessToken: string, id: string): Promise<StartTestResponse> {
+  return request<StartTestResponse>(`/api/v1/tests/${id}/start`, accessToken, {
+    method: "POST",
+  });
+}
+
+export async function getExamSession(accessToken: string, id: string): Promise<ExamSession> {
+  return request<ExamSession>(`/api/v1/tests/${id}/session`, accessToken);
+}
+
+export async function saveAnswers(
+  accessToken: string,
+  id: string,
+  answers: { snapshot_id: string; selected_index: number | null; marked_for_review?: boolean }[],
+): Promise<{
+  test_id: string;
+  status: string;
+  remaining_seconds: number | null;
+  saved: ExamResponseItem[];
+}> {
+  return request(`/api/v1/tests/${id}/answers`, accessToken, {
+    method: "POST",
+    body: JSON.stringify({ answers }),
+  });
+}
+
+export async function submitTest(accessToken: string, id: string): Promise<ExamResult> {
+  return request<ExamResult>(`/api/v1/tests/${id}/submit`, accessToken, {
+    method: "POST",
+  });
+}
+
+export async function getTestResult(accessToken: string, id: string): Promise<ExamResult> {
+  return request<ExamResult>(`/api/v1/tests/${id}/result`, accessToken);
+}

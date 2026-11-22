@@ -1,12 +1,16 @@
 # OfficerPath AI — Phase 2, M6
 # Test builder (GAP-5) + marking configs.
 #
-# All routes require a valid Supabase JWT; every read/write
-# filters by the JWT's user id and answers 404 for unknown or
-# another user's tests (never leaks existence). Values come
-# from the engine DB only (ADR-011) — no PostgREST, no fake
-# data. Creating a test writes template + session + frozen
-# snapshots in one transaction; a later bank edit never
+# M7 adds the examination interface (GAP-6) on the same
+# router: start, exam session, answers, submit, result. The
+# session IS the test instance (M6 creates template + session
+# 1:1); start activates it, submit writes exactly one stored
+# result row. All routes require a valid Supabase JWT; every
+# read/write filters by the JWT's user id and answers 404 for
+# unknown or another user's tests (never leaks existence).
+# Values come from the engine DB only (ADR-011) — no PostgREST,
+# no fake data. Creating a test writes template + session +
+# frozen snapshots in one transaction; a later bank edit never
 # changes a snapshot. Marking is stored with the test and
 # computed on the backend (M7/M8) — never in the browser.
 
@@ -16,6 +20,13 @@ from fastapi import APIRouter, Depends, Query
 
 from app.core.errors import ApiError
 from app.db.session import get_session
+from app.schemas.exam import (
+    ExamSessionResponse,
+    SaveAnswersRequest,
+    SaveAnswersResponse,
+    StartTestResponse,
+    TestResultResponse,
+)
 from app.schemas.tests import (
     AvailabilityResponse,
     MarkingConfigCreate,
@@ -28,6 +39,7 @@ from app.schemas.tests import (
     TestUpdateRequest,
 )
 from app.security.dependencies import get_current_user
+from app.services import exam as exam_service
 from app.services import tests as test_service
 
 router = APIRouter(prefix="/api/v1", tags=["tests"])
@@ -162,3 +174,59 @@ async def delete_test(
 ) -> dict:
     with _session_or_503() as session:
         return test_service.delete_test(session, user, test_id)
+
+
+# ---------------------------------------------------------------------------
+# Examination interface (M7, GAP-6)
+# ---------------------------------------------------------------------------
+
+
+@router.post("/tests/{test_id}/start", response_model=StartTestResponse)
+async def start_test(
+    test_id: str,
+    user: dict = Depends(get_current_user),
+) -> StartTestResponse:
+    with _session_or_503() as session:
+        result = exam_service.start_test(session, user, test_id)
+    return StartTestResponse(**result)
+
+
+@router.get("/tests/{test_id}/session", response_model=ExamSessionResponse)
+async def get_exam_session(
+    test_id: str,
+    user: dict = Depends(get_current_user),
+) -> ExamSessionResponse:
+    with _session_or_503() as session:
+        result = exam_service.get_exam_session(session, user, test_id)
+    return ExamSessionResponse(**result)
+
+
+@router.post("/tests/{test_id}/answers", response_model=SaveAnswersResponse)
+async def save_answers(
+    test_id: str,
+    payload: SaveAnswersRequest,
+    user: dict = Depends(get_current_user),
+) -> SaveAnswersResponse:
+    with _session_or_503() as session:
+        result = exam_service.save_answers(session, user, test_id, payload.model_dump())
+    return SaveAnswersResponse(**result)
+
+
+@router.post("/tests/{test_id}/submit", response_model=TestResultResponse)
+async def submit_test(
+    test_id: str,
+    user: dict = Depends(get_current_user),
+) -> TestResultResponse:
+    with _session_or_503() as session:
+        result = exam_service.submit_test(session, user, test_id)
+    return TestResultResponse(**result)
+
+
+@router.get("/tests/{test_id}/result", response_model=TestResultResponse)
+async def get_test_result(
+    test_id: str,
+    user: dict = Depends(get_current_user),
+) -> TestResultResponse:
+    with _session_or_503() as session:
+        result = exam_service.get_result(session, user, test_id)
+    return TestResultResponse(**result)
