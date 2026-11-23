@@ -13,6 +13,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 import { AdminNav } from "@/components/admin/admin-nav";
+import { Providers } from "@/components/providers";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
@@ -38,9 +39,11 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   }
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6">
-      <AdminNav />
-      {children}
-    </div>
+    <Providers>
+      <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6">
+        <AdminNav />
+        {children}
+      </div>
+    </Providers>
   );
 }

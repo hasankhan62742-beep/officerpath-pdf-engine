@@ -6,6 +6,8 @@
 # the worker runs in-process via run_once (no threads).
 
 import uuid
+from datetime import UTC, datetime
+from pathlib import Path
 
 import pytest
 from sqlalchemy import create_engine
@@ -248,3 +250,73 @@ def test_retry_only_failed_or_cancelled(client, db_factory) -> None:
     )
     assert res.status_code == 409
     assert res.json()["error"]["code"] == "job_not_retryable"
+
+
+# M10 — async-jobs dedup (M7 edge, fixed here): re-submitting
+# identical bytes to POST /api/v1/async-jobs/parse used to 500 with
+# UNIQUE constraint failed on documents.user_id + content_hash.
+# The decision (consistent with the register contract): replay
+# returns the ORIGINAL job with 200 + idempotent_replay, never a
+# new document and never a 500.
+def _resubmit(client, data: bytes, token: str = "token-user-a"):
+    return client.post(
+        "/api/v1/async-jobs/parse",
+        files={"file": ("ca40.pdf", data, "application/pdf")},
+        headers=auth_headers(token),
+    )
+
+
+def test_async_parse_replay_returns_original_job(client, db_factory) -> None:
+    data = CA40.read_bytes()
+    first = _submit(client, data)
+    assert first["idempotent_replay"] is False
+    # Worker completes the first job, so the replay answers with the
+    # finished job's status — polling it shows the real result.
+    summary = run_once(db_factory)
+    assert summary is not None and summary["status"] == "done"
+    res = _resubmit(client, data)
+    assert res.status_code == 200, res.text
+    body = res.json()
+    assert body["idempotent_replay"] is True
+    assert body["job_id"] == first["job_id"]
+    assert body["document_id"] == first["document_id"]
+    assert body["status"] == "done"
+    # Exactly one document + one job, and one stored object: the
+    # replay stored no new bytes and created no new rows.
+    session = db_factory()
+    assert session.query(db.Document).filter(db.Document.user_id == uuid.UUID(USER_A)).count() == 1
+    assert session.query(db.Job).filter(db.Job.user_id == uuid.UUID(USER_A)).count() == 1
+    session.close()
+    stored = [p for p in Path(settings.storage_root).rglob("*") if p.is_file()]
+    assert len(stored) == 1, stored
+
+
+def test_async_parse_replay_after_soft_delete_creates_fresh_job(client, db_factory) -> None:
+    data = CA40.read_bytes()
+    first = _submit(client, data)
+    session = db_factory()
+    doc = session.get(db.Document, uuid.UUID(first["document_id"]))
+    doc.deleted_at = datetime.now(UTC)
+    session.commit()
+    session.close()
+    # A soft-deleted document never blocks a fresh upload of the
+    # same file (M6 partial-index rule): 202, new document + job.
+    res = _resubmit(client, data)
+    assert res.status_code == 202, res.text
+    body = res.json()
+    assert body["idempotent_replay"] is False
+    assert body["document_id"] != first["document_id"]
+    assert body["job_id"] != first["job_id"]
+
+
+def test_async_parse_same_bytes_different_user_is_fresh(client, db_factory) -> None:
+    data = CA40.read_bytes()
+    first = _submit(client, data)
+    # The dedup key is (user_id, content_hash): another user's
+    # identical bytes are their own document, not a replay.
+    res = _resubmit(client, data, token="token-user-b")
+    assert res.status_code == 202, res.text
+    body = res.json()
+    assert body["idempotent_replay"] is False
+    assert body["document_id"] != first["document_id"]
+    assert body["job_id"] != first["job_id"]

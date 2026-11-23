@@ -8,6 +8,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 import { DashboardNav } from "@/components/dashboard/dashboard-nav";
+import { Providers } from "@/components/providers";
 import { createClient } from "@/lib/supabase/server";
 
 // M9 SEO: the whole dashboard is private — never indexed.
@@ -33,9 +34,11 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6">
-      <DashboardNav />
-      {children}
-    </div>
+    <Providers>
+      <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6">
+        <DashboardNav />
+        {children}
+      </div>
+    </Providers>
   );
 }

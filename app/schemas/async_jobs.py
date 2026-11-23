@@ -14,6 +14,9 @@ class AsyncJobCreatedResponse(BaseModel):
     status: str = "queued"
     filename: str
     page_count: int | None = None
+    # True when this request replayed an earlier submit of the same
+    # bytes (same user + same SHA-256) instead of creating a new job.
+    idempotent_replay: bool = False
 
 
 class AsyncJobStageResponse(BaseModel):

@@ -656,6 +656,23 @@ job atomically and runs the pipeline with per-stage timing
 and a per-stage timeout (default 600 s — the stage is named
 in the failure). Poll `GET` below for the result.
 
+**Idempotent replay (M10):** re-submitting byte-identical
+content returns the ORIGINAL job with **200** and
+`"idempotent_replay": true` (same `job_id`/`document_id`,
+current status — `done` if it already finished) instead of
+creating a new document or 500ing on the
+`documents.user_id + content_hash` unique constraint. This
+matches the `/documents/upload` path's contract (M6 dedup)
+and fixes the pre-existing M7 edge where the async path had
+no dedup check. Soft-deleted documents never block a replay
+(the lookup ignores them, matching the M6 partial-index
+rule); delete-then-re-upload creates a fresh job. A
+concurrent double-submit is resolved by an `IntegrityError`
+race guard (rollback → re-lookup → return the winner's
+job). A live document with no job is a 500 `internal_error`
+(partial write — cannot happen on either endpoint's happy
+path, both create doc + job in one transaction).
+
 ### `GET /api/v1/async-jobs/{job_id}` → 200
 Auth, owner-only (**404** for another user). Response
 (`AsyncJobStatusResponse`): `job_id`, `document_id`,
