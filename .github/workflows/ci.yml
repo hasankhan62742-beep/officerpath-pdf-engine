@@ -21,6 +21,20 @@ jobs:
     defaults:
       run:
         working-directory: web
+    # CI FIX (2026-11-23, run #3): `next build` prerenders the
+    # dashboard/admin layouts, whose server client throws unless the
+    # public Supabase vars exist. Locally web/.env.local provides
+    # them; CI has no .env.local, so the vars come from repository
+    # secrets (all NEXT_PUBLIC_* — publishable by design; the anon
+    # key is already embedded in every client bundle). API_URL is the
+    # live Render backend so the build matches production; SITE_URL is
+    # intentionally unset here (lib/site.ts falls back to the
+    # officerpath.ai placeholder — the production domain is still
+    # unconfirmed and this build artifact is never deployed).
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
