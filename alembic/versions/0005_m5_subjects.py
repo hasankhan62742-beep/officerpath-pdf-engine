@@ -111,12 +111,17 @@ def upgrade() -> None:
         "ix_question_subjects_subject", "question_subjects", ["subject_id", "created_at"]
     )
     # Idempotent seed: the same revision must be safe to re-run.
-    # NOTE (M5 fix, found by E2E): insert the id as 32-char hex, NOT the
-    # dashed str(uuid). The ORM maps Subject.id as sa.Uuid, which stores
-    # CHAR(32) hex on SQLite; a dashed raw-SQL value never matches an
-    # ORM filter (assign_subject 404'd "Subject not found" for a subject
-    # the list endpoint returned). Postgres accepts undashed hex as a
-    # uuid literal, so .hex is correct on both dialects.
+    # NOTE (M5 fix, found by E2E): the ORM maps Subject.id as sa.Uuid,
+    # which stores CHAR(32) hex on SQLite; a dashed raw-SQL value never
+    # matches an ORM filter (assign_subject 404'd "Subject not found"
+    # for a subject the list endpoint returned).
+    # NOTE (2026-11-23, live-Postgres run): do NOT bind the id as a
+    # plain hex str — SQLAlchemy types a str bindparam as VARCHAR and
+    # Postgres rejects varchar -> uuid in this INSERT
+    # ("column id is of type uuid but expression is of type character
+    # varying"). Bind a uuid object with type_=sa.Uuid instead: it
+    # stores CHAR(32) hex on SQLite (identical to the old .hex) and
+    # native uuid on Postgres.
     bind = op.get_bind()
     dialect = bind.dialect.name if bind is not None else "postgresql"
     for name, slug in SUBJECTS:
@@ -124,14 +129,22 @@ def upgrade() -> None:
             op.execute(
                 sa.text(
                     "INSERT OR IGNORE INTO subjects (id, name, slug) VALUES (:id, :name, :slug)"
-                ).bindparams(id=uuid.uuid4().hex, name=name, slug=slug)
+                ).bindparams(
+                    sa.bindparam("id", type_=sa.Uuid, value=uuid.uuid4()),
+                    name=name,
+                    slug=slug,
+                )
             )
         else:
             op.execute(
                 sa.text(
                     "INSERT INTO subjects (id, name, slug) VALUES (:id, :name, :slug) "
                     "ON CONFLICT (slug) DO NOTHING"
-                ).bindparams(id=uuid.uuid4().hex, name=name, slug=slug)
+                ).bindparams(
+                    sa.bindparam("id", type_=sa.Uuid, value=uuid.uuid4()),
+                    name=name,
+                    slug=slug,
+                )
             )
 
 

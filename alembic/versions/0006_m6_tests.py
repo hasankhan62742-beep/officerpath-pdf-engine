@@ -282,6 +282,11 @@ def upgrade() -> None:
     op.create_index("ix_snapshots_session", "test_question_snapshots", ["session_id", "created_at"])
 
     # Idempotent seed: the PPSC default marking config.
+    # NOTE (2026-11-23, live-Postgres run): bind the id as a uuid
+    # object with type_=sa.Uuid — a plain hex str binds as VARCHAR
+    # and Postgres rejects varchar -> uuid in this INSERT (same bug
+    # as 0005's subject seed). Typed Uuid stores CHAR(32) hex on
+    # SQLite and native uuid on Postgres.
     bind = op.get_bind()
     dialect = bind.dialect.name if bind is not None else "postgresql"
     if dialect == "sqlite":
@@ -290,7 +295,10 @@ def upgrade() -> None:
                 "INSERT OR IGNORE INTO marking_configs "
                 "(id, name, correct_marks, incorrect_marks, unattempted_marks, is_default) "
                 "VALUES (:id, :name, 1.0, -0.25, 0.0, 1)"
-            ).bindparams(id=uuid.uuid4().hex, name=PPSC_DEFAULT_NAME)
+            ).bindparams(
+                sa.bindparam("id", type_=sa.Uuid, value=uuid.uuid4()),
+                name=PPSC_DEFAULT_NAME,
+            )
         )
     else:
         op.execute(
@@ -298,7 +306,10 @@ def upgrade() -> None:
                 "INSERT INTO marking_configs "
                 "(id, name, correct_marks, incorrect_marks, unattempted_marks, is_default) "
                 "VALUES (:id, :name, 1.0, -0.25, 0.0, true) ON CONFLICT (name) DO NOTHING"
-            ).bindparams(id=uuid.uuid4().hex, name=PPSC_DEFAULT_NAME)
+            ).bindparams(
+                sa.bindparam("id", type_=sa.Uuid, value=uuid.uuid4()),
+                name=PPSC_DEFAULT_NAME,
+            )
         )
 
 
