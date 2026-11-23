@@ -1,10 +1,16 @@
 import type { Metadata } from "next";
-import { SITE_NAME } from "@/lib/site";
+import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: `Privacy Policy | ${SITE_NAME}`,
   description:
     "How OfficerPath AI collects, uses, stores and protects your personal data, uploaded documents and test results.",
+  alternates: {
+    canonical: `${SITE_URL}/privacy`,
+  },
+  openGraph: {
+    url: `${SITE_URL}/privacy`,
+  },
 };
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {

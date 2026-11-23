@@ -10,8 +10,13 @@ log = get_logger(__name__)
 
 
 def verify_jwt(client, token: str) -> dict:
-    """Return {'id': ..., 'email': ...} for a valid Supabase JWT.
+    """Return {'id': ..., 'email': ..., 'app_metadata': {...}} for a
+    valid Supabase JWT.
 
+    ``app_metadata`` is the VERIFIED user record from Supabase Auth
+    itself (auth.get_user) — it is the only source of the admin claim
+    (M9, doc 05 §4: ``app_metadata.is_admin``). No client request
+    body is ever consulted for a role; see ``require_admin``.
     Raises ApiError(401) for missing/invalid/expired tokens and
     ApiError(503) when Auth cannot be reached / is not configured.
     """
@@ -46,4 +51,11 @@ def verify_jwt(client, token: str) -> dict:
             code="invalid_token",
             message="Invalid or expired token.",
         )
-    return {"id": str(user_id), "email": getattr(user, "email", None)}
+    app_metadata = getattr(user, "app_metadata", None) or {}
+    if not isinstance(app_metadata, dict):
+        app_metadata = {}
+    return {
+        "id": str(user_id),
+        "email": getattr(user, "email", None),
+        "app_metadata": app_metadata,
+    }

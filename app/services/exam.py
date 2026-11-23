@@ -47,7 +47,6 @@ from app.services.tests import (
     _load_template_and_marking,
     _marking_to_dict,
     _own_session,
-    _snapshot_dict,
     score_answers,
 )
 
@@ -139,6 +138,26 @@ def _response_to_dict(row: db.StudentResponse) -> dict:
         "marked_for_review": row.marked_for_review,
         "answered_at": row.answered_at.isoformat() if row.answered_at else None,
         "updated_at": row.updated_at.isoformat() if row.updated_at else None,
+    }
+
+
+def _session_snapshot_dict(row: db.TestQuestionSnapshot) -> dict:
+    """The exam-time snapshot shape (M9 security fix): the
+    student must NOT receive the answer key while the test is
+    in progress. ``correct_index`` and ``answer_source`` are
+    withheld; only ``is_unknown`` (correct_index < 0) is sent,
+    which is all the take page needs to disable options and
+    show the "not scored" badge. Post-submit review still uses
+    the full ``_snapshot_dict`` (key included)."""
+    return {
+        "snapshot_id": str(row.id),
+        "question_id": str(row.question_id) if row.question_id else None,
+        "position": row.position,
+        "question_text": row.question_text,
+        "options": row.options,
+        "is_unknown": row.correct_index < 0,
+        "source_document_id": str(row.source_document_id) if row.source_document_id else None,
+        "source_page": row.source_page,
     }
 
 
@@ -234,7 +253,7 @@ def get_exam_session(session: Session, user: dict, test_id: str) -> dict:
         "remaining_seconds": _remaining_seconds(session_row, now),
         "server_time": now.isoformat(),
         "marking_config": _marking_to_dict(marking),
-        "snapshots": [_snapshot_dict(row) for row in snapshots],
+        "snapshots": [_session_snapshot_dict(row) for row in snapshots],
         "responses": [_response_to_dict(row) for row in responses],
     }
 
@@ -443,6 +462,35 @@ def submit_test(session: Session, user: dict, test_id: str) -> dict:
     session.add(result)
     session_row.status = "submitted"
     session_row.submitted_at = now
+    # M9 (GAP-9): in-app notifications for the real submit, in the
+    # SAME transaction as the result row — a submit never leaves a
+    # result without its notifications. A concurrent-submit rollback
+    # (IntegrityError below) wipes these rows too, correctly.
+    from app.services.notifications import create_notification
+
+    create_notification(
+        session,
+        user_uuid,
+        type="test_submitted",
+        title=f"Test submitted: {session_row.title}",
+        body=(
+            f"You submitted {session_row.title} — "
+            f"{score['correct']} correct, {score['incorrect']} incorrect, "
+            f"{score['unattempted']} unattempted."
+        ),
+        link=f"/dashboard/tests/{test_id}",
+    )
+    create_notification(
+        session,
+        user_uuid,
+        type="result_ready",
+        title=f"Result ready: {session_row.title}",
+        body=(
+            f"Your result for {session_row.title} is ready — "
+            f"{total_marks} out of {max_marks} ({percentage}%)."
+        ),
+        link=f"/dashboard/tests/{test_id}/result",
+    )
     try:
         session.commit()
     except IntegrityError:

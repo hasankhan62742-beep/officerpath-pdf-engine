@@ -4,10 +4,19 @@
 // unauthenticated visitors, but this layout re-checks here so the
 // protected area stays protected even if the proxy matcher changes.
 
+import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 import { DashboardNav } from "@/components/dashboard/dashboard-nav";
 import { createClient } from "@/lib/supabase/server";
+
+// M9 SEO: the whole dashboard is private — never indexed.
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default async function DashboardLayout({
   children,

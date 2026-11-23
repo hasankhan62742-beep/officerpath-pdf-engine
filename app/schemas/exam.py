@@ -15,7 +15,7 @@ from __future__ import annotations
 
 from pydantic import BaseModel
 
-from app.schemas.tests import MarkingConfigResponse, SnapshotItem
+from app.schemas.tests import MarkingConfigResponse, SnapshotOption
 
 
 class StartTestResponse(BaseModel):
@@ -37,6 +37,31 @@ class ExamResponseItem(BaseModel):
     updated_at: str | None
 
 
+class SessionSnapshotItem(BaseModel):
+    """A snapshot AS SEEN DURING THE EXAM.
+
+    Deliberately carries NO ``correct_index`` and NO
+    ``answer_source``: the session response is served to the
+    student's browser while the test is in progress, and leaking
+    the key there would let anyone read the answers from the
+    network tab. The UI only needs to know whether the question
+    is UNKNOWN (options disabled, "not scored" badge) — that is
+    the ``is_unknown`` flag. The full ``SnapshotItem`` (with the
+    key) is still returned by the test-detail and result
+    endpoints, which run after the test is over (or are the
+    creator's own preview).
+    """
+
+    snapshot_id: str
+    question_id: str | None
+    position: int
+    question_text: str
+    options: list[SnapshotOption]
+    is_unknown: bool
+    source_document_id: str | None
+    source_page: int | None
+
+
 class ExamSessionResponse(BaseModel):
     test_id: str
     title: str
@@ -47,7 +72,7 @@ class ExamSessionResponse(BaseModel):
     remaining_seconds: int | None
     server_time: str
     marking_config: MarkingConfigResponse
-    snapshots: list[SnapshotItem]
+    snapshots: list[SessionSnapshotItem]
     responses: list[ExamResponseItem]
 
 

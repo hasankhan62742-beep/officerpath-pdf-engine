@@ -217,9 +217,15 @@ def test_session_returns_snapshots_in_order_and_no_responses_yet(client, engine_
     assert body["status"] == "in_progress"
     assert body["server_time"] is not None
     assert [s["position"] for s in body["snapshots"]] == [1, 2, 3, 4]
-    # The random sample shuffles which question lands at which
-    # position — the SET of frozen answers is what matters.
-    assert sorted(s["correct_index"] for s in body["snapshots"]) == [-1, 0, 1, 2]
+    # M9: the session carries no answer key — only is_unknown.
+    # Exactly one of the four snapshots is unknown (Q4).
+    assert all("correct_index" not in s for s in body["snapshots"])
+    assert sorted(s["is_unknown"] for s in body["snapshots"]) == [
+        False,
+        False,
+        False,
+        True,
+    ]
     assert body["responses"] == []
 
 
@@ -355,10 +361,14 @@ def test_submit_hand_checked_marks(client, engine_db, seeded_doc):
     test_id = _create_test_id(client)
     _start(client, test_id)
     snaps = _snapshots(client, test_id)
-    # The random sample shuffles positions, so identify
-    # snapshots by their frozen correct_index (1, 0, 2, -1 —
-    # all distinct in this seed).
-    by_ci = {s["correct_index"]: s for s in snaps}
+    # The random sample shuffles positions, so identify snapshots
+    # by their frozen correct_index (1, 0, 2, -1 — all distinct
+    # in this seed). M9: the session no longer carries the key,
+    # so the mapping comes from the seed itself via question_id.
+    _, by_number = seeded_doc
+    ci_by_number = {"1": 1, "2": 0, "3": 2, "4": -1}  # the _matched() seed
+    qid_to_ci = {qid: ci_by_number[num] for num, qid in by_number.items()}
+    by_ci = {qid_to_ci[s["question_id"]]: s for s in snaps}
     res = _save(
         client,
         test_id,

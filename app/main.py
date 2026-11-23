@@ -17,11 +17,13 @@ from fastapi.responses import JSONResponse
 
 from app.api import health as health_api
 from app.api import metrics as metrics_api
+from app.api.v1 import admin as admin_routes
 from app.api.v1 import async_jobs as async_jobs_routes
 from app.api.v1 import collections as collections_routes
 from app.api.v1 import dashboard as dashboard_routes
 from app.api.v1 import documents as documents_routes
 from app.api.v1 import me as me_routes
+from app.api.v1 import notifications as notifications_routes
 from app.api.v1 import questions as questions_routes
 from app.api.v1 import results as results_routes
 from app.api.v1 import review as review_routes
@@ -192,6 +194,60 @@ app.include_router(questions_routes.router)
 app.include_router(tests_routes.router)
 app.include_router(results_routes.router)
 app.include_router(collections_routes.router)
+app.include_router(admin_routes.router)
+app.include_router(notifications_routes.router)
+
+
+@app.middleware("http")
+async def security_headers(request: Request, call_next):
+    """M9 security hardening: response headers on every engine
+    response. The engine serves JSON only, so the CSP can be
+    strict — except /docs, /redoc and /openapi.json, where
+    Swagger UI needs its own scripts/styles and the CSP is
+    skipped (the other headers still apply)."""
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+    if not request.url.path.startswith(("/docs", "/redoc", "/openapi.json")):
+        response.headers["Content-Security-Policy"] = "default-src 'none'; frame-ancestors 'none'"
+    return response
+
+
+@app.middleware("http")
+async def role_field_anomaly_log(request: Request, call_next):
+    """M9 (doc 05 §4): no endpoint accepts a role, plan, or
+    ``is_admin`` field from the client — any such field in a
+    JSON request body is ignored by the handlers and logged
+    here as a validation anomaly (method + path only, never a
+    token or body contents). Log-only: the request proceeds
+    normally. Non-JSON bodies (multipart uploads) are skipped,
+    and a logging failure never fails the request."""
+    content_type = request.headers.get("content-type", "")
+    if content_type.startswith("application/json"):
+        try:
+            body = await request.body()
+            if body:
+                import json as _json
+
+                parsed = _json.loads(body)
+                if isinstance(parsed, dict) and (
+                    "is_admin" in parsed or "role" in parsed or "plan" in parsed
+                ):
+                    log.warning(
+                        "role field in request body ignored",
+                        extra={
+                            "fields": {
+                                "method": request.method,
+                                "path": request.url.path,
+                            }
+                        },
+                    )
+        except Exception:
+            pass
+    return await call_next(request)
+
 
 # CORS (M3, ADR-011): the browser frontend calls this API. Origins
 # come from CORS_ALLOWED_ORIGINS (dev default http://localhost:3000);

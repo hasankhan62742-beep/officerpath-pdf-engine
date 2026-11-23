@@ -980,3 +980,38 @@ class StudentQuestionCollection(Base):
         Index("ix_collections_user_type_created", "user_id", "collection_type", "created_at"),
         Index("ix_collections_question", "question_id", "created_at"),
     )
+
+
+class Notification(Base):
+    """One in-app notification for one student (doc 03 §2.6, M9,
+    GAP-9). In-app ONLY — no email is ever claimed sent (prompt
+    §19); the table supports a future email outbox, Phase 2 writes
+    in-app rows only.
+
+    Written by the real flows: upload done/failed (worker job
+    completion), test submitted / result ready (exam submit),
+    review needed (upload done with pending questions). ``user_id``
+    is NOT NULL (doc 03 left broadcast NULL as an M9 decision;
+    M9 decides per-user only — no broadcast in Phase 2).
+    """
+
+    __tablename__ = "notifications"
+
+    id: Mapped[uuid.UUID] = _uuid_pk()
+    user_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
+    type: Mapped[str] = mapped_column(String(32), nullable=False)
+    title: Mapped[str] = mapped_column(String(200), nullable=False)
+    body: Mapped[str] = mapped_column(Text, nullable=False)
+    link: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    is_read: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    created_at: Mapped[datetime] = _created_at()
+
+    __table_args__ = (
+        CheckConstraint(
+            "type IN ('upload_done', 'upload_failed', 'review_needed', "
+            "'test_submitted', 'result_ready', 'subscription_change')",
+            name="ck_notification_type",
+        ),
+        Index("ix_notifications_user_created", "user_id", "created_at"),
+        Index("ix_notifications_user_unread", "user_id", "is_read", "created_at"),
+    )

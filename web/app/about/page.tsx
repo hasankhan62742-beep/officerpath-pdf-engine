@@ -2,12 +2,18 @@ import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { SITE_NAME } from "@/lib/site";
+import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: `About | ${SITE_NAME}`,
   description:
     "OfficerPath AI is an AI-assisted competitive exam preparation platform that turns your own books, PDFs and past papers into traceable MCQs and timed practice tests.",
+  alternates: {
+    canonical: `${SITE_URL}/about`,
+  },
+  openGraph: {
+    url: `${SITE_URL}/about`,
+  },
 };
 
 export default function AboutPage() {

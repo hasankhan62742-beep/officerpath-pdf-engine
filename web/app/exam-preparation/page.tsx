@@ -3,12 +3,18 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { EXAMS, SITE_NAME, SUBJECTS } from "@/lib/site";
+import { EXAMS, SITE_NAME, SITE_URL, SUBJECTS } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: `Exam Preparation | ${SITE_NAME}`,
   description:
     "Prepare for PPSC, FPSC, BPSC, SPSC, KPSC, CSS, PMS and NTS with your own books — General Knowledge, Pakistan Affairs, Current Affairs, English, Mathematics and more.",
+  alternates: {
+    canonical: `${SITE_URL}/exam-preparation`,
+  },
+  openGraph: {
+    url: `${SITE_URL}/exam-preparation`,
+  },
 };
 
 export default function ExamPreparationPage() {

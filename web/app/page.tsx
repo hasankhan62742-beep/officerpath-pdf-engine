@@ -4,11 +4,41 @@ import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { PakistanMapWatermark } from "@/components/landing/pakistan-map";
-import { EXAMS, SITE_DESCRIPTION, SITE_NAME } from "@/lib/site";
+import { EXAMS, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: `${SITE_NAME} — Prepare Smarter. Practice Better. Become Exam Ready.`,
   description: SITE_DESCRIPTION,
+  alternates: {
+    canonical: SITE_URL,
+  },
+  openGraph: {
+    url: SITE_URL,
+  },
+};
+
+// Structured data (M9 SEO): Organization + WebSite, using only
+// real site facts — no invented ratings, counts, or partnerships.
+const STRUCTURED_DATA = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": `${SITE_URL}/#organization`,
+      name: SITE_NAME,
+      url: SITE_URL,
+      description: SITE_DESCRIPTION,
+      email: "hello@abdulqadeerml.com",
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${SITE_URL}/#website`,
+      url: SITE_URL,
+      name: SITE_NAME,
+      description: SITE_DESCRIPTION,
+      publisher: { "@id": `${SITE_URL}/#organization` },
+    },
+  ],
 };
 
 const FEATURES = [
@@ -76,6 +106,10 @@ const STEPS = [
 export default function HomePage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(STRUCTURED_DATA) }}
+      />
       {/* Hero */}
       <section className="relative overflow-hidden bg-gradient-to-b from-brand-50 via-white to-white">
         <PakistanMapWatermark className="right-[-4%] top-8 hidden h-[420px] w-[420px] text-brand-600 opacity-[0.07] md:block" />

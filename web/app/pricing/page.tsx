@@ -3,12 +3,18 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { SITE_NAME } from "@/lib/site";
+import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: `Pricing | ${SITE_NAME}`,
   description:
     "OfficerPath AI is free to use during this phase. Paid plans and subscription management are planned for Phase 3 — no prices are charged or promised yet.",
+  alternates: {
+    canonical: `${SITE_URL}/pricing`,
+  },
+  openGraph: {
+    url: `${SITE_URL}/pricing`,
+  },
 };
 
 const FREE_FEATURES = [

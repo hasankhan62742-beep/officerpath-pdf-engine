@@ -336,7 +336,7 @@ export function ExamClient({ id }: { id: string }) {
     let marked = 0;
     let unknown = 0;
     for (const snap of snapshots) {
-      if (snap.correct_index < 0) unknown += 1;
+      if (snap.is_unknown) unknown += 1;
       const answer = answers?.[snap.snapshot_id];
       if (answer?.selected_index !== null && answer?.selected_index !== undefined) answered += 1;
       if (answer?.marked_for_review) marked += 1;
@@ -472,7 +472,7 @@ export function ExamClient({ id }: { id: string }) {
   }
 
   const answer = currentSnap ? (answers?.[currentSnap.snapshot_id] ?? { selected_index: null, marked_for_review: false }) : null;
-  const isUnknown = currentSnap ? currentSnap.correct_index < 0 : false;
+  const isUnknown = currentSnap ? currentSnap.is_unknown : false;
   const hasNoOptions = currentSnap ? currentSnap.options.length === 0 : false;
   const locked = exam.status !== "in_progress";
 
@@ -644,7 +644,7 @@ export function ExamClient({ id }: { id: string }) {
               const isAnswered = snapAnswer?.selected_index !== null && snapAnswer?.selected_index !== undefined;
               const isMarked = snapAnswer?.marked_for_review === true;
               const isCurrent = index === current;
-              const snapUnknown = snap.correct_index < 0;
+              const snapUnknown = snap.is_unknown;
               return (
                 <button
                   key={snap.snapshot_id}

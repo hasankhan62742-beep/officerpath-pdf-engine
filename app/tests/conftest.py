@@ -36,12 +36,18 @@ from app.security.rate_limit import rate_limiter
 
 USER_A = "11111111-1111-1111-1111-111111111111"
 USER_B = "22222222-2222-2222-2222-222222222222"
+# M9: the admin user — app_metadata.is_admin is the claim the
+# engine reads from the VERIFIED user record (doc 05 §4).
+USER_ADMIN = "33333333-3333-3333-3333-333333333333"
 
 
 class _FakeUser:
-    def __init__(self, user_id, email=None):
+    def __init__(self, user_id, email=None, app_metadata=None):
         self.id = user_id
         self.email = email or f"{user_id}@example.com"
+        # Mirrors Supabase Auth's user.app_metadata (verified by
+        # auth.get_user, never client-supplied).
+        self.app_metadata = app_metadata or {}
 
 
 class _FakeUserResponse:
@@ -50,14 +56,14 @@ class _FakeUserResponse:
 
 
 class _FakeAuth:
-    def __init__(self, tokens):
-        self._tokens = tokens  # token -> user_id
+    def __init__(self, users):
+        self._users = users  # token -> _FakeUser
 
     def get_user(self, token):
-        user_id = self._tokens.get(token)
-        if user_id is None:
+        user = self._users.get(token)
+        if user is None:
             raise Exception("invalid token")
-        return _FakeUserResponse(_FakeUser(user_id))
+        return _FakeUserResponse(user)
 
 
 class _FakeTable:
@@ -90,7 +96,13 @@ class FakeSupabaseClient:
     engine_db fixture for those)."""
 
     def __init__(self):
-        self.auth = _FakeAuth({"token-user-a": USER_A, "token-user-b": USER_B})
+        self.auth = _FakeAuth(
+            {
+                "token-user-a": _FakeUser(USER_A),
+                "token-user-b": _FakeUser(USER_B),
+                "token-admin": _FakeUser(USER_ADMIN, app_metadata={"is_admin": True}),
+            }
+        )
 
     def table(self, name):
         return _FakeTable()

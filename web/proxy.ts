@@ -16,6 +16,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 const PROTECTED_PREFIX = "/dashboard";
+const ADMIN_PREFIX = "/admin";
 const AUTH_PAGES = new Set(["/login", "/register"]);
 
 export async function proxy(request: NextRequest) {
@@ -58,6 +59,16 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
+  // M9: /admin is guarded the same way (the admin layout
+  // re-checks server-side, and the engine's require_admin is the
+  // real enforcement — the proxy is a convenience gate).
+  if (pathname.startsWith(ADMIN_PREFIX) && !user) {
+    const loginUrl = request.nextUrl.clone();
+    loginUrl.pathname = "/login";
+    loginUrl.searchParams.set("next", pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
   if (AUTH_PAGES.has(pathname) && user) {
     const dashboardUrl = request.nextUrl.clone();
     dashboardUrl.pathname = "/dashboard/profile";
@@ -71,6 +82,7 @@ export async function proxy(request: NextRequest) {
 export const config = {
   matcher: [
     "/dashboard/:path*",
+    "/admin/:path*",
     "/login",
     "/register",
     "/forgot-password",

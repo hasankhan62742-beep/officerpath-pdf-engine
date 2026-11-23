@@ -362,9 +362,17 @@ responses, session status, `remaining_seconds` (server
 computed) and `server_time`. Returns `{test_id, title,
 status, time_limit_seconds, server_started_at, expires_at,
 remaining_seconds, server_time, marking_config, snapshots:
-[SnapshotItem], responses: [{snapshot_id, selected_index,
+[SessionSnapshotItem], responses: [{snapshot_id, selected_index,
 marked_for_review, answered_at, updated_at}]}`. A session past
 its deadline reads as `expired` with `remaining_seconds: 0`.
+**M9 security fix:** session snapshots are `SessionSnapshotItem`,
+which carries NO `correct_index` and NO `answer_source` — the
+key must not reach the browser while the test is in progress.
+Only `is_unknown` (correct_index < 0) is sent, which is all
+the take page needs to disable options. The full `SnapshotItem`
+(with the key) is still returned by the test-detail and result
+endpoints, which run after the test is over (or are the
+creator's own preview).
 
 ### `POST /api/v1/tests/{test_id}/answers` → 200
 Auth. Upsert one or more answers. Body: `{answers:
@@ -386,7 +394,9 @@ session `submitted`. In the SAME transaction (M8) it also
 computes the subject/topic breakdowns onto the result row
 and records a `mistake` collection row for every
 incorrectly-answered scored question (correct, unattempted
-and unknown questions create none). Idempotent: a second
+and unknown questions create none). In the same transaction
+(M9) it also writes two notification rows for the student
+(`test_submitted` + `result_ready`). Idempotent: a second
 submit returns the same row. Returns `{result_id, test_id, template_id, title,
 status, total_questions, correct, incorrect, unattempted,
 unknown_count, total_marks, max_marks, percentage,
@@ -474,6 +484,71 @@ bookmark/mistake/custom entry. Foreign id: **404**.
 ### `DELETE /api/v1/collections/{collection_id}` → 200
 Auth. Removes the entry. Returns `{id, deleted: true}`.
 Foreign id: **404**.
+
+## Notifications — in-app only (Phase 2, M9)
+
+`notifications` (Alembic 0009): `type` CHECK over
+`upload_done` / `upload_failed` / `review_needed` /
+`test_submitted` / `result_ready` / `subscription_change`;
+`title`/`body` NOT NULL; `link` NULL (in-app route);
+`is_read` default false. Rows are written by the real flows
+in the same transaction as the triggering write: worker
+success → `upload_done` (plus `review_needed` only when the
+parse left questions pending); worker failure →
+`upload_failed`; exam submit → `test_submitted` +
+`result_ready`. **In-app only — no email is ever sent or
+claimed.**
+
+### `GET /api/v1/notifications` → 200
+Auth, owner-only, newest first: `{items: [NotificationItem],
+total, unread_count, limit, offset}`. `?unread_only=true`
+filters to unread rows. A foreign user's rows are never
+listed (their total is 0).
+
+### `PATCH /api/v1/notifications/{notification_id}/read` → 200
+Auth. Marks the caller's own notification read (idempotent —
+marking twice still returns 200 with `is_read: true`).
+A foreign id: **404**.
+
+## Admin — read-only foundation (Phase 2, M9)
+
+Admin is a claim on the Supabase Auth user
+(`app_metadata.is_admin`), read from the VERIFIED JWT only —
+never from a request body (a top-level `is_admin`/`role`/`plan`
+key in a JSON body is ignored and logged as a warning). The
+`require_admin` dependency enforces it: every admin route
+returns **404** `not_found` for non-admins (the same no-leak
+pattern as every other owner check — no 403 that confirms
+existence). All admin endpoints are paginated and return real
+engine-DB rows only. Admin is read-only in M9, so no
+`audit_log` writes exist yet; denied attempts are logged by
+`require_admin`. The users list carries **no email field** —
+the engine DB stores no student email.
+
+### `GET /api/v1/admin/overview` → 200
+Admin only. Real counts: `{users, documents, jobs,
+questions, tests, results, errors, jobs_by_status}`.
+
+### `GET /api/v1/admin/users` → 200
+Admin only. `{items: [AdminUserItem], total, limit,
+offset}` — student profiles + per-user document/test counts.
+
+### `GET /api/v1/admin/documents` → 200
+Admin only. `{items, total, limit, offset}` — every document
+with its latest job status.
+
+### `GET /api/v1/admin/jobs` → 200
+Admin only. `{items, total, limit, offset}` — every job with
+error text + `error_rows` count; filter `?status=`.
+
+### `GET /api/v1/admin/errors` → 200
+Admin only. `{items, total, limit, offset}` — the
+`processing_errors` table, newest first.
+
+### `GET /api/v1/admin/questions` → 200
+Admin only. `{items, total, limit, offset}` — bank rows with
+`?search=` and `?validation_status=` filters; `correct_index`
+comes from the latest answer's resolved label, −1 = unknown.
 
 ## Dashboard — summary (Phase 2, M4)
 
@@ -613,9 +688,11 @@ Auth, owner-only. Re-queues a `failed` or `cancelled` job
 
 ## What Phase 1 does NOT expose
 
-No admin endpoints, no quota/premium endpoints, no user
-management, no Gemini endpoints (the advisory adapter is
-disabled by default and has no HTTP surface), no upload to
-any third party. The engine never writes
-`profiles.plan` / `premium_until` / `is_admin`, never touches
-`activation_codes` or `payments`, and never grants Premium.
+No quota/premium endpoints, no user management writes, no
+Gemini endpoints (the advisory adapter is disabled by default
+and has no HTTP surface), no upload to any third party. The
+engine never writes `profiles.plan` / `premium_until` /
+`is_admin`, never touches `activation_codes` or `payments`,
+and never grants Premium. Admin endpoints exist (Phase 2 M9,
+read-only, `app_metadata.is_admin` claim only) — they list
+and inspect, they do not create, update or delete users.

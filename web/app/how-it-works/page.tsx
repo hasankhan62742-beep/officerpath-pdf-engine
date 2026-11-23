@@ -2,12 +2,18 @@ import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { SITE_NAME } from "@/lib/site";
+import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: `How It Works | ${SITE_NAME}`,
   description:
     "Register, upload your books or past papers, review the extracted MCQs, build a custom test, and take a timed exam with PPSC-style marking — step by step.",
+  alternates: {
+    canonical: `${SITE_URL}/how-it-works`,
+  },
+  openGraph: {
+    url: `${SITE_URL}/how-it-works`,
+  },
 };
 
 const STEPS = [

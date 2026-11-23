@@ -275,6 +275,38 @@ def process_job(
             detail={"seconds": total_seconds},
         )
         metrics.inc("jobs_total", {"status": "done"})
+        # M9 (GAP-9): in-app notifications for the real completion,
+        # in the SAME transaction as the job status — a completed
+        # job never leaves the student uninformed. review_needed
+        # fires only when the parse actually left questions
+        # pending (unknown answers); a clean parse writes one row.
+        from app.services.notifications import create_notification
+
+        create_notification(
+            session,
+            job.user_id,
+            type="upload_done",
+            title=f"Processing complete: {document.title}",
+            body=(
+                f"Your document {document.title} finished processing — "
+                f"{matched.counts['questions']} questions, "
+                f"{matched.answered} with answers."
+            ),
+            link=f"/dashboard/documents/{document.id}",
+        )
+        if matched.pending:
+            create_notification(
+                session,
+                job.user_id,
+                type="review_needed",
+                title=f"Review needed: {document.title}",
+                body=(
+                    f"{len(matched.pending)} question(s) in {document.title} "
+                    "could not be answered from the paper — review them "
+                    "in the question bank."
+                ),
+                link=f"/dashboard/documents/{document.id}/questions",
+            )
         session.commit()
         summary.update(
             {
@@ -381,6 +413,22 @@ def _fail_job(session, job, document, recorder, stage, message, stage_totals, st
         )
     metrics.inc("jobs_total", {"status": "failed"})
     metrics.inc("errors_total", {"code": "job_failed"})
+    # M9 (GAP-9): the failure notification rides the same
+    # transaction as the failed job row + ProcessingError row.
+    from app.services.notifications import create_notification
+
+    create_notification(
+        session,
+        job.user_id,
+        type="upload_failed",
+        title=f"Processing failed: {document.title if document is not None else 'your document'}",
+        body=f"Processing failed at stage {stage}: {message}",
+        link=(
+            f"/dashboard/documents/{document.id}"
+            if document is not None
+            else "/dashboard/documents"
+        ),
+    )
     session.commit()
     summary.update({"status": "failed", "error": message, "failed_at_stage": stage})
     log.info(

@@ -832,6 +832,20 @@ export interface ExamResponseItem {
   updated_at: string | null;
 }
 
+export interface ExamSessionSnapshot {
+  snapshot_id: string;
+  question_id: string | null;
+  position: number;
+  question_text: string;
+  options: { label: string; text: string }[];
+  // M9: the session response deliberately carries NO correct_index
+  // (the answer key must not reach the browser mid-exam). Only
+  // is_unknown is sent — the take page disables options for it.
+  is_unknown: boolean;
+  source_document_id: string | null;
+  source_page: number | null;
+}
+
 export interface ExamSession {
   test_id: string;
   title: string;
@@ -842,7 +856,7 @@ export interface ExamSession {
   remaining_seconds: number | null;
   server_time: string;
   marking_config: MarkingConfig;
-  snapshots: TestSnapshot[];
+  snapshots: ExamSessionSnapshot[];
   responses: ExamResponseItem[];
 }
 
@@ -1067,4 +1081,199 @@ export async function deleteCollection(
   return request<{ id: string; deleted: boolean }>(`/api/v1/collections/${id}`, accessToken, {
     method: "DELETE",
   });
+}
+
+// --- Notifications (Phase 2, M9, GAP-9) -------------------------------------
+// In-app only. No email is ever claimed sent.
+
+export interface NotificationItem {
+  id: string;
+  user_id: string;
+  type: string;
+  title: string;
+  body: string;
+  link: string | null;
+  is_read: boolean;
+  created_at: string | null;
+}
+
+export interface NotificationListResponse {
+  items: NotificationItem[];
+  total: number;
+  unread_count: number;
+  limit: number;
+  offset: number;
+}
+
+export async function listNotifications(
+  accessToken: string,
+  opts: { unread_only?: boolean; limit?: number; offset?: number },
+): Promise<NotificationListResponse> {
+  const params = new URLSearchParams();
+  if (opts.unread_only) params.set("unread_only", "true");
+  params.set("limit", String(opts.limit ?? 20));
+  params.set("offset", String(opts.offset ?? 0));
+  return request<NotificationListResponse>(`/api/v1/notifications?${params}`, accessToken);
+}
+
+export async function markNotificationRead(
+  accessToken: string,
+  id: string,
+): Promise<NotificationItem> {
+  return request<NotificationItem>(`/api/v1/notifications/${id}/read`, accessToken, {
+    method: "PATCH",
+  });
+}
+
+// --- Admin (Phase 2, M9, GAP-10) --------------------------------------------
+// Read-only views over real engine rows. The backend enforces the
+// admin claim (require_admin); a non-admin gets 404 from every
+// call below. The /admin layout guard is UX only.
+
+export interface AdminOverview {
+  users: number;
+  documents: number;
+  jobs: number;
+  jobs_by_status: Record<string, number>;
+  questions: number;
+  tests: number;
+  results: number;
+  errors: number;
+  notifications: number;
+}
+
+export interface AdminUserItem {
+  user_id: string;
+  full_name: string;
+  phone: string | null;
+  preferred_exam: string | null;
+  education_level: string | null;
+  documents: number;
+  tests: number;
+  created_at: string | null;
+  updated_at: string | null;
+}
+
+export interface AdminDocumentItem {
+  id: string;
+  user_id: string;
+  title: string;
+  file_type: string;
+  file_size_bytes: number;
+  page_count: number | null;
+  latest_job_status: string | null;
+  deleted_at: string | null;
+  created_at: string | null;
+}
+
+export interface AdminJobItem {
+  id: string;
+  user_id: string;
+  document_id: string;
+  document_title: string | null;
+  status: string;
+  retry_count: number;
+  error: string | null;
+  error_rows: number;
+  result_summary: Record<string, unknown> | null;
+  created_at: string | null;
+  started_at: string | null;
+  completed_at: string | null;
+}
+
+export interface AdminErrorItem {
+  id: string;
+  document_id: string;
+  document_title: string | null;
+  job_id: string | null;
+  page_number: number | null;
+  stage: string | null;
+  error_code: string;
+  message: string;
+  created_at: string | null;
+}
+
+export interface AdminQuestionItem {
+  id: string;
+  document_id: string;
+  question_number: string | null;
+  text: string;
+  options_count: number;
+  correct_index: number;
+  answer_status: string | null;
+  validation_status: string;
+  extraction_method: string | null;
+  created_at: string | null;
+}
+
+export interface AdminListResponse<T> {
+  items: T[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export async function getAdminOverview(accessToken: string): Promise<AdminOverview> {
+  return request<AdminOverview>("/api/v1/admin/overview", accessToken);
+}
+
+export async function listAdminUsers(
+  accessToken: string,
+  opts: { limit?: number; offset?: number },
+): Promise<AdminListResponse<AdminUserItem>> {
+  const params = new URLSearchParams();
+  params.set("limit", String(opts.limit ?? 20));
+  params.set("offset", String(opts.offset ?? 0));
+  return request<AdminListResponse<AdminUserItem>>(`/api/v1/admin/users?${params}`, accessToken);
+}
+
+export async function listAdminDocuments(
+  accessToken: string,
+  opts: { user_id?: string; limit?: number; offset?: number },
+): Promise<AdminListResponse<AdminDocumentItem>> {
+  const params = new URLSearchParams();
+  if (opts.user_id) params.set("user_id", opts.user_id);
+  params.set("limit", String(opts.limit ?? 20));
+  params.set("offset", String(opts.offset ?? 0));
+  return request<AdminListResponse<AdminDocumentItem>>(
+    `/api/v1/admin/documents?${params}`,
+    accessToken,
+  );
+}
+
+export async function listAdminJobs(
+  accessToken: string,
+  opts: { status?: string; limit?: number; offset?: number },
+): Promise<AdminListResponse<AdminJobItem>> {
+  const params = new URLSearchParams();
+  if (opts.status) params.set("status", opts.status);
+  params.set("limit", String(opts.limit ?? 20));
+  params.set("offset", String(opts.offset ?? 0));
+  return request<AdminListResponse<AdminJobItem>>(`/api/v1/admin/jobs?${params}`, accessToken);
+}
+
+export async function listAdminErrors(
+  accessToken: string,
+  opts: { limit?: number; offset?: number },
+): Promise<AdminListResponse<AdminErrorItem>> {
+  const params = new URLSearchParams();
+  params.set("limit", String(opts.limit ?? 20));
+  params.set("offset", String(opts.offset ?? 0));
+  return request<AdminListResponse<AdminErrorItem>>(`/api/v1/admin/errors?${params}`, accessToken);
+}
+
+export async function listAdminQuestions(
+  accessToken: string,
+  opts: { validation_status?: string; document_id?: string; search?: string; limit?: number; offset?: number },
+): Promise<AdminListResponse<AdminQuestionItem>> {
+  const params = new URLSearchParams();
+  if (opts.validation_status) params.set("validation_status", opts.validation_status);
+  if (opts.document_id) params.set("document_id", opts.document_id);
+  if (opts.search) params.set("search", opts.search);
+  params.set("limit", String(opts.limit ?? 20));
+  params.set("offset", String(opts.offset ?? 0));
+  return request<AdminListResponse<AdminQuestionItem>>(
+    `/api/v1/admin/questions?${params}`,
+    accessToken,
+  );
 }

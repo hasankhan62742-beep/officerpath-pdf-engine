@@ -1,10 +1,16 @@
 import type { Metadata } from "next";
-import { SITE_NAME } from "@/lib/site";
+import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: `Terms and Conditions | ${SITE_NAME}`,
   description:
     "The terms for using OfficerPath AI — accounts, uploads, tests, marking, acceptable use, and the limits of what the platform promises.",
+  alternates: {
+    canonical: `${SITE_URL}/terms`,
+  },
+  openGraph: {
+    url: `${SITE_URL}/terms`,
+  },
 };
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {

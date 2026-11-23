@@ -4,12 +4,18 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { SITE_NAME } from "@/lib/site";
+import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: `Features | ${SITE_NAME}`,
   description:
     "Upload your books, extract traceable MCQs, build custom tests, take timed exams with PPSC-style marking, and track your performance with OfficerPath AI.",
+  alternates: {
+    canonical: `${SITE_URL}/features`,
+  },
+  openGraph: {
+    url: `${SITE_URL}/features`,
+  },
 };
 
 const FEATURES = [
