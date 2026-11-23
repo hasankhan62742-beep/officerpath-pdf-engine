@@ -350,7 +350,7 @@ export default function NewTestPage() {
                     >
                       <span>
                         {pick.text}
-                        {pick.correct_index < 0 ? (
+                        {pick.correct_index !== null && pick.correct_index < 0 ? (
                           <span className="ml-2 font-semibold text-amber-700">
                             — unknown answer
                           </span>
@@ -385,7 +385,7 @@ export default function NewTestPage() {
                       <span className="ml-2 text-xs text-slate-500">
                         {question.document_title}
                       </span>
-                      {question.correct_index < 0 ? (
+                      {question.correct_index !== null && question.correct_index < 0 ? (
                         <span className="ml-2 font-semibold text-amber-700">
                           — unknown answer
                         </span>

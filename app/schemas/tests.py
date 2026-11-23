@@ -9,6 +9,10 @@
 #   explicitly included as UNKNOWN (``include_unknown`` at
 #   creation); the UI renders it as unknown, never as a correct
 #   option, and M7 must never offer it as a scored question.
+# - ``correct_index`` None means the key is WITHHELD: the test
+#   has not been submitted yet, so the detail endpoints return
+#   no key (security fix — a student must not read the key
+#   mid-test). ``is_unknown`` still flags the -1 rows.
 # - Question counts are 1–200 (validated in the service); the UI
 #   offers 25/50/100/150/200 as quick picks. No duplicates in a
 #   test unless ``allow_repetition`` is explicitly true.
@@ -50,8 +54,13 @@ class SnapshotItem(BaseModel):
     position: int
     question_text: str
     options: list[SnapshotOption]
-    correct_index: int  # -1 = UNKNOWN (explicit opt-in only)
+    # None = key withheld: the test has not been submitted yet.
+    # -1 = UNKNOWN (explicit opt-in only); >= 0 = the answer.
+    correct_index: int | None
     answer_source: str | None
+    # True when the frozen correct_index is -1. Always present,
+    # so the UI can flag unknown questions without the key.
+    is_unknown: bool = False
     source_document_id: str | None
     source_page: int | None
 

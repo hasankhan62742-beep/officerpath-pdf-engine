@@ -352,7 +352,8 @@ export type AnswerStatus =
   | "detected"
   | "unknown"
   | "needs_review"
-  | "conflicting";
+  | "conflicting"
+  | "withheld";
 
 export interface QuestionItem {
   question_id: string;
@@ -362,7 +363,9 @@ export interface QuestionItem {
   text: string;
   options: string[];
   kind: string;
-  correct_index: number;
+  // null = key withheld (test not submitted yet); the card
+  // renders "Answer hidden" instead of an answer.
+  correct_index: number | null;
   correct_letter: string;
   answer_source: string;
   confidence: number | null;
@@ -646,8 +649,13 @@ export interface TestSnapshot {
   position: number;
   question_text: string;
   options: { label: string; text: string }[];
-  correct_index: number; // -1 = UNKNOWN (explicit opt-in only)
+  // null = key withheld: the test has not been submitted yet.
+  // -1 = UNKNOWN (explicit opt-in only); >= 0 = the answer.
+  correct_index: number | null;
   answer_source: string | null;
+  // True when the frozen correct_index is -1. Always present,
+  // so the UI can flag unknown questions without the key.
+  is_unknown: boolean;
   source_document_id: string | null;
   source_page: number | null;
 }

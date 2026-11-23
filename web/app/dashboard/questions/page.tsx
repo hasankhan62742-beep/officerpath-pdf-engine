@@ -276,7 +276,7 @@ export default function QuestionsPage() {
                       </Link>
                     </TableCell>
                     <TableCell>
-                      {q.correct_index >= 0 ? (
+                      {q.correct_index !== null && q.correct_index >= 0 ? (
                         <span className="font-semibold text-slate-900">
                           {q.correct_letter}
                         </span>

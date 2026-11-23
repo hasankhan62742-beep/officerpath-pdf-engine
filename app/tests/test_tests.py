@@ -325,7 +325,8 @@ def test_create_test_from_all_freezes_ppsc_default(client, engine_db, seeded_doc
     positions = [s["position"] for s in body["snapshots"]]
     assert positions == [1, 2]
     for snap in body["snapshots"]:
-        assert snap["correct_index"] >= 0  # no unknown slipped in
+        assert snap["is_unknown"] is False  # no unknown slipped in
+        assert snap["correct_index"] is None  # key withheld until submit
         assert len(snap["options"]) == 4
         assert snap["options"][0]["label"] == "A"
         assert snap["question_text"]
@@ -351,8 +352,9 @@ def test_create_test_include_unknown_flags_snapshots(client, engine_db, seeded_d
     assert res.status_code == 201, res.text
     body = res.json()
     assert len(body["snapshots"]) == 4
-    unknowns = [s for s in body["snapshots"] if s["correct_index"] == -1]
-    assert len(unknowns) == 2  # Q2 + Q3, flagged by the -1 itself
+    unknowns = [s for s in body["snapshots"] if s["is_unknown"]]
+    assert len(unknowns) == 2  # Q2 + Q3, flagged by is_unknown itself
+    assert all(s["correct_index"] is None for s in body["snapshots"])  # key withheld
     for snap in unknowns:
         assert snap["options"]  # options are still frozen for review
 
@@ -435,7 +437,7 @@ def test_explicit_picks_duplicates_and_mismatch(client, engine_db, seeded_doc):
         ),
     )
     assert res.status_code == 201, res.text
-    assert any(s["correct_index"] == -1 for s in res.json()["snapshots"])
+    assert any(s["is_unknown"] for s in res.json()["snapshots"])
     # Another user's question is a 404.
     res = client.post(
         "/api/v1/tests",
@@ -455,6 +457,15 @@ def test_snapshot_frozen_after_bank_correction(client, engine_db, seeded_doc):
     res = _create(client, _create_payload())
     assert res.status_code == 201, res.text
     test_id = res.json()["test_id"]
+    # The key is only visible once the test is submitted, so
+    # submit it (no answers — all unattempted) before reading
+    # the frozen snapshot.
+    res = client.post(f"/api/v1/tests/{test_id}/start", headers=auth_headers("token-user-a"))
+    assert res.status_code == 200, res.text
+    res = client.post(f"/api/v1/tests/{test_id}/submit", headers=auth_headers("token-user-a"))
+    assert res.status_code == 200, res.text
+    res = client.get(f"/api/v1/tests/{test_id}", headers=auth_headers("token-user-a"))
+    assert res.status_code == 200, res.text
     before = res.json()["snapshots"]
     q1 = by_number["1"]
     q1_snap_before = next(s for s in before if s["question_id"] == q1)
@@ -543,6 +554,106 @@ def test_tests_are_per_user(client, engine_db, seeded_doc):
 def test_tests_require_auth(client, engine_db):
     assert client.get("/api/v1/tests").status_code == 401
     assert client.get("/api/v1/marking-configs").status_code == 401
+
+
+# ---------------------------------------------------------------------------
+# Answer-key withholding (security fix: GET /tests/{id} must not
+# leak the key mid-test — the M9 exam-session rule, extended to
+# the detail endpoints. Key visible only after submission.)
+# ---------------------------------------------------------------------------
+
+
+def _start(client, test_id):
+    res = client.post(f"/api/v1/tests/{test_id}/start", headers=auth_headers("token-user-a"))
+    assert res.status_code == 200, res.text
+    return res
+
+
+def _submit(client, test_id):
+    res = client.post(f"/api/v1/tests/{test_id}/submit", headers=auth_headers("token-user-a"))
+    assert res.status_code == 200, res.text
+    return res
+
+
+def _get_detail(client, test_id):
+    res = client.get(f"/api/v1/tests/{test_id}", headers=auth_headers("token-user-a"))
+    assert res.status_code == 200, res.text
+    return res.json()
+
+
+def test_get_test_withholds_key_while_created(client, engine_db, seeded_doc):
+    res = _create(client, _create_payload(question_count=4, include_unknown=True))
+    assert res.status_code == 201, res.text
+    body = res.json()
+    assert body["status"] == "created"
+    # The create response itself carries no key.
+    assert len(body["snapshots"]) == 4
+    for snap in body["snapshots"]:
+        assert snap["correct_index"] is None
+        assert snap["answer_source"] is None
+    # The unknown rows are still flagged — without the key.
+    unknowns = [s for s in body["snapshots"] if s["is_unknown"]]
+    assert len(unknowns) == 2
+    assert sum(1 for s in body["snapshots"] if not s["is_unknown"]) == 2
+    # Same on a fresh GET.
+    detail = _get_detail(client, body["test_id"])
+    assert detail["status"] == "created"
+    assert all(s["correct_index"] is None for s in detail["snapshots"])
+    assert all(s["answer_source"] is None for s in detail["snapshots"])
+
+
+def test_get_test_withholds_key_while_in_progress(client, engine_db, seeded_doc):
+    res = _create(client, _create_payload(question_count=2))
+    assert res.status_code == 201, res.text
+    test_id = res.json()["test_id"]
+    _start(client, test_id)
+    detail = _get_detail(client, test_id)
+    assert detail["status"] == "in_progress"
+    assert len(detail["snapshots"]) == 2
+    for snap in detail["snapshots"]:
+        assert snap["correct_index"] is None
+        assert snap["answer_source"] is None
+        assert snap["is_unknown"] is False  # both seeded rows are answered
+
+
+def test_get_test_reveals_key_after_submit(client, engine_db, seeded_doc):
+    res = _create(client, _create_payload(question_count=4, include_unknown=True))
+    assert res.status_code == 201, res.text
+    test_id = res.json()["test_id"]
+    _start(client, test_id)
+    _submit(client, test_id)
+    detail = _get_detail(client, test_id)
+    assert detail["status"] == "submitted"
+    by_text = {s["question_text"]: s for s in detail["snapshots"]}
+    assert by_text["What is the capital of Pakistan?"]["correct_index"] == 1
+    assert by_text["What is the capital of Pakistan?"]["answer_source"] == "trailing-key"
+    assert by_text["The largest desert of Pakistan is?"]["correct_index"] == 0
+    assert by_text["The largest desert of Pakistan is?"]["answer_source"] == "inferred"
+    unknown = by_text["Which river flows through Multan?"]
+    assert unknown["correct_index"] == -1
+    assert unknown["is_unknown"] is True
+
+
+def test_retry_withholds_key_until_submitted(client, engine_db, seeded_doc):
+    res = _create(client, _create_payload(question_count=2))
+    assert res.status_code == 201, res.text
+    test_id = res.json()["test_id"]
+    _start(client, test_id)
+    _submit(client, test_id)
+    original = _get_detail(client, test_id)
+    original_key = {s["question_id"]: s["correct_index"] for s in original["snapshots"]}
+    assert all(v is not None for v in original_key.values())
+    res = client.post(f"/api/v1/tests/{test_id}/retry", headers=auth_headers("token-user-a"))
+    assert res.status_code == 201, res.text
+    retry_id = res.json()["test_id"]
+    assert res.json()["status"] == "created"
+    assert all(s["correct_index"] is None for s in res.json()["snapshots"])
+    # The retry carries the same frozen key — visible once the
+    # retry itself is submitted.
+    _start(client, retry_id)
+    _submit(client, retry_id)
+    retried = _get_detail(client, retry_id)
+    assert {s["question_id"]: s["correct_index"] for s in retried["snapshots"]} == original_key
 
 
 # ---------------------------------------------------------------------------

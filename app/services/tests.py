@@ -578,15 +578,33 @@ def _normalize_source_ids(source_type: str, source_ids: dict | list[str] | None)
 # ---------------------------------------------------------------------------
 
 
-def _snapshot_dict(row: db.TestQuestionSnapshot) -> dict:
+def _key_visible(status: str) -> bool:
+    """The answer key is visible only once the attempt is over
+    (status ``submitted``). A created or in-progress test — and
+    an expired/abandoned one with no submission — must never
+    expose it through the detail endpoints, or a student can
+    read the key mid-test with a deliberate API call (the
+    normal UI never calls the detail endpoint mid-test, but
+    the API must not rely on that)."""
+    return status == "submitted"
+
+
+def _snapshot_dict(row: db.TestQuestionSnapshot, *, include_key: bool) -> dict:
+    """One frozen snapshot. ``correct_index`` and
+    ``answer_source`` are included ONLY when ``include_key``
+    is True (the test is submitted and the owner is reviewing
+    it). Otherwise both are None and only ``is_unknown`` is
+    sent, mirroring the M9 exam-session shape, so the UI can
+    still flag unknown questions without ever seeing the key."""
     return {
         "snapshot_id": str(row.id),
         "question_id": str(row.question_id) if row.question_id else None,
         "position": row.position,
         "question_text": row.question_text,
         "options": row.options,
-        "correct_index": row.correct_index,
-        "answer_source": row.answer_source,
+        "correct_index": row.correct_index if include_key else None,
+        "answer_source": row.answer_source if include_key else None,
+        "is_unknown": row.correct_index < 0,
         "source_document_id": str(row.source_document_id) if row.source_document_id else None,
         "source_page": row.source_page,
     }
@@ -791,7 +809,7 @@ def create_test(session: Session, user: dict, payload: dict) -> dict:
         .all()
     )
     detail = _test_to_dict(session_row, template, marking)
-    detail["snapshots"] = [_snapshot_dict(row) for row in snapshots]
+    detail["snapshots"] = [_snapshot_dict(row, include_key=False) for row in snapshots]
     detail["excluded_unknown"] = template.excluded_unknown
     detail["excluded_no_options"] = template.excluded_no_options
     return detail
@@ -824,7 +842,9 @@ def get_test(session: Session, user: dict, test_id: str) -> dict:
         .all()
     )
     detail = _test_to_dict(session_row, template, marking)
-    detail["snapshots"] = [_snapshot_dict(row) for row in snapshots]
+    detail["snapshots"] = [
+        _snapshot_dict(row, include_key=_key_visible(session_row.status)) for row in snapshots
+    ]
     detail["excluded_unknown"] = template.excluded_unknown
     detail["excluded_no_options"] = template.excluded_no_options
     return detail

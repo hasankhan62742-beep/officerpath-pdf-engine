@@ -183,6 +183,13 @@ def _snapshot_map(client, test_id) -> dict:
     return {s["question_id"]: s for s in res.json()["snapshots"]}
 
 
+def _get_detail_snaps(client, test_id) -> list:
+    """Snapshot rows from the test-detail endpoint."""
+    res = client.get(f"/api/v1/tests/{test_id}", headers=auth_headers("token-user-a"))
+    assert res.status_code == 200, res.text
+    return res.json()["snapshots"]
+
+
 # The standard attempt: Q1/Q2/Q4 correct, Q3/Q5 incorrect,
 # Q6 unattempted, Q7 marked-for-review only. (Q5 "2 + 2" is
 # correct B=1, so the incorrect answer is C=2.)
@@ -528,7 +535,18 @@ def _canonical_snapshots(client, test_id) -> str:
     res = client.get(f"/api/v1/tests/{test_id}", headers=auth_headers("token-user-a"))
     assert res.status_code == 200, res.text
     snaps = res.json()["snapshots"]
-    stripped = [{k: v for k, v in snap.items() if k != "snapshot_id"} for snap in snaps]
+    # The key fields are status-dependent (withheld until the
+    # test is submitted), so they are not part of the frozen
+    # content comparison — the key copy itself is checked
+    # separately after submission.
+    stripped = [
+        {
+            k: v
+            for k, v in snap.items()
+            if k not in ("snapshot_id", "correct_index", "answer_source")
+        }
+        for snap in snaps
+    ]
     return json.dumps(stripped, sort_keys=True)
 
 
@@ -536,6 +554,7 @@ def test_retry_keeps_snapshots_byte_identical(client, engine_db, seeded_doc):
     _, by_number, _, _ = seeded_doc
     test_id, _ = _run_standard_attempt(client, by_number)
     before = _canonical_snapshots(client, test_id)
+    before_key = {s["question_id"]: s["correct_index"] for s in _get_detail_snaps(client, test_id)}
     res = client.post(f"/api/v1/tests/{test_id}/retry", headers=auth_headers("token-user-a"))
     assert res.status_code == 201, res.text
     body = res.json()
@@ -548,6 +567,15 @@ def test_retry_keeps_snapshots_byte_identical(client, engine_db, seeded_doc):
         f"/api/v1/tests/{body['test_id']}/start", headers=auth_headers("token-user-a")
     )
     assert res.status_code == 200, res.text
+    # And once the retry is submitted, its frozen key is the
+    # same key the original attempt had.
+    res = client.post(
+        f"/api/v1/tests/{body['test_id']}/submit", headers=auth_headers("token-user-a")
+    )
+    assert res.status_code == 200, res.text
+    res = client.get(f"/api/v1/tests/{body['test_id']}", headers=auth_headers("token-user-a"))
+    assert res.status_code == 200, res.text
+    assert {s["question_id"]: s["correct_index"] for s in res.json()["snapshots"]} == before_key
 
 
 def test_retry_requires_submitted(client, engine_db, seeded_doc):
@@ -584,6 +612,16 @@ def test_from_mistakes_uses_original_snapshots(client, engine_db, seeded_doc):
     assert body["skipped_question_ids"] == []
     snaps = body["snapshots"]
     assert {s["question_id"] for s in snaps} == {by_number["3"], by_number["5"]}
+    # The key is withheld until the practice test is submitted,
+    # so submit it (no answers) before reading the frozen key.
+    practice_id = body["test_id"]
+    res = client.post(f"/api/v1/tests/{practice_id}/start", headers=auth_headers("token-user-a"))
+    assert res.status_code == 200, res.text
+    res = client.post(f"/api/v1/tests/{practice_id}/submit", headers=auth_headers("token-user-a"))
+    assert res.status_code == 200, res.text
+    res = client.get(f"/api/v1/tests/{practice_id}", headers=auth_headers("token-user-a"))
+    assert res.status_code == 200, res.text
+    snaps = res.json()["snapshots"]
     # The practice snapshots carry the ORIGINAL correct answers.
     by_qid = {s["question_id"]: s for s in snaps}
     assert by_qid[by_number["3"]]["correct_index"] == 2

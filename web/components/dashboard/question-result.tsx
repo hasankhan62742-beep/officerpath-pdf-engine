@@ -26,6 +26,8 @@ function answerStatusBadge(item: QuestionItem) {
       return <Badge tone="accent">Needs review</Badge>;
     case "conflicting":
       return <Badge tone="danger">Conflicting</Badge>;
+    case "withheld":
+      return <Badge tone="neutral">Answer hidden</Badge>;
     default:
       return <Badge tone="neutral">Unknown answer</Badge>;
   }
@@ -55,7 +57,7 @@ export function QuestionOptions({ item }: { item: QuestionItem }) {
       </p>
     );
   }
-  const known = item.correct_index >= 0;
+  const known = item.correct_index !== null && item.correct_index >= 0;
   return (
     <ul className="mt-3 space-y-2">
       {item.options.map((option, index) => {
@@ -84,6 +86,15 @@ export function QuestionOptions({ item }: { item: QuestionItem }) {
 }
 
 export function AnswerLine({ item }: { item: QuestionItem }) {
+  if (item.correct_index === null) {
+    return (
+      <p className="mt-3 text-sm text-slate-600">
+        <strong>Answer hidden.</strong> The answer key is revealed
+        after the test is submitted — it is never shown while a
+        test is still open.
+      </p>
+    );
+  }
   if (item.correct_index < 0) {
     return (
       <p className="mt-3 text-sm text-slate-600">

@@ -285,8 +285,13 @@ random sample with a saved `selection_seed` (reproducible);
 explicit mode keeps the given order. Returns the full test
 with `snapshots: [{snapshot_id, question_id, position,
 question_text, options: [{label, text}], correct_index,
-answer_source, source_document_id, source_page}]` (a
-`correct_index` of −1 means explicitly included as unknown),
+answer_source, is_unknown, source_document_id, source_page}]` (a
+`correct_index` of −1 means explicitly included as unknown).
+The answer key is WITHHELD while the test is not submitted:
+`correct_index` and `answer_source` are null and only
+`is_unknown` is sent, so a student cannot read the key
+mid-test (same rule as the M9 exam session). Once the test is
+submitted, the key is returned for review.
 `marking_config`, `excluded_unknown`, `excluded_no_options`.
 Unknown source / bad count / duplicate or unknown picks
 without their flags: **422**. `server_started_at` is null
@@ -299,7 +304,10 @@ Auth. The caller's tests, newest first. Query: `limit`
 
 ### `GET /api/v1/tests/{test_id}` → 200
 Auth. One test with its snapshots + marking config + exclusion
-counts (same shape as the create response). Other user: **404**.
+counts (same shape as the create response). The answer key is
+withheld (`correct_index` / `answer_source` null) until the
+test is submitted — only `is_unknown` is sent before then.
+Other user: **404**.
 
 ### `PATCH /api/v1/tests/{test_id}` → 200
 Auth. Rename / re-describe a test (`{name?, description?}`).

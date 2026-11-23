@@ -536,14 +536,14 @@ def test_migration_0009_downgrade_refuses_with_notification_rows(tmp_path, monke
 
 
 def test_exam_session_withholds_answer_key(client, engine_db):
-    """M9 SECURITY FIX: the exam session is served to the
-    student's browser WHILE the test is in progress — it must
+    """M9 SECURITY FIX, extended: the exam session is served to
+    the student's browser WHILE the test is in progress — it must
     never carry ``correct_index`` (or ``answer_source``), or the
-    key is readable from the network tab. The UI only needs
-    ``is_unknown``. The creator's test-detail preview still
-    returns the key (post-creation review, own bank) — assert
-    that split explicitly so a future refactor does not merge
-    the two shapes back together."""
+    key is readable from the network tab. The test-detail
+    endpoint follows the SAME rule now: the key is withheld
+    while the test is created or in progress, and is returned
+    only once the test is submitted (post-submit review). The
+    UI only needs ``is_unknown`` before then."""
     factory = engine_db
     session = factory()
     doc_id = uuid.uuid4()
@@ -611,15 +611,24 @@ def test_exam_session_withholds_answer_key(client, engine_db):
     assert res.status_code == 201, res.text
     test_id = res.json()["test_id"]
 
-    # The creator's own preview DOES show the key.
+    # The creator's own preview does NOT show the key while the
+    # test is still created — only is_unknown is sent.
     res = client.get(f"/api/v1/tests/{test_id}", headers=auth_headers("token-user-a"))
     assert res.status_code == 200, res.text
     detail_snaps = res.json()["snapshots"]
     assert len(detail_snaps) == 2
-    assert sorted(s["correct_index"] for s in detail_snaps) == [-1, 2]
+    assert all(s["correct_index"] is None for s in detail_snaps)
+    assert all(s["answer_source"] is None for s in detail_snaps)
+    by_text = {s["question_text"]: s for s in detail_snaps}
+    assert by_text["Scored question?"]["is_unknown"] is False
+    assert by_text["Unknown question?"]["is_unknown"] is True
 
     res = client.post(f"/api/v1/tests/{test_id}/start", headers=auth_headers("token-user-a"))
     assert res.status_code == 200, res.text
+    # Still withheld from the detail endpoint mid-test.
+    res = client.get(f"/api/v1/tests/{test_id}", headers=auth_headers("token-user-a"))
+    assert res.status_code == 200, res.text
+    assert all(s["correct_index"] is None for s in res.json()["snapshots"])
     res = client.get(f"/api/v1/tests/{test_id}/session", headers=auth_headers("token-user-a"))
     assert res.status_code == 200, res.text
     snaps = res.json()["snapshots"]
@@ -634,6 +643,14 @@ def test_exam_session_withholds_answer_key(client, engine_db):
     # The unknown snapshot still carries its options (rendered
     # disabled by the take page) but no key to leak.
     assert len(by_text["Unknown question?"]["options"]) == 4
+
+    # Once submitted, the detail endpoint returns the key for review.
+    res = client.post(f"/api/v1/tests/{test_id}/submit", headers=auth_headers("token-user-a"))
+    assert res.status_code == 200, res.text
+    res = client.get(f"/api/v1/tests/{test_id}", headers=auth_headers("token-user-a"))
+    assert res.status_code == 200, res.text
+    detail_snaps = res.json()["snapshots"]
+    assert sorted(s["correct_index"] for s in detail_snaps) == [-1, 2]
 
 
 def test_admin_questions_count_live_bank_only(client, engine_db):

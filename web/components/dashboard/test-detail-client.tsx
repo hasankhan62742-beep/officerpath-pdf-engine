@@ -34,6 +34,10 @@ import {
 import { formatDateTime } from "@/lib/utils";
 
 function snapshotToQuestionItem(snap: TestSnapshot): QuestionItem {
+  // The key is withheld (null) until the test is submitted:
+  // never render a correct option, and never label the
+  // question "unknown" when the key is merely hidden.
+  const keyWithheld = snap.correct_index === null;
   return {
     question_id: snap.question_id ?? snap.snapshot_id,
     document_id: snap.source_document_id ?? "",
@@ -44,14 +48,16 @@ function snapshotToQuestionItem(snap: TestSnapshot): QuestionItem {
     kind: snap.options.length === 0 ? "qa_pair" : "mcq",
     correct_index: snap.correct_index,
     correct_letter:
-      snap.correct_index >= 0 ? String.fromCharCode(65 + snap.correct_index) : "",
+      snap.correct_index !== null && snap.correct_index >= 0
+        ? String.fromCharCode(65 + snap.correct_index)
+        : "",
     answer_source: snap.answer_source ?? "",
     confidence: null,
     verified: false,
     inferred: false,
     corrected: false,
-    status: snap.correct_index >= 0 ? "answered" : "unknown",
-    answer_status: snap.correct_index >= 0 ? "detected" : "unknown",
+    status: snap.is_unknown ? "unknown" : keyWithheld ? "withheld" : "answered",
+    answer_status: keyWithheld ? "withheld" : snap.is_unknown ? "unknown" : "detected",
     page: snap.source_page,
     subjects: [],
     created_at: null,
@@ -160,7 +166,7 @@ export function TestDetailClient({ id }: { id: string }) {
   }
 
   const test = testQuery.data;
-  const unknownCount = test.snapshots.filter((s) => s.correct_index < 0).length;
+  const unknownCount = test.snapshots.filter((s) => s.is_unknown).length;
 
   return (
     <div className="space-y-6">
@@ -187,6 +193,7 @@ export function TestDetailClient({ id }: { id: string }) {
       <Alert tone="info" title="Preview — start the test to answer">
         These are the frozen questions this test will ask. Nothing here is an exam yet:
         your answers are not recorded and no score is calculated until you start the test.
+        The answer key is hidden until you submit the test.
       </Alert>
 
       {startError ? (

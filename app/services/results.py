@@ -637,7 +637,9 @@ def _new_test_detail(
 ) -> dict:
     snapshots = _session_snapshots(session, session_row)
     detail = _test_to_dict(session_row, template, marking)
-    detail["snapshots"] = [_snapshot_dict(row) for row in snapshots]
+    # The new session is always "created" — the key is withheld
+    # until it is submitted (same rule as get_test).
+    detail["snapshots"] = [_snapshot_dict(row, include_key=False) for row in snapshots]
     detail["excluded_unknown"] = template.excluded_unknown
     detail["excluded_no_options"] = template.excluded_no_options
     return detail
