@@ -1,0 +1,44 @@
+-- ============================================================
+-- OfficerPath AI — PDF Engine, migration 019_documents_content_hash.sql
+-- RUN ORDER: 19 — run AFTER 018 (and before re-running 017).
+-- HOW TO APPLY: Supabase Dashboard -> SQL Editor -> New query ->
+-- paste this file -> Run. DO NOT apply from the VM (no SQL access);
+-- applying needs the owner's go-ahead.
+-- No secrets or keys in this file. Safe to commit.
+--
+-- WHY IT EXISTS (found live 2026-11-23, while applying 017):
+-- migration 017 failed with ERROR 42703: column "content_hash"
+-- does not exist. The live public.documents table was never given
+-- a content_hash column, although 015's file defines it and the
+-- engine's Document model (app/db/models.py) expects it: the M1
+-- upload path writes the SHA-256 of the file bytes into
+-- content_hash on every upload (per-user dedup), and the M6
+-- partial unique index (017) is built on it. A read-only live
+-- column listing (2026-11-23) confirmed content_hash is the ONLY
+-- column missing from the live table — documents has 10 columns
+-- (id, user_id, title, storage_path, file_type, file_size_bytes,
+-- page_count, metadata, created_at, deleted_at via 018) and jobs
+-- matches 015 exactly (11 columns). The live table was evidently
+-- created by an earlier process, not by running 015.
+-- This migration adds ONLY that one nullable column, with the
+-- same CHECK as 015 (NULL or exactly 64 hex chars); it touches
+-- no rows and no other table, index, policy, or function.
+-- Existing rows all get NULL, which passes the CHECK.
+--
+-- IDEMPOTENT: safe to run even if the column already exists
+-- (IF NOT EXISTS guard).
+--
+-- VERIFY AFTER APPLYING: Dashboard -> SQL Editor ->
+--   select column_name, data_type from information_schema.columns
+--     where table_schema = 'public' and table_name = 'documents'
+--       and column_name = 'content_hash';
+--   -- expect one row: content_hash, text
+-- Then re-run 017 and verify its indexdef contains
+-- "WHERE deleted_at IS NULL".
+-- Reversal: 019_documents_content_hash_down.sql (drops the column;
+-- only safe while no rows carry a content_hash — check first).
+-- ============================================================
+
+alter table public.documents
+  add column if not exists content_hash text
+  check (content_hash is null or length(content_hash) = 64);
