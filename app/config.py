@@ -2,7 +2,24 @@
 # Settings. Secrets come ONLY from environment variables, never from code
 # or from files committed to the repo. `.env.example` shows placeholders only.
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+def normalize_database_url(url: str | None) -> str | None:
+    """Rewrite bare Postgres schemes to the psycopg (v3) dialect.
+
+    Supabase hands out plain ``postgresql://`` URLs; SQLAlchemy maps
+    that scheme to the psycopg2 dialect, which is NOT installed here
+    (requirements pin psycopg v3 only). Without the rewrite, the first
+    engine use raises ``ModuleNotFoundError: psycopg2`` — which crashed
+    the first Render deploy (2026-11-23) when /health checked the DB.
+    """
+    if url and url.startswith("postgresql://"):
+        return "postgresql+psycopg://" + url[len("postgresql://") :]
+    if url and url.startswith("postgres://"):
+        return "postgresql+psycopg://" + url[len("postgres://") :]
+    return url
 
 
 class Settings(BaseSettings):
@@ -163,6 +180,11 @@ class Settings(BaseSettings):
     @property
     def supabase_configured(self) -> bool:
         return bool(self.supabase_url and self.supabase_anon_key)
+
+    @field_validator("database_url", mode="after")
+    @classmethod
+    def _normalize_database_url(cls, v: str | None) -> str | None:
+        return normalize_database_url(v)
 
     @property
     def service_role_configured(self) -> bool:
