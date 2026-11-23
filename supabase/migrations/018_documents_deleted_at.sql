@@ -1,0 +1,37 @@
+-- ============================================================
+-- OfficerPath AI — PDF Engine, migration 018_documents_deleted_at.sql
+-- RUN ORDER: 18 — run AFTER 015 (and before re-running 017).
+-- HOW TO APPLY: Supabase Dashboard -> SQL Editor -> New query ->
+-- paste this file -> Run. DO NOT apply from the VM (no SQL access);
+-- applying needs the owner's go-ahead.
+-- No secrets or keys in this file. Safe to commit.
+--
+-- WHY IT EXISTS (found live 2026-11-23, while applying 017):
+-- migration 017 failed with ERROR 42703: column "deleted_at"
+-- does not exist. The live public.documents table (created by
+-- 015) was never given a deleted_at column, but the engine's
+-- Document model (app/db/models.py) and Alembic 0001/0006 both
+-- expect it: the M4 soft-delete path (DELETE /documents/{id}
+-- sets deleted_at) and the M6 partial unique index (017) both
+-- need the column. Without it, soft-delete would 500 live too.
+-- This migration adds ONLY that one nullable column; it touches
+-- no rows and no other table, index, policy, or function.
+-- The jobs table was checked at the same time: its model matches
+-- 015 exactly, so no second gap exists.
+--
+-- IDEMPOTENT: safe to run even if the column already exists
+-- (IF NOT EXISTS guard).
+--
+-- VERIFY AFTER APPLYING: Dashboard -> SQL Editor ->
+--   select column_name, data_type from information_schema.columns
+--     where table_schema = 'public' and table_name = 'documents'
+--       and column_name = 'deleted_at';
+--   -- expect one row: deleted_at, timestamp with time zone
+-- Then re-run 017 and verify its indexdef contains
+-- "WHERE deleted_at IS NULL".
+-- Reversal: 018_documents_deleted_at_down.sql (drops the column;
+-- only safe while no rows are soft-deleted — check first).
+-- ============================================================
+
+alter table public.documents
+  add column if not exists deleted_at timestamptz;
