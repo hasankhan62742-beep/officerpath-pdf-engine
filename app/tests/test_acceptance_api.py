@@ -14,6 +14,15 @@
 #   update it with a new measurement, not a guess.
 # - Paper 60 photo: 4 questions, 4 answered, 9 pending (M7 §2/§3).
 #
+# Fixtures are repo-relative (fixtures/golden/ppsc66, next to this
+# file) so the suite is self-contained on GitHub Actions — the
+# earlier absolute ~/workspace/officerpath-ai path exists only on
+# the dev VM and broke CI with FileNotFoundError (2026-11-23).
+# The Paper 60 pending count is OCR-segmentation sensitive (VM
+# measures 9, the GitHub runner 11 on the same file), so that one
+# count is a range, not an exact number — the exact invariants are
+# the answered questions and the shape of the pending items.
+#
 # These tests are slow (~3 min total: PPSC-66 single-path OCR is
 # ~130 s on this VM). They run the real Tesseract binary, so they
 # fail without it — same as the existing OCR tests (CI installs
@@ -27,9 +36,8 @@ from starlette.testclient import StarletteDeprecationWarning
 from app.tests.conftest import auth_headers
 
 FIX = Path(__file__).resolve().parent / "fixtures/golden/ppsc66"
-FLUTTER_FIX = Path("~/workspace/officerpath-ai/test-fixtures/ppsc66").expanduser()
-PPSC66_PDF = FLUTTER_FIX / "ppsc_paper_66.pdf"
-TABLE_PHOTO = FLUTTER_FIX / "table-computer-q67-81-resent-20261121.jpg"
+PPSC66_PDF = FIX / "ppsc_paper_66.pdf"
+TABLE_PHOTO = FIX / "table-computer-q67-81-resent-20261121.jpg"
 PAPER60_PHOTO = FIX / "paper60-photo.jpg"
 
 # The sync parse of a 7-page scan takes ~130 s; the TestClient's
@@ -98,6 +106,34 @@ def test_acceptance_paper60_photo_via_parse_image(client) -> None:
     assert body["is_digital"] is False
     assert body["page_count"] == 1
     matched = body["matched"]
+    # The 4 star-marked questions resolve on every Tesseract build
+    # measured (VM 5.3.4 and the GitHub runner): 4 found, 4 answered.
     assert matched["counts"]["questions"] == 4
     assert matched["answered"] == 4
-    assert len(matched["pending"]) == 9
+
+    # The three clean-English star-marked answers must resolve to
+    # the exact option text — this is the ground truth the star
+    # marks carry, not an OCR-count artefact.
+    def _answered(fragment: str) -> dict:
+        hits = [q for q in matched["questions"] if fragment in (q["text"] or "")]
+        assert len(hits) == 1, fragment
+        return hits[0]
+
+    q = _answered("A computer on network is identified by its")
+    assert q["correct_index"] == 2 and q["options"][2] == "IP Address"
+    q = _answered("generally used in architectural design")
+    assert q["correct_index"] == 2 and q["options"][2] == "Auto CAD"
+    q = _answered("Another name for free software")
+    assert q["correct_index"] == 3 and q["options"][3] == "Public Domain Software"
+    assert all(q["answer_source"] == "style-star" for q in matched["questions"])
+    # Pending (unresolved question-like fragments) is
+    # OCR-segmentation sensitive — VM measures 9, the GitHub runner
+    # measures 11 on the same file — so it is pinned as a range
+    # that brackets both measured environments, with its shape
+    # pinned exactly: every pending item is an unanswered
+    # 4-option fragment.
+    pending = matched["pending"]
+    assert 8 <= len(pending) <= 12
+    assert matched["counts"]["pending"] == len(pending)
+    assert all(p["reason"] == "no-key-entry" for p in pending)
+    assert all(len(p["options"]) == 4 for p in pending)

@@ -65,3 +65,16 @@ Pak Affairs notes) were copied md5-verified from the same source
 folder. Ground truth for the digital ones was extracted
 programmatically — see scripts/extract_golden_v2_ground_truth.py
 and the ppsc66/ground_truth_*.json / extracted_*.json files.
+
+## Golden dataset v3 (CI fix, 2026-11-23) — added fixtures
+
+- `ppsc_paper_66.pdf` — copied md5-verified from the same source
+  folder. The Phase 1 acceptance test (test_acceptance_api.py)
+  pointed at the Flutter repo's copy via an absolute VM-only path
+  (`~/workspace/officerpath-ai/...`), which does not exist on
+  GitHub Actions — the repo copy makes the acceptance suite
+  self-contained so CI can run it. The Flutter repo remains the
+  source of truth and is NEVER modified by the engine.
+- `paper60-photo.jpg` was already in this directory (added M4,
+  commit 111f3f2) but was missing from this list — recorded here
+  for completeness.
