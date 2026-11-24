@@ -23,6 +23,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ApiError, getSessionToken, listAdminQuestions } from "@/lib/api";
+import { formatMathText } from "@/lib/mathText";
 
 const PAGE_SIZE = 20;
 
@@ -131,7 +132,10 @@ export default function AdminQuestionsPage() {
                     href={`/dashboard/questions/${q.id}`}
                     className="font-medium text-brand-700 underline"
                   >
-                    {q.text.length > 90 ? `${q.text.slice(0, 90)}…` : q.text}
+                    {(() => {
+                      const plain = formatMathText(q.text);
+                      return plain.length > 90 ? `${plain.slice(0, 90)}…` : plain;
+                    })()}
                   </Link>
                   {q.question_number && (
                     <span className="block text-xs text-slate-500">Q{q.question_number}</span>

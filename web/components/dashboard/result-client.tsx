@@ -42,6 +42,7 @@ import {
   type BreakdownItem,
   type ReviewItem,
 } from "@/lib/api";
+import { formatMathText } from "@/lib/mathText";
 import { formatDateTime } from "@/lib/utils";
 
 function formatDuration(seconds: number): string {
@@ -360,7 +361,7 @@ export function ResultClient({ id }: { id: string }) {
                 {item.marked_for_review ? <Badge tone="accent">Marked for review</Badge> : null}
                 {item.is_mistake ? <Badge tone="danger">Mistake</Badge> : null}
               </div>
-              <p className="mt-2 whitespace-pre-wrap text-slate-800">{item.question_text}</p>
+              <p className="mt-2 whitespace-pre-wrap text-slate-800">{formatMathText(item.question_text)}</p>
               {item.options.length > 0 ? (
                 <ul className="mt-3 space-y-1">
                   {item.options.map((opt, idx) => {
@@ -378,7 +379,7 @@ export function ResultClient({ id }: { id: string }) {
                         }
                       >
                         <span className="font-semibold">{optionLetter(idx)}. </span>
-                        {opt.text}
+                        {formatMathText(opt.text)}
                         {isCorrect ? " — stored answer" : ""}
                         {isSelected && !isCorrect ? " — your answer" : ""}
                         {isSelected && isCorrect ? " — your answer" : ""}
@@ -406,7 +407,7 @@ export function ResultClient({ id }: { id: string }) {
                 <div className="mt-3 rounded-md bg-info-50 px-3 py-2 ring-1 ring-info-200">
                   <p className="text-xs font-semibold text-info-800">Explanation</p>
                   <p className="mt-1 whitespace-pre-wrap text-sm text-info-900">
-                    {item.explanation}
+                    {formatMathText(item.explanation)}
                   </p>
                 </div>
               ) : item.status === "incorrect" ? (

@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:math": "tsc lib/mathText.ts lib/mathText.test.ts --module commonjs --target es2022 --outDir /tmp/mathtext-test-build --skipLibCheck && node --test /tmp/mathtext-test-build/mathText.test.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^7.0.8",

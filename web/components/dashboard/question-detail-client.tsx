@@ -33,6 +33,7 @@ import {
   submitCorrection,
   unassignSubject,
 } from "@/lib/api";
+import { formatMathText } from "@/lib/mathText";
 import { formatDateTime } from "@/lib/utils";
 
 const ANSWER_LETTERS = ["A", "B", "C", "D"];
@@ -210,7 +211,7 @@ export function QuestionDetailClient({ id }: { id: string }) {
           </Link>
         </div>
         <p className="mt-3 text-base leading-relaxed text-slate-900" dir="auto">
-          {item.text}
+          {formatMathText(item.text)}
         </p>
         <QuestionOptions item={item} />
         <AnswerLine item={item} />
@@ -310,7 +311,7 @@ export function QuestionDetailClient({ id }: { id: string }) {
                     <option key={letter} value={letter}>
                       {letter}
                       {item.options[letter.charCodeAt(0) - 65]
-                        ? ` — ${item.options[letter.charCodeAt(0) - 65]}`
+                        ? ` — ${formatMathText(item.options[letter.charCodeAt(0) - 65])}`
                         : ""}
                     </option>
                   ),

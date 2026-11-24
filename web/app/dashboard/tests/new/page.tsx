@@ -36,6 +36,7 @@ import {
   type QuestionItem,
   type TestSourceType,
 } from "@/lib/api";
+import { formatMathText } from "@/lib/mathText";
 import { cn } from "@/lib/utils";
 
 type SourceMode = "all" | "documents" | "subjects" | "topics" | "explicit";
@@ -605,7 +606,7 @@ export default function NewTestPage() {
                       className="flex items-start justify-between gap-3 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm"
                     >
                       <span>
-                        {pick.text}
+                        {formatMathText(pick.text)}
                         {pick.correct_index !== null && pick.correct_index < 0 ? (
                           <span className="ml-2 font-semibold text-amber-700">
                             — unknown answer
@@ -637,7 +638,7 @@ export default function NewTestPage() {
                     className="flex items-start justify-between gap-3 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm"
                   >
                     <span>
-                      {question.text}
+                      {formatMathText(question.text)}
                       <span className="ml-2 text-xs text-slate-500">
                         {question.document_title}
                       </span>
@@ -734,7 +735,7 @@ export default function NewTestPage() {
                   <ul className="mt-1 list-disc pl-5 text-sm text-slate-700">
                     {availabilityQuery.data.sample.map((item) => (
                       <li key={item.question_id}>
-                        {item.text}
+                        {formatMathText(item.text)}
                         {item.correct_index < 0 ? (
                           <span className="font-semibold text-amber-700">
                             {" "}— unknown answer

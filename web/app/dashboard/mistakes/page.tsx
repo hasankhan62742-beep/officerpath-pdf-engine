@@ -32,6 +32,7 @@ import {
   updateCollectionNote,
   type CollectionItem,
 } from "@/lib/api";
+import { formatMathText } from "@/lib/mathText";
 import { formatDateTime } from "@/lib/utils";
 
 const PAGE_SIZE = 20;
@@ -83,7 +84,7 @@ function MistakeCard({
         </div>
         {q ? (
           <>
-            <p className="mt-2 whitespace-pre-wrap text-slate-800">{q.text}</p>
+            <p className="mt-2 whitespace-pre-wrap text-slate-800">{formatMathText(q.text)}</p>
             {q.options.length > 0 ? (
               <ul className="mt-3 space-y-1">
                 {q.options.map((text, idx) => {
@@ -98,7 +99,7 @@ function MistakeCard({
                       }
                     >
                       <span className="font-semibold">{String.fromCharCode(65 + idx)}. </span>
-                      {text}
+                      {formatMathText(text)}
                       {isCorrect ? " — stored answer" : ""}
                     </li>
                   );
@@ -117,7 +118,7 @@ function MistakeCard({
             {q.explanation ? (
               <div className="mt-3 rounded-md bg-info-50 px-3 py-2 ring-1 ring-info-200">
                 <p className="text-xs font-semibold text-info-800">Explanation</p>
-                <p className="mt-1 whitespace-pre-wrap text-sm text-info-900">{q.explanation}</p>
+                <p className="mt-1 whitespace-pre-wrap text-sm text-info-900">{formatMathText(q.explanation)}</p>
               </div>
             ) : (
               <p className="mt-3 text-sm text-slate-600">

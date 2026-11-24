@@ -32,6 +32,7 @@ import {
   submitTest,
   type ExamResult,
 } from "@/lib/api";
+import { formatMathText } from "@/lib/mathText";
 import { cn } from "@/lib/utils";
 
 type AnswerState = { selected_index: number | null; marked_for_review: boolean };
@@ -541,7 +542,9 @@ export function ExamClient({ id }: { id: string }) {
               {answer?.marked_for_review ? <Badge tone="accent">Marked for review</Badge> : null}
             </div>
             <p className="mt-3 text-base font-medium leading-relaxed text-slate-900">
-              {currentSnap?.question_text}
+              {currentSnap?.question_text
+                ? formatMathText(currentSnap.question_text)
+                : null}
             </p>
 
             {hasNoOptions ? (
@@ -579,7 +582,7 @@ export function ExamClient({ id }: { id: string }) {
                       >
                         {option.label}
                       </span>
-                      <span className="leading-relaxed text-slate-900">{option.text}</span>
+                      <span className="leading-relaxed text-slate-900">{formatMathText(option.text)}</span>
                     </button>
                   );
                 })}

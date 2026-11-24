@@ -13,6 +13,7 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { answerSourceLabel, type QuestionItem } from "@/lib/api";
+import { formatMathText } from "@/lib/mathText";
 
 const OPTION_LETTERS = ["A", "B", "C", "D", "E", "F", "G", "H"];
 
@@ -74,7 +75,7 @@ export function QuestionOptions({ item }: { item: QuestionItem }) {
             <span className="mr-2 font-semibold">
               {OPTION_LETTERS[index] ?? `(${index + 1})`}.
             </span>
-            {option}
+            {formatMathText(option)}
             {isCorrect ? (
               <span className="ml-2 font-semibold text-success-800">— correct</span>
             ) : null}
@@ -112,7 +113,7 @@ export function AnswerLine({ item }: { item: QuestionItem }) {
       <strong>
         Answer: {item.correct_letter}
         {item.options[item.correct_index]
-          ? ` — ${item.options[item.correct_index]}`
+          ? ` — ${formatMathText(item.options[item.correct_index])}`
           : ""}
       </strong>
       {" · "}
@@ -167,8 +168,8 @@ export function QuestionResultCard({
           </Link>
         </p>
       ) : null}
-      <p className="mt-2 text-sm leading-relaxed text-slate-900" dir="auto">
-        {item.text}
+      <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-slate-900" dir="auto">
+        {formatMathText(item.text)}
       </p>
       <QuestionOptions item={item} />
       <AnswerLine item={item} />

@@ -39,10 +39,18 @@ import {
   type BankStatus,
   type QuestionItem,
 } from "@/lib/api";
+import { formatMathText } from "@/lib/mathText";
 import { cn } from "@/lib/utils";
 
 const PAGE_SIZE = 20;
 const READ_PAGE_SIZE = 10;
+
+/** Truncate AFTER plain-text conversion, so a LaTeX-heavy
+ * question is cut on its readable form, not its raw form. */
+function truncateMathText(text: string, max: number): string {
+  const plain = formatMathText(text);
+  return plain.length > max ? `${plain.slice(0, max)}…` : plain;
+}
 
 type ConfidenceBand = "all" | "high" | "medium" | "low";
 
@@ -424,7 +432,7 @@ export default function QuestionsPage() {
                         className="font-medium text-brand-700 hover:underline"
                       >
                         {q.number ? `Q${q.number} — ` : ""}
-                        {q.text.length > 120 ? `${q.text.slice(0, 120)}…` : q.text}
+                        {truncateMathText(q.text, 120)}
                       </Link>
                       <div className="mt-1">
                         <QuestionBadges item={q} />
@@ -664,7 +672,7 @@ function ReadingCard({ q, position }: { q: QuestionItem; position: number }) {
         Question {position}
         {q.number ? <span className="font-normal text-slate-500"> (Q{q.number})</span> : null}
       </p>
-      <p className="mt-2 text-slate-900">{q.text}</p>
+      <p className="mt-2 text-slate-900">{formatMathText(q.text)}</p>
       {q.options.length > 0 ? (
         <ol className="mt-3 space-y-2">
           {q.options.map((option, i) => {
@@ -680,7 +688,7 @@ function ReadingCard({ q, position }: { q: QuestionItem; position: number }) {
                 )}
               >
                 <span className="font-semibold">{String.fromCharCode(65 + i)}.</span>
-                <span>{option}</span>
+                <span>{formatMathText(option)}</span>
                 {isCorrect ? (
                   <span className="ml-auto shrink-0 text-xs font-semibold">Correct answer</span>
                 ) : null}
@@ -701,7 +709,7 @@ function ReadingCard({ q, position }: { q: QuestionItem; position: number }) {
       {q.explanation ? (
         <div className="mt-3 rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-700">
           <p className="font-semibold text-slate-900">Explanation</p>
-          <p className="mt-1">{q.explanation}</p>
+          <p className="mt-1 whitespace-pre-wrap">{formatMathText(q.explanation)}</p>
         </div>
       ) : (
         <p className="mt-3 text-sm text-slate-500">
