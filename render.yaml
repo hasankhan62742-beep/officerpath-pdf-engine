@@ -13,7 +13,7 @@ services:
     runtime: docker
     plan: free
     repo: https://github.com/hasankhan62742-beep/officerpath-pdf-engine
-    branch: officerpath-phase2-web
+    branch: main
     dockerfilePath: ./Dockerfile
     healthCheckPath: /health
     envVars:
