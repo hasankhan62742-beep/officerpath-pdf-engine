@@ -52,6 +52,7 @@ function snapshotToQuestionItem(snap: TestSnapshot): QuestionItem {
         ? String.fromCharCode(65 + snap.correct_index)
         : "",
     answer_source: snap.answer_source ?? "",
+    explanation: snap.explanation ?? null,
     confidence: null,
     verified: false,
     inferred: false,

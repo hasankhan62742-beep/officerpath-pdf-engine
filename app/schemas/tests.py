@@ -113,6 +113,13 @@ class TestCreateRequest(BaseModel):
     allow_repetition: bool = False
     include_unknown: bool = False
     time_limit_seconds: int | None = None
+    # M12 — question range (1-based, inclusive positions into the
+    # chosen section's bank-ordered candidate pool). Only valid
+    # with source_type "topics" and exactly ONE topic id; both
+    # must be given together. The maximum is the section's live
+    # available count — there is no fixed cap.
+    question_range_start: int | None = None
+    question_range_end: int | None = None
 
 
 class TestUpdateRequest(BaseModel):
@@ -129,11 +136,25 @@ class AvailabilitySampleItem(BaseModel):
     correct_index: int  # -1 = UNKNOWN (only when include_unknown)
 
 
+class TopicAvailability(BaseModel):
+    """M12 — per-topic counts for one requested topic id.
+    Returned only when source_type is "topics" and no range is
+    given. Topics with no available questions are included
+    with available 0, so the UI can show every section tab."""
+
+    topic_id: str
+    topic_name: str
+    available: int
+    excluded_unknown: int
+    excluded_no_options: int
+
+
 class AvailabilityResponse(BaseModel):
     available: int
     excluded_unknown: int
     excluded_no_options: int
     sample: list[AvailabilitySampleItem]
+    by_topic: list[TopicAvailability] | None = None
 
 
 class ScoreItem(BaseModel):

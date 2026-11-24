@@ -26,6 +26,7 @@ import {
   createTest,
   getSessionToken,
   getTestAvailability,
+  groupTopicsBySection,
   listDocuments,
   listMarkingConfigs,
   listQuestions,
@@ -37,12 +38,13 @@ import {
 } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
-type SourceMode = "all" | "documents" | "subjects" | "explicit";
+type SourceMode = "all" | "documents" | "subjects" | "topics" | "explicit";
 
 const SOURCE_LABELS: Record<SourceMode, string> = {
   all: "All my questions",
   documents: "From specific documents",
   subjects: "From specific subjects",
+  topics: "From specific sections",
   explicit: "Pick questions myself",
 };
 
@@ -53,6 +55,14 @@ export default function NewTestPage() {
   const [sourceMode, setSourceMode] = useState<SourceMode>("all");
   const [documentIds, setDocumentIds] = useState<string[]>([]);
   const [subjectIds, setSubjectIds] = useState<string[]>([]);
+  // M12 — sections mode: one subject, then its sections
+  // (subtopic groups such as "Synonyms") as selectable tabs.
+  const [topicsSubjectId, setTopicsSubjectId] = useState("");
+  const [selectedSections, setSelectedSections] = useState<string[]>([]);
+  // M12 — question range, only when exactly one section is
+  // selected. Empty means "the whole section".
+  const [rangeStart, setRangeStart] = useState("");
+  const [rangeEnd, setRangeEnd] = useState("");
   const [picks, setPicks] = useState<QuestionItem[]>([]);
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
@@ -105,11 +115,106 @@ export default function NewTestPage() {
     [configsQuery.data],
   );
 
+  // M12 — sections mode: the chosen subject's sections, with
+  // per-section question counts. The subject defaults to the
+  // first one that has sections.
+  const topicsSubject = useMemo(
+    () =>
+      subjectsQuery.data?.subjects.find((s) => s.id === topicsSubjectId) ??
+      subjectsQuery.data?.subjects.find((s) => s.topics.length > 0),
+    [subjectsQuery.data, topicsSubjectId],
+  );
+  const topicGroups = useMemo(
+    () => (topicsSubject ? groupTopicsBySection(topicsSubject.topics) : []),
+    [topicsSubject],
+  );
+  const selectedTopicIds = useMemo(
+    () =>
+      topicGroups
+        .filter((group) => selectedSections.includes(group.name))
+        .flatMap((group) => group.topicIds),
+    [topicGroups, selectedSections],
+  );
+  const allTopicIdsOfSubject = useMemo(
+    () => topicGroups.flatMap((group) => group.topicIds),
+    [topicGroups],
+  );
+  const sectionCountsQuery = useQuery({
+    queryKey: ["section-counts", topicsSubject?.id, includeUnknown],
+    enabled: sourceMode === "topics" && allTopicIdsOfSubject.length > 0,
+    queryFn: async () => {
+      const token = await getSessionToken();
+      if (!token) throw new Error("Your session has expired. Please log in again.");
+      return getTestAvailability(token, {
+        source_type: "topics",
+        topic_ids: allTopicIdsOfSubject,
+        include_unknown: includeUnknown,
+      });
+    },
+  });
+  const sectionCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const group of topicGroups) {
+      let total = 0;
+      let known = false;
+      for (const topicId of group.topicIds) {
+        const row = sectionCountsQuery.data?.by_topic?.find((t) => t.topic_id === topicId);
+        if (row) {
+          total += row.available;
+          known = true;
+        }
+      }
+      counts.set(group.name, known ? total : -1);
+    }
+    return counts;
+  }, [topicGroups, sectionCountsQuery.data]);
+  const singleSection =
+    selectedSections.length === 1
+      ? topicGroups.find((group) => group.name === selectedSections[0])
+      : undefined;
+  const singleSectionTotal =
+    singleSection === undefined ? undefined : sectionCounts.get(singleSection.name);
+  const rangeStartNum = rangeStart.trim() === "" ? null : Number(rangeStart);
+  const rangeEndNum = rangeEnd.trim() === "" ? null : Number(rangeEnd);
+  const rangeSet = rangeStartNum !== null || rangeEndNum !== null;
+  const rangeValid =
+    !rangeSet ||
+    (singleSection !== undefined &&
+      rangeStartNum !== null &&
+      rangeEndNum !== null &&
+      Number.isInteger(rangeStartNum) &&
+      Number.isInteger(rangeEndNum) &&
+      rangeStartNum >= 1 &&
+      rangeEndNum >= rangeStartNum &&
+      singleSectionTotal !== undefined &&
+      singleSectionTotal >= 0 &&
+      rangeEndNum <= singleSectionTotal);
+  const rangeError = rangeSet
+    ? singleSection === undefined
+      ? "A range needs exactly one section selected."
+      : singleSectionTotal === undefined || singleSectionTotal < 0
+        ? "Still loading how many questions this section holds…"
+        : rangeStartNum === null || rangeEndNum === null
+          ? "Enter both ends of the range."
+          : !Number.isInteger(rangeStartNum) || !Number.isInteger(rangeEndNum)
+            ? "The range must be whole question numbers."
+            : rangeStartNum < 1 || rangeEndNum < rangeStartNum
+              ? "The range must start at 1 or later, and end at or after where it starts."
+              : rangeEndNum > singleSectionTotal
+                ? `This section holds ${singleSectionTotal} question${singleSectionTotal === 1 ? "" : "s"} — the range cannot go past ${singleSectionTotal}.`
+                : ""
+    : "";
+  const rangeForRequest =
+    rangeSet && rangeValid && rangeStartNum !== null && rangeEndNum !== null
+      ? { start: rangeStartNum, end: rangeEndNum }
+      : null;
+
   const availabilityReady =
     !isExplicit &&
     (sourceMode === "all" ||
       (sourceMode === "documents" && documentIds.length > 0) ||
-      (sourceMode === "subjects" && subjectIds.length > 0));
+      (sourceMode === "subjects" && subjectIds.length > 0) ||
+      (sourceMode === "topics" && selectedTopicIds.length > 0));
 
   const availabilityQuery = useQuery({
     queryKey: [
@@ -117,6 +222,8 @@ export default function NewTestPage() {
       sourceMode,
       documentIds,
       subjectIds,
+      selectedTopicIds,
+      rangeForRequest,
       includeUnknown,
     ],
     enabled: availabilityReady,
@@ -127,7 +234,10 @@ export default function NewTestPage() {
         source_type: sourceMode as TestSourceType,
         document_ids: documentIds.length ? documentIds : undefined,
         subject_ids: subjectIds.length ? subjectIds : undefined,
+        topic_ids: selectedTopicIds.length ? selectedTopicIds : undefined,
         include_unknown: includeUnknown,
+        question_range_start: rangeForRequest?.start,
+        question_range_end: rangeForRequest?.end,
       });
     },
   });
@@ -151,6 +261,7 @@ export default function NewTestPage() {
   const canCreate =
     name.trim().length > 0 &&
     (isExplicit ? picks.length > 0 : !countTooHigh && availabilityReady) &&
+    (!rangeSet || rangeValid) &&
     !creating;
 
   function toggleId(list: string[], id: string, setList: (next: string[]) => void) {
@@ -175,9 +286,13 @@ export default function NewTestPage() {
             ? documentIds
             : sourceMode === "subjects"
               ? subjectIds
-              : sourceMode === "explicit"
-                ? picks.map((p) => p.question_id)
-                : null,
+              : sourceMode === "topics"
+                ? selectedTopicIds
+                : sourceMode === "explicit"
+                  ? picks.map((p) => p.question_id)
+                  : null,
+        question_range_start: rangeForRequest?.start ?? null,
+        question_range_end: rangeForRequest?.end ?? null,
         marking_config_id:
           markingChoice === "custom" ? null : markingChoice === "default" ? null : markingChoice,
         marking:
@@ -316,6 +431,145 @@ export default function NewTestPage() {
                   {subject.name}
                 </button>
               ))}
+            </div>
+          )
+        ) : null}
+
+        {sourceMode === "topics" ? (
+          subjectsQuery.isPending ? (
+            <p className="flex items-center gap-2 text-sm text-slate-600">
+              <Spinner /> Loading subjects…
+            </p>
+          ) : subjectsQuery.isError || !subjectsQuery.data ? (
+            <ErrorState
+              title="Could not load subjects"
+              description="The engine did not answer."
+              onRetry={() => subjectsQuery.refetch()}
+            />
+          ) : (
+            <div className="space-y-3">
+              <div>
+                <p className="text-sm font-medium text-slate-900">Subject</p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {subjectsQuery.data.subjects
+                    .filter((subject) => subject.topics.length > 0)
+                    .map((subject) => (
+                      <button
+                        key={subject.id}
+                        type="button"
+                        onClick={() => {
+                          // A new subject resets the section + range
+                          // picks (each subject has its own sections).
+                          setTopicsSubjectId(subject.id);
+                          setSelectedSections([]);
+                          setRangeStart("");
+                          setRangeEnd("");
+                        }}
+                        aria-pressed={topicsSubject?.id === subject.id}
+                        className={cn(
+                          "rounded-full border px-4 py-2 text-sm",
+                          topicsSubject?.id === subject.id
+                            ? "border-brand-600 bg-brand-600 font-semibold text-white"
+                            : "border-slate-300 text-slate-700 hover:bg-slate-50",
+                        )}
+                      >
+                        {subject.name}
+                      </button>
+                    ))}
+                </div>
+              </div>
+              {topicsSubject ? (
+                <div>
+                  <p className="text-sm font-medium text-slate-900">
+                    Sections of {topicsSubject.name} — pick one or more
+                  </p>
+                  {sectionCountsQuery.isPending ? (
+                    <p className="mt-2 flex items-center gap-2 text-sm text-slate-600">
+                      <Spinner /> Counting questions per section…
+                    </p>
+                  ) : (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {topicGroups.map((group) => {
+                        const count = sectionCounts.get(group.name);
+                        const selected = selectedSections.includes(group.name);
+                        return (
+                          <button
+                            key={group.name}
+                            type="button"
+                            onClick={() => toggleId(selectedSections, group.name, setSelectedSections)}
+                            aria-pressed={selected}
+                            className={cn(
+                              "rounded-full border px-4 py-2 text-sm",
+                              selected
+                                ? "border-brand-600 bg-brand-600 font-semibold text-white"
+                                : "border-slate-300 text-slate-700 hover:bg-slate-50",
+                            )}
+                          >
+                            {group.name}
+                            {count !== undefined && count >= 0 ? (
+                              <span className={cn("ml-2 text-xs", selected ? "text-white" : "text-slate-500")}>
+                                {count}
+                              </span>
+                            ) : null}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              ) : null}
+              {singleSection ? (
+                <div className="max-w-xl space-y-2">
+                  <p className="text-sm font-medium text-slate-900">
+                    Only part of this section? (optional)
+                  </p>
+                  <p className="text-sm text-slate-600">
+                    {singleSection.name} holds{" "}
+                    {singleSectionTotal !== undefined && singleSectionTotal >= 0
+                      ? `${singleSectionTotal} question${singleSectionTotal === 1 ? "" : "s"}`
+                      : "…"}{" "}
+                    — enter a range to test only the part you have read, e.g. 1 to 500.
+                    Leave both empty for the whole section.
+                  </p>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <Input
+                      label="From question"
+                      type="number"
+                      min={1}
+                      max={
+                        singleSectionTotal !== undefined && singleSectionTotal >= 0
+                          ? singleSectionTotal
+                          : undefined
+                      }
+                      value={rangeStart}
+                      onChange={(e) => setRangeStart(e.target.value)}
+                      placeholder="1"
+                    />
+                    <Input
+                      label="To question"
+                      type="number"
+                      min={1}
+                      max={
+                        singleSectionTotal !== undefined && singleSectionTotal >= 0
+                          ? singleSectionTotal
+                          : undefined
+                      }
+                      value={rangeEnd}
+                      onChange={(e) => setRangeEnd(e.target.value)}
+                      placeholder={
+                        singleSectionTotal !== undefined && singleSectionTotal >= 0
+                          ? String(singleSectionTotal)
+                          : ""
+                      }
+                    />
+                  </div>
+                  {rangeError ? (
+                    <Alert tone="warning" title="Check the range">
+                      {rangeError}
+                    </Alert>
+                  ) : null}
+                </div>
+              ) : null}
             </div>
           )
         ) : null}
@@ -460,6 +714,12 @@ export default function NewTestPage() {
                   : ""}
                 .
               </p>
+              {rangeForRequest && singleSection ? (
+                <p className="text-sm text-slate-700">
+                  From questions {rangeForRequest.start}–{rangeForRequest.end} of{" "}
+                  {singleSection.name} — the test will draw only from this range.
+                </p>
+              ) : null}
               {countTooHigh ? (
                 <Alert tone="warning" title="Not enough questions">
                   Only {availabilityQuery.data.available} question
@@ -489,8 +749,13 @@ export default function NewTestPage() {
           ) : null
         ) : (
           <p className="text-sm text-slate-600">
-            Select at least one {sourceMode === "documents" ? "document" : "subject"} to
-            see how many questions are available.
+            Select at least one{" "}
+            {sourceMode === "documents"
+              ? "document"
+              : sourceMode === "topics"
+                ? "section"
+                : "subject"}{" "}
+            to see how many questions are available.
           </p>
         )}
       </section>

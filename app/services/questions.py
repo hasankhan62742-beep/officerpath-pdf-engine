@@ -204,6 +204,11 @@ def _to_item(
         "correct_index": correct_index,
         "correct_letter": chr(65 + correct_index) if 0 <= correct_index < 26 else "",
         "answer_source": (answer.resolution_method or "") if answer else "",
+        # Stored verbatim explanation (M10); None when the source
+        # gave none — never invented. Reading mode shows it
+        # underneath the question; test snapshots withhold it
+        # until submission (see tests.py _snapshot_dict).
+        "explanation": row.explanation,
         "confidence": answer.resolution_score if answer else None,
         "verified": bool(
             answer and answer.status in ("verified_explicit_key", "manually_verified")

@@ -370,6 +370,10 @@ export interface QuestionItem {
   correct_index: number | null;
   correct_letter: string;
   answer_source: string;
+  // Stored verbatim explanation (M10); null when the source
+  // gave none — never invented. Reading mode shows it under
+  // the question.
+  explanation: string | null;
   confidence: number | null;
   verified: boolean;
   inferred: boolean;
@@ -655,6 +659,10 @@ export interface TestSnapshot {
   // -1 = UNKNOWN (explicit opt-in only); >= 0 = the answer.
   correct_index: number | null;
   answer_source: string | null;
+  // Stored verbatim explanation, frozen at test creation (M10).
+  // null pre-submit (withheld with the key) or when the bank
+  // holds none — never invented.
+  explanation: string | null;
   // True when the frozen correct_index is -1. Always present,
   // so the UI can flag unknown questions without the key.
   is_unknown: boolean;
@@ -710,6 +718,10 @@ export interface TestCreateInput {
   allow_repetition?: boolean;
   include_unknown?: boolean;
   time_limit_seconds?: number | null;
+  // M12 — 1-based inclusive positions into the chosen
+  // section's bank-ordered pool. Single-section only.
+  question_range_start?: number | null;
+  question_range_end?: number | null;
 }
 
 export interface AvailabilitySample {
@@ -721,11 +733,22 @@ export interface AvailabilitySample {
   correct_index: number;
 }
 
+export interface TopicAvailability {
+  topic_id: string;
+  topic_name: string;
+  available: number;
+  excluded_unknown: number;
+  excluded_no_options: number;
+}
+
 export interface Availability {
   available: number;
   excluded_unknown: number;
   excluded_no_options: number;
   sample: AvailabilitySample[];
+  // M12 — per-topic counts, only when source_type is "topics"
+  // and no range is given.
+  by_topic?: TopicAvailability[] | null;
 }
 
 export const QUICK_COUNTS = [25, 50, 100, 150, 200] as const;
@@ -761,6 +784,8 @@ export async function getTestAvailability(
     subject_ids?: string[];
     topic_ids?: string[];
     include_unknown?: boolean;
+    question_range_start?: number | null;
+    question_range_end?: number | null;
   },
 ): Promise<Availability> {
   const params = new URLSearchParams();
@@ -769,7 +794,70 @@ export async function getTestAvailability(
   for (const id of opts.subject_ids ?? []) params.append("subject_ids", id);
   for (const id of opts.topic_ids ?? []) params.append("topic_ids", id);
   if (opts.include_unknown) params.set("include_unknown", "true");
+  if (opts.question_range_start != null)
+    params.set("question_range_start", String(opts.question_range_start));
+  if (opts.question_range_end != null)
+    params.set("question_range_end", String(opts.question_range_end));
   return request<Availability>(`/api/v1/tests/availability?${params}`, accessToken);
+}
+
+export async function listSectionQuestions(
+  accessToken: string,
+  topicIds: string[],
+  opts: { limit?: number; offset?: number } = {},
+): Promise<QuestionListResponse> {
+  const params = new URLSearchParams();
+  for (const id of topicIds) params.append("topic_ids", id);
+  params.set("limit", String(opts.limit ?? 20));
+  params.set("offset", String(opts.offset ?? 0));
+  return request<QuestionListResponse>(
+    `/api/v1/tests/sections/questions?${params}`,
+    accessToken,
+  );
+}
+
+export interface TopicSectionGroup {
+  /** Display name of the section, e.g. "Synonyms". */
+  name: string;
+  /** Topic ids of the section's parts, in section order. */
+  topicIds: string[];
+}
+
+/**
+ * Group a subject's topics into user-facing sections (M12).
+ * The bank import names one topic per (subtopic, section)
+ * group — "Synonyms — Section 1", "Synonyms — Section 2" —
+ * but a student picks the section "Synonyms" as one tab, so
+ * topics sharing a base name collapse into one group. A
+ * topic without a " — Section N" suffix is its own group.
+ * Topic ids inside a group are ordered by section number
+ * (names alone would sort "Section 10" before "Section 2").
+ */
+export function groupTopicsBySection(topics: SubjectTopic[]): TopicSectionGroup[] {
+  function sectionIndex(topic: SubjectTopic): number {
+    const fromSlug = /-s(\d+)$/.exec(topic.slug);
+    if (fromSlug) return Number(fromSlug[1]);
+    const fromName = /—\s*Section\s+(\d+)\s*$/.exec(topic.name);
+    if (fromName) return Number(fromName[1]);
+    return 0;
+  }
+  const groups = new Map<string, { name: string; parts: { id: string; index: number }[] }>();
+  for (const topic of topics) {
+    const base = topic.name.replace(/\s+—\s+Section\s+\d+\s*$/, "").trim() || topic.name;
+    const existing = groups.get(base);
+    if (!existing) {
+      groups.set(base, { name: base, parts: [{ id: topic.id, index: sectionIndex(topic) }] });
+    } else {
+      existing.parts.push({ id: topic.id, index: sectionIndex(topic) });
+    }
+  }
+  return [...groups.values()].map(({ name, parts }) => ({
+    name,
+    topicIds: parts
+      .slice()
+      .sort((a, b) => a.index - b.index)
+      .map((part) => part.id),
+  }));
 }
 
 export async function createTest(

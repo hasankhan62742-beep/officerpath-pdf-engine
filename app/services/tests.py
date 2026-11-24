@@ -30,15 +30,25 @@
 from __future__ import annotations
 
 import random
+import re
 import uuid
 from decimal import Decimal
+from typing import Any, cast
 
-from sqlalchemy import exists, or_
-from sqlalchemy.orm import Session
+from sqlalchemy import Select, exists, or_
+from sqlalchemy.orm import Query, Session
 
 from app.core.errors import ApiError
 from app.db import models as db
-from app.services.questions import _batch_answers, _batch_options, _correct_index, _parse_uuid
+from app.services.questions import (
+    _batch_answers,
+    _batch_corrected,
+    _batch_options,
+    _batch_subjects,
+    _correct_index,
+    _parse_uuid,
+    _to_item,
+)
 from app.utils.logging import get_logger
 
 log = get_logger(__name__)
@@ -307,17 +317,18 @@ def _existing_topic_ids(session: Session, ids: list[str]) -> list[uuid.UUID]:
     return out
 
 
-def _pool_rows(
+def _pool_query(
     session: Session,
     user_uuid: uuid.UUID,
     source_type: str,
     source_ids: dict | list[str] | None,
-) -> list[db.ExtractedQuestion]:
-    """All extracted questions the caller may build from,
-    matching the source filter — before the unknown /
-    no-option exclusions. The pool is the caller's own
-    documents PLUS shared bank documents (M11); another
-    student's private documents are never in it."""
+) -> Query:
+    """Base query for the source filter — no rows loaded yet.
+    The pool is the caller's own documents PLUS shared bank
+    documents (M11); another student's private documents are
+    never in it. Callers add classification, counts, or an
+    ID-only select on top (see the performance note above
+    _pool_counts)."""
     query = (
         session.query(db.ExtractedQuestion)
         .join(db.Document, db.Document.id == db.ExtractedQuestion.document_id)
@@ -370,7 +381,7 @@ def _pool_rows(
             raise _validation("mixed needs at least one document or subject id.")
         doc_uuids = _accessible_document_ids(session, user_uuid, doc_ids) if doc_ids else []
         subject_uuids = _existing_subject_ids(session, subject_ids) if subject_ids else []
-        conditions = []
+        conditions: list[Any] = []
         if doc_uuids:
             conditions.append(db.ExtractedQuestion.document_id.in_(doc_uuids))
         if subject_uuids:
@@ -380,12 +391,10 @@ def _pool_rows(
                     & (db.QuestionSubject.subject_id.in_(subject_uuids))
                 )
             )
-        from sqlalchemy import or_ as _or
-
-        query = query.filter(_or(*conditions))
+        query = query.filter(or_(*conditions))
     else:  # pragma: no cover - validated by the caller
         raise _validation(f"source_type must be one of: {', '.join(SOURCE_TYPES)}.")
-    return query.all()
+    return query
 
 
 def _classify_pool(
@@ -419,29 +428,176 @@ def _classify_pool(
     }
 
 
-def _order_key(row: db.ExtractedQuestion) -> tuple[int, int, str]:
-    number = (row.question_number or "").strip()
-    if number.isdigit():
-        return (0, int(number), str(row.document_id))
-    return (1, 0, str(row.document_id))
+def _topic_section_index(topic: db.Topic) -> int:
+    """Section number of one topic, from its slug
+    ("synonyms-s12") or its display name ("Synonyms —
+    Section 12"). Topics without a section number sort
+    first (index 0). The bank import names one topic per
+    (subtopic, section) group, so this is what puts Section
+    1's questions before Section 2's — printed numbers
+    restart at 1 in every section, so the number alone
+    cannot order a subtopic's questions."""
+    slug = (topic.slug or "").strip()
+    match = re.search(r"-s(\d+)$", slug)
+    if match:
+        return int(match.group(1))
+    name = (topic.name or "").strip()
+    match = re.search(r"—\s*Section\s+(\d+)\s*$", name)
+    if match:
+        return int(match.group(1))
+    return 0
 
 
-def resolve_candidates(
+# ---------------------------------------------------------------------------
+# Pool resolution without row materialisation (M12 performance fix).
+#
+# LIVE EVIDENCE (2026-11-24, Render logs): GET /tests/availability
+# for source "all" took ~53s per call — the old code materialised
+# all 52,573 ExtractedQuestion ORM objects, then every option and
+# answer row, then sorted in Python. On Render free (512 MB,
+# 0.1 CPU) that starved the 5s health check and the instance
+# restarted mid-request, so the user's create-test POST never
+# arrived.
+#
+# The pool is now resolved as plain tuples from four bounded
+# queries — candidate columns, option holders, latest answer
+# labels, topic assignments — and classified + sorted in Python
+# with the exact same rules the old ORM code used. No per-row
+# subqueries: question_options / extracted_answers carry no
+# question_id index, so a correlated EXISTS / scalar subquery
+# would scan those tables once per pool row (the first version
+# of this fix did exactly that — 2s for 1,500 rows locally).
+# No new indexes needed, same pool, same bank order, same
+# exclusions, same messages.
+# ---------------------------------------------------------------------------
+
+
+def _label_is_known(label: str | None) -> bool:
+    """The ``_correct_index(...) >= 0`` rule for one stored
+    label: a single letter A-Z (case-insensitive, surrounding
+    space ignored). No label, an empty label, or a non-letter
+    label reads as unknown — the same as _correct_index,
+    without its ord() crash on a multi-character label."""
+    if not label:
+        return False
+    text = label.strip().upper()
+    return len(text) == 1 and "A" <= text <= "Z"
+
+
+def _bank_order_key(
+    number: str | None, document_id: uuid.UUID, question_id: uuid.UUID, section_index: int = 0
+) -> tuple[int, int, int, str, str]:
+    """Bank order for one question: section first, then the
+    printed number, then document, then id as a stable
+    tiebreak. Printed numbers restart per section, so without
+    the section index a subtopic's questions would interleave
+    (Section 1 Q1, Section 2 Q1, Section 1 Q2, ...).
+    ``section_index`` is 0 for pools without sections, which
+    keeps the previous order exactly."""
+    text = (number or "").strip()
+    if text.isdigit():
+        return (section_index, 0, int(text), str(document_id), str(question_id))
+    return (section_index, 1, 0, str(document_id), str(question_id))
+
+
+def _resolve_pool(
     session: Session,
-    user: dict,
-    *,
+    user_uuid: uuid.UUID,
     source_type: str,
     source_ids: dict | list[str] | None,
     include_unknown: bool,
 ) -> dict:
-    """The selection pool for a source filter: candidates in a
-    stable order (document, printed number) + exclusion counts.
-    Explicit mode is resolved separately (see resolve_explicit)."""
-    user_uuid = uuid.UUID(user["id"])
-    rows = _pool_rows(session, user_uuid, source_type, source_ids)
-    rows.sort(key=_order_key)
-    classified = _classify_pool(session, rows, include_unknown)
-    return classified
+    """The selection pool for a source filter: bank-ordered
+    candidate ids + exclusion counts + the per-question
+    classification and topic assignments the by_topic
+    breakdown needs. Four queries, no ORM rows:
+    (1) candidate columns (id, printed number, document);
+    (2) the questions holding at least one option;
+    (3) every answer row, latest-by-created_at wins (the same
+    rule _batch_answers uses);
+    (4) topic assignments. Classification follows
+    _classify_pool exactly: no options -> excluded_no_options
+    (even when the answer is also unknown); options but no
+    known answer -> excluded_unknown unless include_unknown;
+    otherwise a candidate. Bank order is section, then printed
+    number, then document, then id."""
+    base = _pool_query(session, user_uuid, source_type, source_ids)
+    # The pool ids as a SELECT, reused to restrict the three
+    # classification queries to pool rows only. Query.statement
+    # is a Select for a plain select query — the cast tells
+    # mypy so (its declared type is a wider union).
+    pool_ids = cast(
+        Select, base.with_entities(db.ExtractedQuestion.id).statement
+    )
+    columns = (
+        base.with_entities(
+            db.ExtractedQuestion.id,
+            db.ExtractedQuestion.question_number,
+            db.ExtractedQuestion.document_id,
+        )
+        .all()
+    )
+    option_holders = {
+        row[0]
+        for row in session.query(db.QuestionOption.question_id)
+        .filter(db.QuestionOption.question_id.in_(pool_ids))
+        .distinct()
+        .all()
+    }
+    answer_rows = (
+        session.query(
+            db.ExtractedAnswer.question_id,
+            db.ExtractedAnswer.resolved_label,
+            db.ExtractedAnswer.created_at,
+        )
+        .filter(db.ExtractedAnswer.question_id.in_(pool_ids))
+        .order_by(db.ExtractedAnswer.created_at.desc())
+        .all()
+    )
+    labels: dict[uuid.UUID, str | None] = {}
+    for question_id, label, _created in answer_rows:
+        labels.setdefault(question_id, label)
+    topics = session.query(db.Topic).all()
+    section_of = {topic.id: _topic_section_index(topic) for topic in topics}
+    assignments = (
+        session.query(db.QuestionSubject.question_id, db.QuestionSubject.topic_id)
+        .filter(db.QuestionSubject.question_id.in_(pool_ids))
+        .filter(db.QuestionSubject.topic_id.isnot(None))
+        .all()
+    )
+    per_question_topics: dict[uuid.UUID, list[uuid.UUID]] = {}
+    for question_id, topic_id in assignments:
+        per_question_topics.setdefault(question_id, []).append(topic_id)
+    classification: dict[uuid.UUID, str] = {}
+    excluded_unknown = 0
+    excluded_no_options = 0
+    ordered: list[tuple[uuid.UUID, str | None, uuid.UUID, int]] = []
+    for question_id, number, document_id in columns:
+        if question_id not in option_holders:
+            classification[question_id] = "no_options"
+            excluded_no_options += 1
+            continue
+        if _label_is_known(labels.get(question_id)):
+            classification[question_id] = "known"
+        else:
+            classification[question_id] = "unknown"
+            excluded_unknown += 1
+            if not include_unknown:
+                continue
+        topic_indexes = [
+            section_of.get(topic_id, 0)
+            for topic_id in per_question_topics.get(question_id, [])
+        ]
+        section_index = min(topic_indexes) if topic_indexes else 0
+        ordered.append((question_id, number, document_id, section_index))
+    ordered.sort(key=lambda c: _bank_order_key(c[1], c[2], c[0], c[3]))
+    return {
+        "candidate_ids": [c[0] for c in ordered],
+        "excluded_unknown": excluded_unknown,
+        "excluded_no_options": excluded_no_options,
+        "classification": classification,
+        "topics": per_question_topics,
+    }
 
 
 def resolve_explicit(
@@ -527,6 +683,119 @@ def resolve_explicit(
     return classified
 
 
+def _validate_range(
+    start: int | None, end: int | None
+) -> tuple[int, int] | None:
+    """A question range, validated as a pair: both or neither,
+    integers, 1 <= start <= end. Returns None when no range
+    was given (both None). The upper bound is checked against
+    the live pool size by the caller — there is no fixed cap;
+    the maximum is the section's own question count."""
+    if start is None and end is None:
+        return None
+    if start is None or end is None:
+        raise _validation(
+            "question_range_start and question_range_end must be given together."
+        )
+    if (
+        not isinstance(start, int)
+        or isinstance(start, bool)
+        or not isinstance(end, int)
+        or isinstance(end, bool)
+    ):
+        raise _validation("question_range_start and question_range_end must be integers.")
+    if start < 1 or end < start:
+        raise _validation(
+            "question_range_start must be at least 1 and no greater than "
+            f"question_range_end (got {start}..{end})."
+        )
+    return (start, end)
+
+
+def _require_single_topic_range(
+    source_type: str, source_ids: dict | list[str] | None, question_range: tuple[int, int] | None
+) -> None:
+    """A range only makes sense over one section's bank-ordered
+    pool: source_type "topics" with exactly one topic id."""
+    if question_range is None:
+        return
+    if source_type != "topics" or not isinstance(source_ids, list) or len(source_ids) != 1:
+        raise _validation(
+            "A question range needs exactly one section (source_type "
+            "'topics' with a single topic id)."
+        )
+
+
+def _apply_range(
+    pool: list[db.ExtractedQuestion], start: int, end: int
+) -> list[db.ExtractedQuestion]:
+    """Slice a bank-ordered candidate pool to 1-based inclusive
+    positions start..end. The end is validated against the live
+    pool size, so the message always names the real count."""
+    if end > len(pool):
+        raise ApiError(
+            status_code=422,
+            code="insufficient_questions",
+            message=(
+                f"This section holds {len(pool)} question(s), but the "
+                f"range asks for questions up to {end}. Lower the range end."
+            ),
+        )
+    return pool[start - 1 : end]
+
+
+def _topic_breakdown(
+    session: Session,
+    topic_ids: list[str],
+    include_unknown: bool,
+    resolved: dict,
+) -> list[dict]:
+    """Per-topic counts for the requested topics, tallied from
+    one resolved pool — no extra queries, no pool rows loaded.
+    A question assigned to several topics counts under each.
+    Topics with no questions are included with zeros, so the
+    UI can show every section tab."""
+    topic_uuids = _existing_topic_ids(session, topic_ids)
+    topics = session.query(db.Topic).filter(db.Topic.id.in_(topic_uuids)).all()
+    names = {topic.id: topic.name for topic in topics}
+    classification: dict = resolved["classification"]
+    per_question_topics: dict = resolved["topics"]
+    tallies: dict[uuid.UUID, dict] = {
+        topic_id: {"available": 0, "excluded_unknown": 0, "excluded_no_options": 0}
+        for topic_id in topic_uuids
+    }
+    for question_id, state in classification.items():
+        row_topics = [
+            topic_id
+            for topic_id in per_question_topics.get(question_id, [])
+            if topic_id in tallies
+        ]
+        if not row_topics:
+            continue
+        if state == "no_options":
+            for topic_id in row_topics:
+                tallies[topic_id]["excluded_no_options"] += 1
+        elif state == "unknown":
+            for topic_id in row_topics:
+                if include_unknown:
+                    tallies[topic_id]["available"] += 1
+                else:
+                    tallies[topic_id]["excluded_unknown"] += 1
+        else:  # known
+            for topic_id in row_topics:
+                tallies[topic_id]["available"] += 1
+    return [
+        {
+            "topic_id": str(topic_id),
+            "topic_name": names.get(topic_id, ""),
+            "available": tallies[topic_id]["available"],
+            "excluded_unknown": tallies[topic_id]["excluded_unknown"],
+            "excluded_no_options": tallies[topic_id]["excluded_no_options"],
+        }
+        for topic_id in topic_uuids
+    ]
+
+
 def availability(
     session: Session,
     user: dict,
@@ -534,36 +803,52 @@ def availability(
     source_type: str,
     source_ids: dict | list[str] | None,
     include_unknown: bool,
+    question_range_start: int | None = None,
+    question_range_end: int | None = None,
 ) -> dict:
     """How many questions a source filter can supply, before the
     user commits to building a test. The sample is the first 5
-    candidates in printed-number order."""
+    candidates in bank order. With a range, the numbers describe
+    the range slice only. ``by_topic`` (topics mode, no range)
+    breaks the counts down per requested topic."""
     if source_type not in SOURCE_TYPES:
         raise _validation(f"source_type must be one of: {', '.join(SOURCE_TYPES)}.")
     if source_type == "explicit":
         raise _validation("availability does not apply to explicit picks — they are the list.")
-    classified = resolve_candidates(
-        session,
-        user,
-        source_type=source_type,
-        source_ids=source_ids,
-        include_unknown=include_unknown,
+    question_range = _validate_range(question_range_start, question_range_end)
+    _require_single_topic_range(source_type, source_ids, question_range)
+    user_uuid = uuid.UUID(user["id"])
+    # One pool resolution (four small queries, no pool rows
+    # loaded — the old path materialised the whole pool here
+    # and took ~53s on the live 52,573-question bank). The
+    # sample is the first 5 candidates in bank order.
+    resolved = _resolve_pool(
+        session, user_uuid, source_type, source_ids, include_unknown
     )
-    candidates = classified["candidates"]
-    titles = {
-        row.id: row.title
-        for row in session.query(db.Document)
-        .filter(
-            or_(
-                db.Document.user_id == uuid.UUID(user["id"]),
-                db.Document.is_shared.is_(True),
-            )
+    ordered_ids = resolved["candidate_ids"]
+    if question_range is not None:
+        ordered_ids = _apply_range(ordered_ids, *question_range)
+    sample_ids = ordered_ids[:5]
+    sample_rows: list[db.ExtractedQuestion] = []
+    answers_map: dict = {}
+    titles: dict[uuid.UUID, str] = {}
+    if sample_ids:
+        loaded = (
+            session.query(db.ExtractedQuestion)
+            .filter(db.ExtractedQuestion.id.in_(sample_ids))
+            .all()
         )
-        .filter(db.Document.deleted_at.is_(None))
-        .all()
-    }
+        by_id = {row.id: row for row in loaded}
+        sample_rows = [by_id[sid] for sid in sample_ids]
+        answers_map = _batch_answers(session, sample_ids)
+        titles = {
+            row.id: row.title
+            for row in session.query(db.Document)
+            .filter(db.Document.id.in_({row.document_id for row in sample_rows}))
+            .all()
+        }
     sample = []
-    for row in candidates[:5]:
+    for row in sample_rows:
         sample.append(
             {
                 "question_id": str(row.id),
@@ -571,14 +856,84 @@ def availability(
                 "document_title": titles.get(row.document_id, ""),
                 "number": row.question_number,
                 "text": row.normalized_text,
-                "correct_index": _correct_index(classified["answers"].get(row.id)),
+                "correct_index": _correct_index(answers_map.get(row.id)),
             }
         )
-    return {
-        "available": len(candidates),
-        "excluded_unknown": classified["excluded_unknown"],
-        "excluded_no_options": classified["excluded_no_options"],
+    result: dict = {
+        "available": len(ordered_ids),
+        "excluded_unknown": resolved["excluded_unknown"],
+        "excluded_no_options": resolved["excluded_no_options"],
         "sample": sample,
+    }
+    if source_type == "topics" and question_range is None and isinstance(source_ids, list):
+        result["by_topic"] = _topic_breakdown(
+            session, source_ids, include_unknown, resolved
+        )
+    return result
+
+
+def list_section_questions(
+    session: Session,
+    user: dict,
+    *,
+    topic_ids: list[str],
+    limit: int = 20,
+    offset: int = 0,
+) -> dict:
+    """Reading mode (M12): one section's available questions in
+    bank order, with options + the stored answer + the stored
+    explanation. The pool is exactly the test pool for these
+    topics (unknown and no-option questions excluded), so a
+    reading range of 1..N maps exactly onto a test range of
+    1..N. Shared bank sections are readable by every student;
+    another student's private documents never appear."""
+    if not topic_ids:
+        raise _validation("topic_ids must be a non-empty list.")
+    user_uuid = uuid.UUID(user["id"])
+    # The page is sliced from one resolved pool — the old path
+    # resolved (and classified) the whole section before
+    # slicing. Full rows + options + answers load only for
+    # this page.
+    resolved = _resolve_pool(
+        session, user_uuid, "topics", topic_ids, include_unknown=False
+    )
+    total = len(resolved["candidate_ids"])
+    page_ids = resolved["candidate_ids"][offset : offset + limit]
+    rows: list[db.ExtractedQuestion] = []
+    if page_ids:
+        loaded = (
+            session.query(db.ExtractedQuestion)
+            .filter(db.ExtractedQuestion.id.in_(page_ids))
+            .all()
+        )
+        by_id = {row.id: row for row in loaded}
+        rows = [by_id[pid] for pid in page_ids]
+    titles = {
+        row.id: row.title
+        for row in session.query(db.Document)
+        .filter(db.Document.id.in_({row.document_id for row in rows}))
+        .all()
+    }
+    ids = [row.id for row in rows]
+    options = _batch_options(session, ids)
+    answers = _batch_answers(session, ids)
+    corrected = _batch_corrected(session, ids)
+    subjects = _batch_subjects(session, ids)
+    return {
+        "questions": [
+            _to_item(
+                row,
+                titles.get(row.document_id, ""),
+                options.get(row.id, []),
+                answers.get(row.id),
+                row.id in corrected,
+                subjects.get(row.id, []),
+            )
+            for row in rows
+        ],
+        "total": total,
+        "limit": limit,
+        "offset": offset,
     }
 
 
@@ -591,13 +946,13 @@ def _normalize_source_ids(source_type: str, source_ids: dict | list[str] | None)
     if source_type == "all":
         return None
     if source_type == "documents":
-        return {"document_ids": list(source_ids or [])}  # type: ignore[arg-type]
+        return {"document_ids": list(source_ids or [])}
     if source_type == "subjects":
-        return {"subject_ids": list(source_ids or [])}  # type: ignore[arg-type]
+        return {"subject_ids": list(source_ids or [])}
     if source_type == "topics":
-        return {"topic_ids": list(source_ids or [])}  # type: ignore[arg-type]
+        return {"topic_ids": list(source_ids or [])}
     if source_type == "explicit":
-        return {"question_ids": list(source_ids or [])}  # type: ignore[arg-type]
+        return {"question_ids": list(source_ids or [])}
     if isinstance(source_ids, dict):
         return {
             "document_ids": list(source_ids.get("document_ids") or []),
@@ -736,6 +1091,15 @@ def create_test(session: Session, user: dict, payload: dict) -> dict:
     ):
         raise _validation("time_limit_seconds must be between 60 and 86400 when set.")
     seed = random.SystemRandom().randint(0, 2**31 - 1)
+    # M12 — a range needs source_type "topics" (any other source
+    # has no single section whose bank order the positions refer
+    # to). Validated up front so explicit mode + range is a 422
+    # before any pool work happens.
+    question_range = _validate_range(
+        payload.get("question_range_start"), payload.get("question_range_end")
+    )
+    if question_range is not None and source_type != "topics":
+        raise _validation("A question range needs source_type 'topics'.")
 
     try:
         marking = _resolve_marking_config(
@@ -758,27 +1122,38 @@ def create_test(session: Session, user: dict, payload: dict) -> dict:
                     ),
                 )
         else:
-            classified = resolve_candidates(
-                session,
-                user,
-                source_type=source_type,
-                source_ids=source_ids,
-                include_unknown=include_unknown,
+            # ID-only pick: one pool resolution, then full rows
+            # + options + answers ONLY for the picked questions.
+            # The old path materialised the whole pool here
+            # (~53s live). rng.sample/choice pick by index, so
+            # the same seed over the same bank-ordered ids picks
+            # the same questions as before.
+            user_uuid = uuid.UUID(user["id"])
+            resolved = _resolve_pool(
+                session, user_uuid, source_type, source_ids, include_unknown
             )
-            pool = classified["candidates"]
-            if question_count > len(pool) and not allow_repetition:
+            pool_ids = resolved["candidate_ids"]
+            if question_range is not None:
+                _require_single_topic_range(source_type, source_ids, question_range)
+                pool_ids = _apply_range(pool_ids, *question_range)
+            if question_count > len(pool_ids) and not allow_repetition:
+                range_note = (
+                    f" (questions {question_range[0]}..{question_range[1]} of this section)"
+                    if question_range is not None
+                    else ""
+                )
                 raise ApiError(
                     status_code=422,
                     code="insufficient_questions",
                     message=(
-                        f"Only {len(pool)} question(s) are available from this "
-                        f"source, but the test asks for {question_count}. "
-                        f"({classified['excluded_unknown']} unknown and "
-                        f"{classified['excluded_no_options']} no-option questions "
+                        f"Only {len(pool_ids)} question(s) are available from this "
+                        f"source{range_note}, but the test asks for {question_count}. "
+                        f"({resolved['excluded_unknown']} unknown and "
+                        f"{resolved['excluded_no_options']} no-option questions "
                         "were excluded.) Lower the count or widen the source."
                     ),
                 )
-            if not pool:
+            if not pool_ids:
                 raise ApiError(
                     status_code=422,
                     code="insufficient_questions",
@@ -786,9 +1161,24 @@ def create_test(session: Session, user: dict, payload: dict) -> dict:
                 )
             rng = random.Random(seed)
             if allow_repetition:
-                picked = [rng.choice(pool) for _ in range(question_count)]
+                picked_ids = [rng.choice(pool_ids) for _ in range(question_count)]
             else:
-                picked = rng.sample(pool, question_count)
+                picked_ids = rng.sample(pool_ids, question_count)
+            loaded = (
+                session.query(db.ExtractedQuestion)
+                .filter(db.ExtractedQuestion.id.in_(set(picked_ids)))
+                .all()
+            )
+            by_id = {row.id: row for row in loaded}
+            picked = [by_id[pid] for pid in picked_ids]
+            options_map = _batch_options(session, list(set(picked_ids)))
+            answers_map = _batch_answers(session, list(set(picked_ids)))
+            classified = {
+                "options": options_map,
+                "answers": answers_map,
+                "excluded_unknown": resolved["excluded_unknown"],
+                "excluded_no_options": resolved["excluded_no_options"],
+            }
         options_map = classified["options"]
         answers_map = classified["answers"]
         user_uuid = uuid.UUID(user["id"])

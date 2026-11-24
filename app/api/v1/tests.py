@@ -14,9 +14,11 @@
 # changes a snapshot. Marking is stored with the test and
 # computed on the backend (M7/M8) — never in the browser.
 
+from collections.abc import Iterator
 from contextlib import contextmanager
 
 from fastapi import APIRouter, Depends, Query
+from sqlalchemy.orm import Session
 
 from app.core.errors import ApiError
 from app.db.session import get_session
@@ -27,6 +29,7 @@ from app.schemas.exam import (
     StartTestResponse,
     TestResultResponse,
 )
+from app.schemas.questions import QuestionListResponse
 from app.schemas.results import FromMistakesRequest, TestResultDetailResponse
 from app.schemas.tests import (
     AvailabilityResponse,
@@ -51,7 +54,7 @@ DEFAULT_TEST_LIMIT = 20
 
 
 @contextmanager
-def _session_or_503():
+def _session_or_503() -> Iterator[Session]:
     """Engine-DB session for one request (ADR-011)."""
     session = get_session()
     if session is None:
@@ -93,6 +96,14 @@ async def test_availability(
     include_unknown: bool = Query(
         False, description="Count unknown-answer questions as available."
     ),
+    question_range_start: int | None = Query(
+        None,
+        description="M12: range start, 1-based inclusive, single-topic only.",
+    ),
+    question_range_end: int | None = Query(
+        None,
+        description="M12: range end, 1-based inclusive, single-topic only.",
+    ),
     user: dict = Depends(get_current_user),
 ) -> AvailabilityResponse:
     if source_type == "documents":
@@ -121,8 +132,28 @@ async def test_availability(
             source_type=source_type,
             source_ids=source_ids,
             include_unknown=include_unknown,
+            question_range_start=question_range_start,
+            question_range_end=question_range_end,
         )
     return AvailabilityResponse(**result)
+
+
+@router.get("/tests/sections/questions", response_model=QuestionListResponse)
+async def list_section_questions(
+    topic_ids: list[str] = Query(..., description="Topic ids of one section (one or more)."),
+    limit: int = Query(20, ge=1, le=MAX_LIST_LIMIT),
+    offset: int = Query(0, ge=0),
+    user: dict = Depends(get_current_user),
+) -> QuestionListResponse:
+    """M12 reading mode: the section's available questions in
+    bank order, with options + the stored answer + the stored
+    explanation. Same pool as a test from these topics, so a
+    reading range of 1..N maps exactly onto a test range."""
+    with _session_or_503() as session:
+        result = test_service.list_section_questions(
+            session, user, topic_ids=topic_ids, limit=limit, offset=offset
+        )
+    return QuestionListResponse(**result)
 
 
 @router.post("/tests", response_model=TestDetailResponse, status_code=201)

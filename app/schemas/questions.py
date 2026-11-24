@@ -48,6 +48,9 @@ class QuestionItem(BaseModel):
     correct_index: int  # -1 = UNKNOWN, never guessed
     correct_letter: str
     answer_source: str
+    # Stored verbatim explanation (M10); None when the source
+    # gave none — never invented.
+    explanation: str | None = None
     confidence: float | None
     verified: bool
     inferred: bool
