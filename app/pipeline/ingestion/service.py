@@ -346,11 +346,15 @@ def ingest_file(
     jobs: SqlAlchemyJobRepository,
     recorder: StageRecorder,
     correlation_id: str | None = None,
+    multi_pass: bool = False,
 ) -> IngestionOutcome:
     """Ingest one file end to end. Never raises for a bad file: the
     rejection is the returned outcome (the API maps it to 422 / a
     per-file batch entry). Storage/DB errors still raise — those are
-    server failures, not file failures, and must surface loudly."""
+    server failures, not file failures, and must surface loudly.
+    `multi_pass` (M14, ADR-010) is recorded on the job so the
+    worker runs the three-variant union OCR; False is the default
+    single path, unchanged."""
     user_id = user["id"]
     correlation = correlation_id or str(uuid.uuid4())
     report = validate_file(filename, data, settings)
@@ -428,7 +432,7 @@ def ingest_file(
     # claim this job (unlike register-source jobs, whose bytes are in
     # the bucket until M4 wires bucket download).
     document, job, _replay = job_service.register_document(
-        user, payload, documents, jobs, source="upload"
+        user, payload, documents, jobs, source="upload", multi_pass=multi_pass
     )
     document_id = uuid.UUID(document["id"])
     job_id = uuid.UUID(job["id"])
@@ -482,11 +486,13 @@ def ingest_batch(
     jobs: SqlAlchemyJobRepository,
     recorder: StageRecorder,
     correlation_id: str | None = None,
+    multi_pass: bool = False,
 ) -> list[IngestionOutcome]:
     """Batch upload: each file is independent. One bad file never
     blocks the batch; storage/DB errors on one file are caught and
     reported as that file's rejection with code `ingestion_failed`
-    (the server error is logged with the correlation id)."""
+    (the server error is logged with the correlation id). One
+    `multi_pass` flag applies to the whole batch (M14)."""
     outcomes: list[IngestionOutcome] = []
     for filename, data in files:
         try:
@@ -501,6 +507,7 @@ def ingest_batch(
                     jobs=jobs,
                     recorder=recorder,
                     correlation_id=correlation_id,
+                    multi_pass=multi_pass,
                 )
             )
         except Exception as exc:  # server-side failure for this file only

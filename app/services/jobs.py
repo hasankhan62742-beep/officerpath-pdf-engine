@@ -33,13 +33,17 @@ def register_document(
     jobs: SqlAlchemyJobRepository,
     *,
     source: str = "register",
+    multi_pass: bool = False,
 ) -> tuple[dict, dict, bool]:
     """Register a document + job. `source` records where the bytes
     live (ADR-011): "register" = client-uploaded to the Supabase
     bucket (the worker must NOT claim it — no local bytes — until
     M4 wires bucket download); "upload" = bytes on local disk (the
     worker may claim it). Stored in the job's result_summary so the
-    worker's claim filter can read it without a schema change."""
+    worker's claim filter can read it without a schema change.
+    `multi_pass` (M14, ADR-010) records that the worker must run
+    the three-variant union OCR instead of the single path; it is
+    stored only when True, so the default job row is unchanged."""
     user_id = user["id"]
 
     # Ownership: the storage path must live under the caller's own folder.
@@ -100,7 +104,11 @@ def register_document(
             "idempotency_key": payload.idempotency_key,
             # ADR-011: marks register-source jobs so the worker skips
             # them (bucket bytes, not local disk) until M4.
-            "result_summary": {"source": source},
+            # M14: "multi_pass" only when requested — the default
+            # row stays {"source": source}.
+            "result_summary": (
+                {"source": source, "multi_pass": True} if multi_pass else {"source": source}
+            ),
         }
     )
     log.info(

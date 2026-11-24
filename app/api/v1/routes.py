@@ -159,6 +159,10 @@ async def register_document(
 async def upload_document(
     request: Request,
     file: UploadFile = File(...),
+    # M14 (ADR-010): optional query ?multi_pass=true — the worker
+    # then runs the three-variant union OCR instead of the single
+    # path. Default false: the single path, unchanged.
+    multi_pass: bool = False,
     user: dict = Depends(get_current_user),
 ) -> UploadResponse:
     rate_limiter.check(
@@ -180,6 +184,7 @@ async def upload_document(
                 jobs=jobs,
                 recorder=recorder,
                 correlation_id=getattr(request.state, "request_id", None),
+                multi_pass=multi_pass,
             )
     finally:
         _close_recorder(recorder)
@@ -197,6 +202,9 @@ async def upload_document(
 async def upload_batch(
     request: Request,
     files: list[UploadFile] = File(...),
+    # M14 (ADR-010): one ?multi_pass=true applies to the whole
+    # batch — every file's job runs the union OCR. Default false.
+    multi_pass: bool = False,
     user: dict = Depends(get_current_user),
 ) -> BatchUploadResponse:
     if len(files) > BATCH_MAX_FILES:
@@ -225,6 +233,7 @@ async def upload_batch(
                 jobs=jobs,
                 recorder=recorder,
                 correlation_id=getattr(request.state, "request_id", None),
+                multi_pass=multi_pass,
             )
     finally:
         _close_recorder(recorder)

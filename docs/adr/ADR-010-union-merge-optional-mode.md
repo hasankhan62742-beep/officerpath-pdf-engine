@@ -60,6 +60,23 @@
   - The parse API and the worker both accept multi-pass, but
     nothing enables it by default; the Flutter toggle does not
     expose it.
+  - **M14 (2026-11-24): the web upload page now exposes it** —
+    "Better recognition (multi-pass)", default OFF, wired as
+    `?multi_pass=true` on `POST /documents/upload` and
+    `/documents/upload/batch`; the flag rides the job's
+    `result_summary` (no schema change) and the worker passes
+    it to `parse_document_bytes` / `parse_image_bytes`
+    (multi-pass was added to the image path too — the PDF path
+    already had it). The worker's per-stage timeout is 3x the
+    configured 600 s for multi-pass jobs (1800 s); the global
+    setting is unchanged. Live caveat, measured from the M7
+    numbers: a full 7-page multi-pass parse is ~20 min
+    single-path at Render free's 0.1 CPU, ~60 min multi-pass,
+    so it can still exceed the 1800 s stage timeout on the
+    free tier — multi-pass is most usable there for short
+    scans and single photos; the full effect needs the VPS
+    stage. A re-upload of the same file replays the original
+    job (dedup), so multi-pass only applies to fresh uploads.
   - Render-free deployment must treat a scanned-book parse as
     a ~50 MB-headroom operation: one parse at a time, and
     `worker_stage_timeout_seconds` (600 s) must be raised (a

@@ -662,6 +662,7 @@ def parse_image_bytes(
     settings: Settings | None = None,
     psm_override: int | None = None,
     promote: bool = True,
+    multi_pass: bool = False,
     on_stage: Callable[[str, dict], None] | None = None,
 ) -> tuple[MatchedDocument, dict, dict]:
     """Parse one photo's bytes end to end (JPEG/PNG): the image is
@@ -672,7 +673,10 @@ def parse_image_bytes(
     False, ``page_count`` 1). Raises ValueError on undecodable or
     non-image bytes. This is the server side of the Flutter
     ``importImage`` path (M7); the photo itself is never stored,
-    only the parsed MCQs."""
+    only the parsed MCQs. ``multi_pass=True`` (M14, ADR-010)
+    runs the same three OCR variants as the PDF path — PSM 3 +
+    layout, PSM 3 raw, PSM 4 raw — and union-merges the
+    recovered questions; the default stays the single path."""
     from app.pipeline.extract.service import extract_from_ocr_blocks
     from app.pipeline.layout.analyzer import GeometryLayoutAnalyzer
     from app.pipeline.ocr.psm import select_psm
@@ -700,19 +704,59 @@ def parse_image_bytes(
     if on_stage is not None:
         on_stage("classify", {"is_digital": False, "page_count": 1})
         on_stage("render", {"page": 1})
-    blocks = _ocr_page(
-        png_bytes,
-        1,
-        settings,
-        psm=psm,
-        use_layout=True,
-        analyzer=GeometryLayoutAnalyzer(),
-    )
-    if on_stage is not None:
-        on_stage("ocr", {"page": 1, "psm": psm})
-        on_stage("layout", {"page": 1})
-    lines = _lines_from_blocks(blocks)
-    result = extract_from_ocr_blocks(blocks, source_document_id)
+    merge_report: dict | None = None
+    if multi_pass:
+        # Same three variants as the PDF multi-pass path
+        # (ADR-010): the one image is OCR'd three ways and the
+        # recovered questions are union-merged.
+        import time as _time
+
+        analyzer = GeometryLayoutAnalyzer()
+        variants: list[tuple[str, int, bool]] = [
+            ("psm3-layout", 3, True),
+            ("psm3-raw", 3, False),
+            ("psm4-raw", 4, False),
+        ]
+        variant_results: list[ParseResult] = []
+        variant_labels: list[str] = []
+        variant_seconds: dict[str, float] = {}
+        lines: list[str] = []
+        for label, variant_psm, use_layout in variants:
+            started = _time.monotonic()
+            blocks = _ocr_page(
+                png_bytes,
+                1,
+                settings,
+                psm=variant_psm,
+                use_layout=use_layout,
+                analyzer=analyzer,
+            )
+            if on_stage is not None:
+                on_stage("ocr", {"page": 1, "psm": variant_psm, "variant": label})
+                if use_layout:
+                    on_stage("layout", {"page": 1, "variant": label})
+            if label == "psm3-layout":
+                lines = _lines_from_blocks(blocks)
+            variant_results.append(extract_from_ocr_blocks(blocks, source_document_id))
+            variant_labels.append(label)
+            variant_seconds[label] = round(_time.monotonic() - started, 1)
+        result, merge_report = _merge_parse_results(variant_results, labels=variant_labels)
+        merge_report["variant_seconds"] = variant_seconds
+        psm = variants[0][1]
+    else:
+        blocks = _ocr_page(
+            png_bytes,
+            1,
+            settings,
+            psm=psm,
+            use_layout=True,
+            analyzer=GeometryLayoutAnalyzer(),
+        )
+        if on_stage is not None:
+            on_stage("ocr", {"page": 1, "psm": psm})
+            on_stage("layout", {"page": 1})
+        lines = _lines_from_blocks(blocks)
+        result = extract_from_ocr_blocks(blocks, source_document_id)
     if on_stage is not None:
         on_stage(
             "extract",
@@ -731,8 +775,8 @@ def parse_image_bytes(
             "psm_override": psm_override,
             "psm_by_page": {"1": psm},
             "quality_by_page": {1: quality.to_dict()},
-            "multi_pass": False,
-            "merge": None,
+            "multi_pass": multi_pass,
+            "merge": merge_report,
         },
     )
     return matched, report, debug

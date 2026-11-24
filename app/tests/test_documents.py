@@ -239,3 +239,41 @@ def test_delete_other_users_document_is_404(client, engine_db):
     assert (
         client.get("/api/v1/documents", headers=auth_headers("token-user-a")).json()["total"] == 1
     )
+
+
+def test_upload_multi_pass_flag_reaches_job_and_worker(client, engine_db):
+    """M14 (ADR-010): ?multi_pass=true on upload records the flag
+    on the job row and the worker runs (and reports) multi-pass.
+    CA40 is digital, so the flag changes no answers here — the
+    assertion is that the flag survives upload -> job -> worker."""
+    res = client.post(
+        "/api/v1/documents/upload?multi_pass=true",
+        files={"file": ("ca40.pdf", CA40.read_bytes(), "application/pdf")},
+        headers=auth_headers("token-user-a"),
+    )
+    assert res.status_code == 200, res.text
+    document_id = res.json()["document"]["id"]
+    detail = client.get(
+        f"/api/v1/documents/{document_id}", headers=auth_headers("token-user-a")
+    ).json()
+    assert detail["job"]["result_summary"] == {"source": "upload", "multi_pass": True}
+    summary = run_once(engine_db)
+    assert summary is not None
+    assert summary["status"] == "done", summary
+    assert summary["questions"] == 40
+    assert summary["multi_pass"] is True
+    detail = client.get(
+        f"/api/v1/documents/{document_id}", headers=auth_headers("token-user-a")
+    ).json()
+    assert detail["job"]["result_summary"]["multi_pass"] is True
+
+
+def test_upload_default_records_no_multi_pass_flag(client, engine_db):
+    """M14: the default upload path is unchanged — the job row
+    carries no multi_pass key at all."""
+    uploaded = _upload(client, _pdf(), "plain.pdf")
+    document_id = uploaded["document"]["id"]
+    detail = client.get(
+        f"/api/v1/documents/{document_id}", headers=auth_headers("token-user-a")
+    ).json()
+    assert detail["job"]["result_summary"] == {"source": "upload"}

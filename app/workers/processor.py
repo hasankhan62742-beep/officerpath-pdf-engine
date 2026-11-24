@@ -94,6 +94,19 @@ class StageTimeout(Exception):
         self.limit = limit
 
 
+#: Multi-pass OCR costs 2.8–3.1x the single path (ADR-010), so a
+#: multi-pass job's per-stage timeout is 3x the configured one.
+#: The global setting stays 600 s — only the job that asked for
+#: the slower mode gets the longer allowance.
+MULTI_PASS_TIMEOUT_FACTOR = 3
+
+
+def stage_timeout_limit(settings: Settings, *, multi_pass: bool) -> float:
+    """Per-stage timeout (seconds) for one job."""
+    limit = float(settings.worker_stage_timeout_seconds)
+    return limit * MULTI_PASS_TIMEOUT_FACTOR if multi_pass else limit
+
+
 def claim_next_job(session: Session) -> db.Job | None:
     """Claim the oldest queued job atomically: UPDATE ... WHERE
     id = (oldest queued) AND status='queued'. The status guard
@@ -169,6 +182,11 @@ def process_job(
     stage_totals: dict[str, float] = {}
     last_fire = time.monotonic()
     current_stage = "ingest"
+    # M14 (ADR-010): the upload endpoint records the request in
+    # the job's result_summary; the worker reads it here. Absent
+    # (all pre-M14 jobs) means the single path, unchanged.
+    multi_pass = bool((job.result_summary or {}).get("multi_pass"))
+    stage_limit = stage_timeout_limit(settings, multi_pass=multi_pass)
     summary: dict = {
         "job_id": str(job.id),
         "document_id": str(job.document_id),
@@ -188,8 +206,8 @@ def process_job(
         # first (a cancel is not a failure), then the timeout.
         if _cancel_requested(session, job):
             raise JobCancelled(name)
-        if stage_totals[name] > settings.worker_stage_timeout_seconds:
-            raise StageTimeout(name, stage_totals[name], settings.worker_stage_timeout_seconds)
+        if stage_totals[name] > stage_limit:
+            raise StageTimeout(name, stage_totals[name], stage_limit)
         stage = HOOK_TO_STAGE.get(name)
         if stage is not None and document is not None:
             recorder.record(
@@ -244,6 +262,7 @@ def process_job(
             data,
             str(document.id),
             settings=settings,
+            multi_pass=multi_pass,
             on_stage=on_stage,
         )
         persist_matched_document(
@@ -266,6 +285,7 @@ def process_job(
             "stages": dict(stage_totals),
             "is_digital": debug["is_digital"],
             "page_count": debug["page_count"],
+            "multi_pass": multi_pass,
         }
         recorder.record(
             document_id=document.id,
@@ -314,6 +334,7 @@ def process_job(
                 "seconds": total_seconds,
                 "questions": matched.counts["questions"],
                 "answered": matched.answered,
+                "multi_pass": multi_pass,
             }
         )
         log.info(

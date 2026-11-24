@@ -110,6 +110,11 @@ export default function UploadPage() {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [results, setResults] = useState<UploadResult[]>([]);
+  // M14 (ADR-010): whether the shown results were uploaded with
+  // multi-pass on — kept separate from the checkbox so toggling
+  // it afterwards cannot mislabel an earlier upload.
+  const [resultsMultiPass, setResultsMultiPass] = useState(false);
+  const [multiPass, setMultiPass] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   function addFiles(list: FileList | File[]) {
@@ -141,12 +146,13 @@ export default function UploadPage() {
       const token = await getSessionToken();
       if (!token) throw new Error("Your session has expired. Please log in again.");
       if (files.length === 1) {
-        const result = await uploadFile(token, files[0], setProgress);
+        const result = await uploadFile(token, files[0], setProgress, { multiPass });
         setResults([result]);
       } else {
-        const batch = await uploadBatch(token, files, setProgress);
+        const batch = await uploadBatch(token, files, setProgress, { multiPass });
         setResults(batch.results);
       }
+      setResultsMultiPass(multiPass);
       setFiles([]);
     } catch (err) {
       setError(
@@ -264,6 +270,28 @@ export default function UploadPage() {
           </div>
         ) : null}
 
+        <div className="mt-5">
+          <label className="flex items-start gap-2 text-sm text-slate-700">
+            <input
+              type="checkbox"
+              checked={multiPass}
+              onChange={(e) => setMultiPass(e.target.checked)}
+              disabled={uploading}
+              className="mt-1"
+            />
+            <span>
+              <strong>Better recognition (multi-pass).</strong> Scans each
+              file three ways instead of once, so it can recover
+              questions a single scan misses. About 3x slower — a
+              scanned paper that takes 2 minutes can take about 6 —
+              and only for scanned papers and photos; digital PDFs
+              are read exactly and gain nothing. Off by default. A
+              file you already uploaded is not re-processed — the
+              original upload is shown instead.
+            </span>
+          </label>
+        </div>
+
         <div className="mt-5 flex flex-wrap items-center gap-3">
           <Button
             disabled={files.length === 0 || uploading}
@@ -295,6 +323,12 @@ export default function UploadPage() {
             <Spinner /> Processing runs in the background — the status below
             updates live. You can leave this page; nothing is lost.
           </p>
+          {resultsMultiPass ? (
+            <p className="mt-1 text-sm text-slate-600">
+              Multi-pass was on for this upload — processing takes about
+              3x longer than usual.
+            </p>
+          ) : null}
           <ul className="mt-2">
             {results.map((result) => (
               <ResultRow key={`${result.filename}-${result.job?.id ?? "rejected"}`} result={result} />

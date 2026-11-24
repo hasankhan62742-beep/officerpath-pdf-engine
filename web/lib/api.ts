@@ -286,31 +286,38 @@ function uploadForm<T>(
   });
 }
 
-/** Upload ONE file (single-upload endpoint, honest per-file progress). */
+/** Upload ONE file (single-upload endpoint, honest per-file progress).
+ * `opts.multiPass` (M14, ADR-010) asks the worker for the
+ * three-variant union OCR instead of the single path — slower
+ * (~3x) but recovers more questions from scans. Default off. */
 export async function uploadFile(
   accessToken: string,
   file: File,
   onProgress?: (percent: number) => void,
+  opts: { multiPass?: boolean } = {},
 ): Promise<UploadResult> {
   const form = new FormData();
   form.append("file", file, file.name);
-  return uploadForm<UploadResult>("/api/v1/documents/upload", accessToken, form, onProgress);
+  const path = opts.multiPass
+    ? "/api/v1/documents/upload?multi_pass=true"
+    : "/api/v1/documents/upload";
+  return uploadForm<UploadResult>(path, accessToken, form, onProgress);
 }
 
-/** Upload 2–20 files in one batch request (one rate-limit charge). */
+/** Upload 2–20 files in one batch request (one rate-limit charge).
+ * `opts.multiPass` (M14) applies to every file in the batch. */
 export async function uploadBatch(
   accessToken: string,
   files: File[],
   onProgress?: (percent: number) => void,
+  opts: { multiPass?: boolean } = {},
 ): Promise<BatchUploadResponse> {
   const form = new FormData();
   for (const file of files) form.append("files", file, file.name);
-  return uploadForm<BatchUploadResponse>(
-    "/api/v1/documents/upload/batch",
-    accessToken,
-    form,
-    onProgress,
-  );
+  const path = opts.multiPass
+    ? "/api/v1/documents/upload/batch?multi_pass=true"
+    : "/api/v1/documents/upload/batch";
+  return uploadForm<BatchUploadResponse>(path, accessToken, form, onProgress);
 }
 
 export async function createProfile(

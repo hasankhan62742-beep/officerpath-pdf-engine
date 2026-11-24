@@ -106,11 +106,18 @@ dedups by SHA-256 (same user + same file → original document +
 job, `idempotent_replay: true`), returns per-page
 classification. Rejected files: **422** with a
 machine-readable code (`magic_bytes_mismatch`,
-`pdf_encrypted`, `file_too_large`).
+`pdf_encrypted`, `file_too_large`). Optional query
+`?multi_pass=true` (M14, ADR-010): the worker runs the
+three-variant union OCR instead of the single path — about 3x
+slower, recovers more questions from scans. Default `false`;
+a re-upload of the same file replays the original job, so
+multi-pass only applies to a fresh upload.
 
 ### `POST /api/v1/documents/upload/batch` → 200
 Auth. Up to 20 files. Per-file results (stored / replay /
 rejected with reasons). One bad file never blocks the batch.
+Optional query `?multi_pass=true` (M14): applies to every
+file in the batch.
 
 ### `GET /api/v1/jobs/{job_id}` → 200
 Auth, owner-only (other user: **404**). Job status +

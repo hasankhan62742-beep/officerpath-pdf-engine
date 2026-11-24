@@ -13,6 +13,7 @@ from app.pipeline.extract.models import ExtractedQuestion, ParseResult
 from app.pipeline.matching.service import (
     _merge_parse_results,
     parse_document_bytes,
+    parse_image_bytes,
 )
 
 FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
@@ -116,6 +117,52 @@ def test_multi_pass_returns_same_questions_with_merge_report() -> None:
     # Same two questions, both answered from the key — the union
     # adds nothing on this clean page (the gain shows on PPSC-66,
     # measured in the benchmark, not here).
+    assert matched.counts["questions"] == 2
+    assert matched.answered == 2
+    assert all(q.correct_index == 1 for q in matched.questions)
+
+
+# --- M14: the image path gets the same three variants. ---
+
+
+def test_image_single_path_is_the_default() -> None:
+    matched, _, debug = parse_image_bytes(_mcq_image_png(), "probe-image")
+    assert debug["multi_pass"] is False
+    assert debug["merge"] is None
+    assert matched.counts["questions"] == 2
+    assert matched.answered == 2
+
+
+def test_image_multi_pass_runs_all_three_variants(monkeypatch) -> None:
+    """The mocked OCR records every call: exactly three, in the
+    PDF path's variant order (PSM 3 + layout, PSM 3 raw, PSM 4
+    raw). The mock reads nothing, so the merge is empty — the
+    assertion is about which variants ran, not what they found."""
+    calls: list[tuple[int, bool]] = []
+
+    def fake_ocr_page(png_bytes, page_number, settings, *, psm, use_layout, analyzer=None):
+        calls.append((psm, use_layout))
+        return []
+
+    monkeypatch.setattr("app.pipeline.matching.service._ocr_page", fake_ocr_page)
+    matched, _, debug = parse_image_bytes(_mcq_image_png(), "probe-image", multi_pass=True)
+    assert calls == [(3, True), (3, False), (4, False)]
+    assert debug["multi_pass"] is True
+    merge = debug["merge"]
+    assert merge["mode"] == "multi-pass-union"
+    assert merge["variants"] == ["psm3-layout", "psm3-raw", "psm4-raw"]
+    assert matched.counts["questions"] == 0
+
+
+def test_image_multi_pass_real_ocr_matches_single_path() -> None:
+    """Real Tesseract, three passes over the same clean image:
+    the union adds nothing here, but both questions survive with
+    the key — the mode never loses what the single path found."""
+    matched, _, debug = parse_image_bytes(_mcq_image_png(), "probe-image", multi_pass=True)
+    assert debug["multi_pass"] is True
+    merge = debug["merge"]
+    assert merge["variants"] == ["psm3-layout", "psm3-raw", "psm4-raw"]
+    assert merge["merged_questions"] == 2
     assert matched.counts["questions"] == 2
     assert matched.answered == 2
     assert all(q.correct_index == 1 for q in matched.questions)

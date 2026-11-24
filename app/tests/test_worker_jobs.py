@@ -162,7 +162,7 @@ def test_stage_timeout_fails_job_with_stage_named(client, db_factory, monkeypatc
 
     import app.workers.processor as processor
 
-    def _slow_parse(data, doc_id, *, settings, on_stage):
+    def _slow_parse(data, doc_id, *, settings, on_stage, multi_pass=False):
         on_stage("classify", {"is_digital": False, "page_count": 1})
         _time.sleep(0.3)
         on_stage("ocr", {"page": 1, "psm": 3})
@@ -320,3 +320,63 @@ def test_async_parse_same_bytes_different_user_is_fresh(client, db_factory) -> N
     assert body["idempotent_replay"] is False
     assert body["document_id"] != first["document_id"]
     assert body["job_id"] != first["job_id"]
+
+
+# --- M14 (ADR-010): multi-pass through the worker. ---
+
+
+def test_stage_timeout_limit_scales_for_multi_pass(monkeypatch) -> None:
+    """The per-stage timeout is 3x for a multi-pass job (1800 s
+    at the 600 s default) and unchanged otherwise."""
+    from app.workers.processor import stage_timeout_limit
+
+    monkeypatch.setattr(settings, "worker_stage_timeout_seconds", 600)
+    assert stage_timeout_limit(settings, multi_pass=False) == 600
+    assert stage_timeout_limit(settings, multi_pass=True) == 1800
+
+
+def test_worker_passes_multi_pass_flag_to_parser(client, db_factory, monkeypatch) -> None:
+    """A job whose result_summary carries multi_pass reaches the
+    parser with multi_pass=True (recorded by a wrapper that
+    delegates to the real parser — CA40 still parses 40/40)."""
+    from app.pipeline.matching.service import parse_document_bytes as real_parse
+    from app.workers import processor as processor_module
+
+    seen: list[bool] = []
+
+    def recording_parse(*args, **kwargs):
+        seen.append(kwargs.get("multi_pass", False))
+        return real_parse(*args, **kwargs)
+
+    monkeypatch.setattr(processor_module, "parse_document_bytes", recording_parse)
+    body = _submit(client, CA40.read_bytes())
+    session = db_factory()
+    job = session.get(db.Job, uuid.UUID(body["job_id"]))
+    job.result_summary = {**(job.result_summary or {}), "multi_pass": True}
+    session.commit()
+    session.close()
+    summary = run_once(db_factory)
+    assert summary is not None
+    assert summary["status"] == "done", summary
+    assert summary["questions"] == 40
+    assert seen == [True]
+
+
+def test_worker_default_passes_multi_pass_false(client, db_factory, monkeypatch) -> None:
+    """Without the flag the worker calls the parser with
+    multi_pass=False — the default path, unchanged."""
+    from app.pipeline.matching.service import parse_document_bytes as real_parse
+    from app.workers import processor as processor_module
+
+    seen: list[bool] = []
+
+    def recording_parse(*args, **kwargs):
+        seen.append(kwargs.get("multi_pass", False))
+        return real_parse(*args, **kwargs)
+
+    monkeypatch.setattr(processor_module, "parse_document_bytes", recording_parse)
+    _submit(client, CA40.read_bytes())
+    summary = run_once(db_factory)
+    assert summary is not None
+    assert summary["status"] == "done", summary
+    assert seen == [False]
