@@ -114,6 +114,16 @@ function MistakeCard({
                 Answer unknown — the stored answer was never verified.
               </p>
             ) : null}
+            {q.explanation ? (
+              <div className="mt-3 rounded-md bg-info-50 px-3 py-2 ring-1 ring-info-200">
+                <p className="text-xs font-semibold text-info-800">Explanation</p>
+                <p className="mt-1 whitespace-pre-wrap text-sm text-info-900">{q.explanation}</p>
+              </div>
+            ) : (
+              <p className="mt-3 text-sm text-slate-600">
+                No explanation was stored for this question.
+              </p>
+            )}
           </>
         ) : (
           <p className="mt-2 text-sm text-slate-600">

@@ -5,8 +5,10 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { ErrorState, EmptyState } from "@/components/ui/empty-state";
 import { Pagination } from "@/components/ui/pagination";
 import { SectionHeading } from "@/components/ui/section-heading";
@@ -19,13 +21,29 @@ import {
   TableHeaderCell,
   TableRow,
 } from "@/components/ui/table";
-import { ApiError, getSessionToken, listAdminDocuments } from "@/lib/api";
+import { ApiError, getSessionToken, listAdminDocuments, setDocumentSharing } from "@/lib/api";
 import { formatDateTime } from "@/lib/utils";
 
 const PAGE_SIZE = 20;
 
 export default function AdminDocumentsPage() {
   const [page, setPage] = useState(1);
+  const [shareError, setShareError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const shareMutation = useMutation({
+    mutationFn: async (doc: { id: string; is_shared: boolean }) => {
+      const token = await getSessionToken();
+      if (!token) throw new ApiError(401, "unauthorized", "Sign in to view the admin area.");
+      return setDocumentSharing(token, doc.id, !doc.is_shared);
+    },
+    onSuccess: () => {
+      setShareError(null);
+      void queryClient.invalidateQueries({ queryKey: ["admin-documents"] });
+    },
+    onError: (err) => {
+      setShareError(err instanceof Error ? err.message : "Could not change sharing.");
+    },
+  });
   const query = useQuery({
     queryKey: ["admin-documents", page],
     queryFn: async () => {
@@ -56,6 +74,11 @@ export default function AdminDocumentsPage() {
         title="Documents"
         description={`${data.total} document${data.total === 1 ? "" : "s"} uploaded by students.`}
       />
+      {shareError ? (
+        <Alert tone="danger" title="Sharing could not be changed" className="mb-4">
+          {shareError}
+        </Alert>
+      ) : null}
       {data.items.length === 0 ? (
         <EmptyState title="No documents yet" description="Uploaded documents appear here with their processing status." />
       ) : (
@@ -66,6 +89,7 @@ export default function AdminDocumentsPage() {
               <TableHeaderCell>Type</TableHeaderCell>
               <TableHeaderCell>Pages</TableHeaderCell>
               <TableHeaderCell>Job</TableHeaderCell>
+              <TableHeaderCell>Shared</TableHeaderCell>
               <TableHeaderCell>Uploaded</TableHeaderCell>
             </TableRow>
           </TableHead>
@@ -79,6 +103,23 @@ export default function AdminDocumentsPage() {
                 <TableCell>{doc.file_type}</TableCell>
                 <TableCell>{doc.page_count ?? "—"}</TableCell>
                 <TableCell>{doc.latest_job_status ?? "—"}</TableCell>
+                <TableCell>
+                  <span className="flex flex-wrap items-center gap-2">
+                    {doc.is_shared ? (
+                      <Badge tone="success">Shared</Badge>
+                    ) : (
+                      <Badge>Private</Badge>
+                    )}
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      loading={shareMutation.isPending}
+                      onClick={() => shareMutation.mutate(doc)}
+                    >
+                      {doc.is_shared ? "Unshare" : "Share"}
+                    </Button>
+                  </span>
+                </TableCell>
                 <TableCell>{doc.created_at ? formatDateTime(doc.created_at) : "—"}</TableCell>
               </TableRow>
             ))}

@@ -10,7 +10,9 @@
 #   category.
 # - Review items show ONLY what the engine stored (snapshot
 #   text/options/correct answer + the student's selection +
-#   the evidence source). No explanations are invented.
+#   the evidence source + the stored verbatim explanation).
+#   No explanations are invented: None means the source gave
+#   none, and the UI shows nothing then.
 # - Unknown snapshots (correct_index -1) show as status
 #   "unknown", never correct/incorrect.
 
@@ -52,6 +54,9 @@ class ReviewItem(BaseModel):
     marked_for_review: bool
     status: str  # correct | incorrect | unattempted | unknown
     answer_source: str | None
+    # Stored verbatim explanation from the snapshot (M10).
+    # None = the source gave none; the UI shows nothing then.
+    explanation: str | None = None
     source_document_id: str | None
     source_page: int | None
     is_bookmarked: bool
@@ -98,6 +103,9 @@ class CollectionQuestion(BaseModel):
     options: list[str]
     correct_index: int
     answer_source: str
+    # Stored verbatim explanation from the bank question (M10).
+    # None = the source gave none; the UI shows nothing then.
+    explanation: str | None = None
 
 
 class CollectionItem(BaseModel):

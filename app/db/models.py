@@ -94,6 +94,14 @@ class Document(Base):
     file_size_bytes: Mapped[int] = mapped_column(Integer, nullable=False)
     page_count: Mapped[int | None] = mapped_column(Integer, nullable=True)
     content_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    # Shared bank (M11): an admin-owned bank document students
+    # may read questions from. False by default — a document is
+    # private to its owner unless an admin explicitly shares it.
+    # The test pool includes shared documents for any
+    # authenticated student, in addition to their own.
+    is_shared: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default=text("false")
+    )
     metadata_json: Mapped[dict[str, Any] | None] = mapped_column(
         "metadata", JSONVariant, nullable=True
     )
@@ -407,6 +415,13 @@ class ExtractedQuestion(Base):
     question_number: Mapped[str | None] = mapped_column(String(32), nullable=True)
     original_text: Mapped[str] = mapped_column(Text, nullable=False)
     normalized_text: Mapped[str] = mapped_column(Text, nullable=False)
+    # Verbatim explanation/solution as stored by the source (M10):
+    # shown to the student after a test, in the same question
+    # card, for wrong answers. NULL means the source gave none
+    # (solution_missing) — the UI shows nothing then, and an
+    # explanation is NEVER invented. Written by the question-bank
+    # import; the extraction pipeline never fabricates one.
+    explanation: Mapped[str | None] = mapped_column(Text, nullable=True)
     source_pages: Mapped[list[int] | None] = mapped_column(JSONVariant, nullable=True)
     bbox: Mapped[dict[str, Any] | None] = mapped_column(JSONVariant, nullable=True)
     extraction_method: Mapped[str | None] = mapped_column(String(64), nullable=True)
@@ -840,6 +855,11 @@ class TestQuestionSnapshot(Base):
     options: Mapped[list[dict[str, Any]]] = mapped_column(JSONVariant, nullable=False)
     correct_index: Mapped[int] = mapped_column(Integer, nullable=False)
     answer_source: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    # Frozen copy of the bank question's explanation at test
+    # creation (M10): the review shows the explanation the
+    # student actually saw, even if the bank question is later
+    # edited. NULL = no stored explanation (nothing invented).
+    explanation: Mapped[str | None] = mapped_column(Text, nullable=True)
     source_document_id: Mapped[uuid.UUID | None] = mapped_column(Uuid, nullable=True)
     source_page: Mapped[int | None] = mapped_column(Integer, nullable=True)
     created_at: Mapped[datetime] = _created_at()

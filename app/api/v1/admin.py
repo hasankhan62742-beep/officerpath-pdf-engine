@@ -3,8 +3,9 @@
 # ``require_admin`` — the claim comes ONLY from the verified
 # Supabase JWT (app_metadata.is_admin). Non-admins get 404
 # (no-leak), never a 403 that confirms the route exists.
-# Read-only in M9: no admin writes, so no audit_log writes —
-# admin reads are not logged to the DB (they would flood it);
+# Read-only in M9, except the M11 document-sharing toggle
+# (PATCH /documents/{id}/sharing) — the one admin write.
+# Admin reads are not logged to the DB (they would flood it);
 # denied attempts are logged by require_admin itself.
 
 from fastapi import APIRouter, Depends, Query
@@ -17,6 +18,8 @@ from app.schemas.admin import (
     AdminOverview,
     AdminQuestionListResponse,
     AdminUserListResponse,
+    DocumentSharingRequest,
+    DocumentSharingResponse,
 )
 from app.security.dependencies import require_admin
 from app.services import admin as admin_service
@@ -55,6 +58,24 @@ async def get_documents(
     with _session_or_503() as session:
         return AdminDocumentListResponse(
             **admin_service.list_documents(session, user_id=user_id, limit=limit, offset=offset)
+        )
+
+
+@router.patch("/documents/{document_id}/sharing", response_model=DocumentSharingResponse)
+async def set_document_sharing(
+    document_id: str,
+    payload: DocumentSharingRequest,
+    user: dict = Depends(require_admin),
+) -> DocumentSharingResponse:
+    """Mark a document shared / unshared (M11). Sharing makes
+    its questions visible to every authenticated student in the
+    test pool (read-only); unsharing removes them at once.
+    Non-admins get 404 (no-leak), same as every admin route."""
+    with _session_or_503() as session:
+        return DocumentSharingResponse(
+            **admin_service.set_document_sharing(
+                session, document_id=document_id, is_shared=payload.is_shared
+            )
         )
 
 

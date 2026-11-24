@@ -14,6 +14,7 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { Alert } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ErrorState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
@@ -76,7 +77,9 @@ export default function NewTestPage() {
     queryFn: async () => {
       const token = await getSessionToken();
       if (!token) throw new Error("Your session has expired. Please log in again.");
-      return listDocuments(token, { limit: 100, offset: 0 });
+      // Shared bank documents are listed too (M11), flagged by
+      // is_shared, so a student can pick them as a test source.
+      return listDocuments(token, { limit: 100, offset: 0, include_shared: true });
     },
   });
 
@@ -277,6 +280,7 @@ export default function NewTestPage() {
                   )}
                 >
                   {doc.title}
+                  {doc.is_shared ? <Badge tone="success">Shared bank</Badge> : null}
                 </button>
               ))}
             </div>

@@ -58,6 +58,10 @@ class SnapshotItem(BaseModel):
     # -1 = UNKNOWN (explicit opt-in only); >= 0 = the answer.
     correct_index: int | None
     answer_source: str | None
+    # Stored verbatim explanation, frozen at test creation (M10).
+    # None pre-submit (withheld with the key — never leaked
+    # mid-test) or when no explanation was stored at all.
+    explanation: str | None = None
     # True when the frozen correct_index is -1. Always present,
     # so the UI can flag unknown questions without the key.
     is_unknown: bool = False

@@ -43,8 +43,22 @@ class AdminDocumentItem(BaseModel):
     file_size_bytes: int
     page_count: int | None = None
     latest_job_status: str | None = None
+    is_shared: bool = False
     deleted_at: str | None = None
     created_at: str | None = None
+
+
+class DocumentSharingRequest(BaseModel):
+    """Admin-only (M11): mark a document shared / unshared."""
+
+    is_shared: bool
+
+
+class DocumentSharingResponse(BaseModel):
+    id: str
+    user_id: str
+    title: str
+    is_shared: bool
 
 
 class AdminDocumentListResponse(BaseModel):

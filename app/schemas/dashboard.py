@@ -24,6 +24,7 @@ class DashboardDocumentItem(BaseModel):
     job: JobResponse | None = None
     questions: int | None = None
     answered: int | None = None
+    is_shared: bool = False
 
 
 class DocumentListResponse(BaseModel):

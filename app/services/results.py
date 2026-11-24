@@ -484,8 +484,10 @@ def _review_items(
 ) -> list[dict]:
     """Per-question review: ONLY what the engine stored — the
     snapshot text/options/correct answer, the student's selected
-    option, the evidence source. No explanations are invented.
-    Unknown snapshots show as unknown, never correct/incorrect."""
+    option, the evidence source, and the stored verbatim
+    explanation (M10). No explanations are invented: None means
+    the source gave none. Unknown snapshots show as unknown,
+    never correct/incorrect."""
     outcomes = _snapshot_outcomes(snapshots, responses)
     question_ids = [o["snapshot"].question_id for o in outcomes if o["snapshot"].question_id]
     collections: dict[uuid.UUID, dict] = {}
@@ -518,6 +520,7 @@ def _review_items(
                 "marked_for_review": outcome["marked_for_review"],
                 "status": outcome["status"],
                 "answer_source": snap.answer_source,
+                "explanation": snap.explanation,
                 "source_document_id": (
                     str(snap.source_document_id) if snap.source_document_id else None
                 ),
@@ -599,8 +602,9 @@ def _copy_snapshots_into_new_session(
 ) -> db.TestSession:
     """Create a fresh session + byte-identical snapshot copies.
     Only the snapshot row ids are new — text, options, correct
-    answer, evidence source, source links and positions are
-    copied field by field from the source snapshots."""
+    answer, evidence source, explanation, source links and
+    positions are copied field by field from the source
+    snapshots."""
     session_row = db.TestSession(
         user_id=user_uuid,
         template_id=template.id,
@@ -622,6 +626,7 @@ def _copy_snapshots_into_new_session(
                 options=[dict(o) for o in (source.options or [])],
                 correct_index=source.correct_index,
                 answer_source=source.answer_source,
+                explanation=source.explanation,
                 source_document_id=source.source_document_id,
                 source_page=source.source_page,
             )
@@ -857,6 +862,9 @@ def _collection_to_dict(
             "options": options,
             "correct_index": _correct_index(answer),
             "answer_source": answer.resolution_method if answer else "",
+            # Stored verbatim explanation from the bank (M10).
+            # None = the source gave none; the UI shows nothing.
+            "explanation": question.explanation,
         }
     return {
         "id": str(row.id),

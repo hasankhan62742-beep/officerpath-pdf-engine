@@ -33,7 +33,7 @@ import random
 import uuid
 from decimal import Decimal
 
-from sqlalchemy import exists
+from sqlalchemy import exists, or_
 from sqlalchemy.orm import Session
 
 from app.core.errors import ApiError
@@ -257,14 +257,25 @@ def _marking_to_dict(row: db.MarkingConfig) -> dict:
 # ---------------------------------------------------------------------------
 
 
-def _own_document_ids(session: Session, user_uuid: uuid.UUID, ids: list[str]) -> list[uuid.UUID]:
+def _accessible_document_ids(
+    session: Session, user_uuid: uuid.UUID, ids: list[str]
+) -> list[uuid.UUID]:
+    """Document ids the caller may build a test from: their own
+    documents, or shared bank documents (M11). A private
+    document of another student answers 404 — never leaks
+    existence (the Phase 1 pattern)."""
     out = []
     for raw in ids:
         doc_uuid = _parse_uuid(raw, "Document not found.")
         row = (
             session.query(db.Document)
             .filter(db.Document.id == doc_uuid)
-            .filter(db.Document.user_id == user_uuid)
+            .filter(
+                or_(
+                    db.Document.user_id == user_uuid,
+                    db.Document.is_shared.is_(True),
+                )
+            )
             .filter(db.Document.deleted_at.is_(None))
             .first()
         )
@@ -302,12 +313,20 @@ def _pool_rows(
     source_type: str,
     source_ids: dict | list[str] | None,
 ) -> list[db.ExtractedQuestion]:
-    """All of the user's extracted questions matching the source
-    filter — before the unknown / no-option exclusions."""
+    """All extracted questions the caller may build from,
+    matching the source filter — before the unknown /
+    no-option exclusions. The pool is the caller's own
+    documents PLUS shared bank documents (M11); another
+    student's private documents are never in it."""
     query = (
         session.query(db.ExtractedQuestion)
         .join(db.Document, db.Document.id == db.ExtractedQuestion.document_id)
-        .filter(db.Document.user_id == user_uuid)
+        .filter(
+            or_(
+                db.Document.user_id == user_uuid,
+                db.Document.is_shared.is_(True),
+            )
+        )
         .filter(db.Document.deleted_at.is_(None))
     )
     if source_type == "all":
@@ -316,7 +335,9 @@ def _pool_rows(
         if not isinstance(source_ids, list) or not source_ids:
             raise _validation("source_ids must be a non-empty list of document ids.")
         query = query.filter(
-            db.ExtractedQuestion.document_id.in_(_own_document_ids(session, user_uuid, source_ids))
+            db.ExtractedQuestion.document_id.in_(
+                _accessible_document_ids(session, user_uuid, source_ids)
+            )
         )
     elif source_type == "subjects":
         if not isinstance(source_ids, list) or not source_ids:
@@ -347,7 +368,7 @@ def _pool_rows(
         subject_ids = source_ids.get("subject_ids") or []
         if not doc_ids and not subject_ids:
             raise _validation("mixed needs at least one document or subject id.")
-        doc_uuids = _own_document_ids(session, user_uuid, doc_ids) if doc_ids else []
+        doc_uuids = _accessible_document_ids(session, user_uuid, doc_ids) if doc_ids else []
         subject_uuids = _existing_subject_ids(session, subject_ids) if subject_ids else []
         conditions = []
         if doc_uuids:
@@ -431,7 +452,9 @@ def resolve_explicit(
     include_unknown: bool,
 ) -> dict:
     """Explicit question picks, in the order given. Every id must
-    belong to the caller (404 otherwise). Duplicates are a 422
+    be the caller's own question or a shared-bank question
+    (M11) — a private question of another student is a 404.
+    Duplicates are a 422
     unless allow_repetition — then the repetition is the caller's
     explicit choice and is recorded on the template. An unknown
     pick (correct_index -1) is a 422 unless include_unknown —
@@ -462,7 +485,12 @@ def resolve_explicit(
             session.query(db.ExtractedQuestion)
             .join(db.Document, db.Document.id == db.ExtractedQuestion.document_id)
             .filter(db.ExtractedQuestion.id == q_uuid)
-            .filter(db.Document.user_id == user_uuid)
+            .filter(
+                or_(
+                    db.Document.user_id == user_uuid,
+                    db.Document.is_shared.is_(True),
+                )
+            )
             .filter(db.Document.deleted_at.is_(None))
             .first()
         )
@@ -525,7 +553,12 @@ def availability(
     titles = {
         row.id: row.title
         for row in session.query(db.Document)
-        .filter(db.Document.user_id == uuid.UUID(user["id"]))
+        .filter(
+            or_(
+                db.Document.user_id == uuid.UUID(user["id"]),
+                db.Document.is_shared.is_(True),
+            )
+        )
         .filter(db.Document.deleted_at.is_(None))
         .all()
     }
@@ -595,7 +628,12 @@ def _snapshot_dict(row: db.TestQuestionSnapshot, *, include_key: bool) -> dict:
     is True (the test is submitted and the owner is reviewing
     it). Otherwise both are None and only ``is_unknown`` is
     sent, mirroring the M9 exam-session shape, so the UI can
-    still flag unknown questions without ever seeing the key."""
+    still flag unknown questions without ever seeing the key.
+    ``explanation`` follows the SAME rule (M10): it is the
+    stored verbatim explanation, and it must never leak before
+    submission — a pre-submit reader could otherwise read the
+    reasoning for every answer. None means withheld, or no
+    stored explanation at all."""
     return {
         "snapshot_id": str(row.id),
         "question_id": str(row.question_id) if row.question_id else None,
@@ -604,6 +642,7 @@ def _snapshot_dict(row: db.TestQuestionSnapshot, *, include_key: bool) -> dict:
         "options": row.options,
         "correct_index": row.correct_index if include_key else None,
         "answer_source": row.answer_source if include_key else None,
+        "explanation": row.explanation if include_key else None,
         "is_unknown": row.correct_index < 0,
         "source_document_id": str(row.source_document_id) if row.source_document_id else None,
         "source_page": row.source_page,
@@ -794,6 +833,11 @@ def create_test(session: Session, user: dict, payload: dict) -> dict:
                     ],
                     correct_index=_correct_index(answer),
                     answer_source=(answer.resolution_method or "") if answer else "",
+                    # Frozen copy of the bank explanation (M10): a
+                    # past test keeps its explanation even if the
+                    # bank question is later edited. None when the
+                    # bank holds none — never invented.
+                    explanation=question.explanation,
                     source_document_id=question.document_id,
                     source_page=(question.source_pages or [None])[0],
                 )

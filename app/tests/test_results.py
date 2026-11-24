@@ -844,3 +844,171 @@ def test_migration_0008_downgrade_refuses_with_collection_rows(tmp_path, monkeyp
     with pytest.raises(RuntimeError, match="Refusing downgrade"):
         command.downgrade(cfg, "0007_m7_exam")
     command.upgrade(cfg, "head")
+
+
+# ---------------------------------------------------------------------------
+# M10: stored explanations
+# ---------------------------------------------------------------------------
+
+EXPLANATIONS = {
+    "1": "Islamabad became the capital of Pakistan in 1967.",
+    "3": "Thar is the largest desert of Pakistan.",
+}
+
+
+def _set_explanations(engine_db, doc_id):
+    """Store verbatim explanations on Q1/Q3; Q5 (and the rest)
+    keep none — the no-explanation case must show nothing."""
+    session = engine_db()
+    rows = (
+        session.query(db.ExtractedQuestion).filter(db.ExtractedQuestion.document_id == doc_id).all()
+    )
+    for row in rows:
+        if row.question_number in EXPLANATIONS:
+            row.explanation = EXPLANATIONS[row.question_number]
+    session.commit()
+    session.close()
+
+
+def _db_snapshots(engine_db, test_id):
+    session = engine_db()
+    rows = (
+        session.query(db.TestQuestionSnapshot)
+        .filter(db.TestQuestionSnapshot.session_id == uuid.UUID(test_id))
+        .order_by(db.TestQuestionSnapshot.position)
+        .all()
+    )
+    out = {str(row.question_id): row for row in rows}
+    session.close()
+    return out
+
+
+def test_snapshot_carries_bank_explanation_at_creation(client, engine_db, seeded_doc):
+    """M10 (a): test creation freezes the bank explanation into
+    the snapshot — Q1/Q3 carry it, Q5 (none stored) carries
+    None. The test-detail endpoint still withholds it
+    pre-submit (None, like the key)."""
+    doc_id, by_number, _, _ = seeded_doc
+    _set_explanations(engine_db, doc_id)
+    question_ids = [by_number[str(n)] for n in range(1, 8)]
+    res = _create_explicit(client, question_ids)
+    assert res.status_code == 201, res.text
+    test_id = res.json()["test_id"]
+    snaps = _db_snapshots(engine_db, test_id)
+    assert snaps[by_number["1"]].explanation == EXPLANATIONS["1"]
+    assert snaps[by_number["3"]].explanation == EXPLANATIONS["3"]
+    assert snaps[by_number["5"]].explanation is None
+    detail_snaps = _get_detail_snaps(client, test_id)
+    by_qid = {s["question_id"]: s for s in detail_snaps}
+    assert by_qid[by_number["1"]]["explanation"] is None
+    assert by_qid[by_number["1"]]["correct_index"] is None
+
+
+def test_in_progress_session_never_carries_explanation(client, engine_db, seeded_doc):
+    """M10 (c): the exam session shape (served mid-test) has NO
+    explanation field at all — not even null — so the reasoning
+    can never be read from the network tab while answering."""
+    doc_id, by_number, _, _ = seeded_doc
+    _set_explanations(engine_db, doc_id)
+    question_ids = [by_number[str(n)] for n in range(1, 8)]
+    res = _create_explicit(client, question_ids)
+    assert res.status_code == 201, res.text
+    test_id = res.json()["test_id"]
+    res = client.post(f"/api/v1/tests/{test_id}/start", headers=auth_headers("token-user-a"))
+    assert res.status_code == 200, res.text
+    res = client.get(f"/api/v1/tests/{test_id}/session", headers=auth_headers("token-user-a"))
+    assert res.status_code == 200, res.text
+    for snap in res.json()["snapshots"]:
+        assert "explanation" not in snap
+        assert "correct_index" not in snap
+
+
+def test_result_detail_returns_explanation_after_submit(client, engine_db, seeded_doc):
+    """M10 (b)+(d): after submission the review shows the stored
+    verbatim explanation in the same item — wrong Q3 carries
+    it, wrong Q5 (none stored) carries None and nothing is
+    invented, correct Q1 carries it too."""
+    doc_id, by_number, _, _ = seeded_doc
+    _set_explanations(engine_db, doc_id)
+    test_id, _ = _run_standard_attempt(client, by_number)
+    res = _result(client, test_id)
+    assert res.status_code == 200, res.text
+    review = {item["question_id"]: item for item in res.json()["review"]}
+    q3 = review[by_number["3"]]
+    assert q3["status"] == "incorrect"
+    assert q3["explanation"] == EXPLANATIONS["3"]
+    q5 = review[by_number["5"]]
+    assert q5["status"] == "incorrect"
+    assert q5["explanation"] is None
+    q1 = review[by_number["1"]]
+    assert q1["status"] == "correct"
+    assert q1["explanation"] == EXPLANATIONS["1"]
+
+
+def test_mistake_notebook_returns_explanation(client, engine_db, seeded_doc):
+    """M10: the mistake notebook shows the bank explanation for
+    each wrong question — Q3 carries it, Q5 (none stored)
+    carries None."""
+    doc_id, by_number, _, _ = seeded_doc
+    _set_explanations(engine_db, doc_id)
+    test_id, _ = _run_standard_attempt(client, by_number)
+    res = client.get(
+        "/api/v1/collections?collection_type=mistake", headers=auth_headers("token-user-a")
+    )
+    assert res.status_code == 200, res.text
+    by_qid = {row["question_id"]: row for row in res.json()["collections"]}
+    assert set(by_qid) == {by_number["3"], by_number["5"]}
+    assert by_qid[by_number["3"]]["question"]["explanation"] == EXPLANATIONS["3"]
+    assert by_qid[by_number["5"]]["question"]["explanation"] is None
+
+
+def test_retry_copies_explanation_into_new_snapshots(client, engine_db, seeded_doc):
+    """M10: retrying copies the frozen explanation with the
+    snapshots, so the retake's review shows the same text."""
+    doc_id, by_number, _, _ = seeded_doc
+    _set_explanations(engine_db, doc_id)
+    test_id, _ = _run_standard_attempt(client, by_number)
+    res = client.post(f"/api/v1/tests/{test_id}/retry", headers=auth_headers("token-user-a"))
+    assert res.status_code == 201, res.text
+    new_id = res.json()["test_id"]
+    snaps = _db_snapshots(engine_db, new_id)
+    assert snaps[by_number["3"]].explanation == EXPLANATIONS["3"]
+    assert snaps[by_number["5"]].explanation is None
+
+
+def test_migration_0010_explanation_columns_on_fresh_db(tmp_path, monkeypatch):
+    """A database built ONLY by ``alembic upgrade head`` has the
+    M10 explanation columns on the bank and on snapshots, and a
+    downgrade to 0009 drops them."""
+    from alembic.config import Config
+
+    from alembic import command
+
+    db_file = tmp_path / "alembic-m10.db"
+    monkeypatch.setattr(settings, "database_url", f"sqlite:///{db_file}")
+
+    cfg = Config("alembic.ini")
+    command.upgrade(cfg, "head")
+
+    engine = create_engine(f"sqlite:///{db_file}")
+    try:
+        cols = {
+            t: {c["name"] for c in inspect(engine).get_columns(t)}
+            for t in ("extracted_questions", "test_question_snapshots")
+        }
+        assert "explanation" in cols["extracted_questions"]
+        assert "explanation" in cols["test_question_snapshots"]
+    finally:
+        engine.dispose()
+    command.downgrade(cfg, "0009_m9_notifications")
+    engine = create_engine(f"sqlite:///{db_file}")
+    try:
+        cols = {
+            t: {c["name"] for c in inspect(engine).get_columns(t)}
+            for t in ("extracted_questions", "test_question_snapshots")
+        }
+        assert "explanation" not in cols["extracted_questions"]
+        assert "explanation" not in cols["test_question_snapshots"]
+    finally:
+        engine.dispose()
+    command.upgrade(cfg, "head")

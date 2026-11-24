@@ -4,11 +4,12 @@
 // (GET /api/v1/tests/{id}/result): score, counts, breakdowns and
 // the per-question review. The frontend never computes marks or
 // trends. Review shows only what the engine stored — snapshot
-// text/options + the selected answer + evidence labels. No
-// explanations are invented: there is no explanation field
-// anywhere, because the engine never stored one. Unknown
-// snapshots (correct_index = -1) are shown as unknown, never as
-// correct or incorrect.
+// text/options + the selected answer + evidence labels + the
+// stored verbatim explanation (M10), shown in the same card as
+// the question. No explanations are invented: a question with
+// no stored explanation shows none. Unknown snapshots
+// (correct_index = -1) are shown as unknown, never as correct
+// or incorrect.
 
 "use client";
 
@@ -341,8 +342,9 @@ export function ResultClient({ id }: { id: string }) {
         <h2 className="text-lg font-semibold text-slate-900">Question review</h2>
         <p className="text-sm text-slate-600">
           Only what the engine stored: the frozen question, your answer, the
-          stored answer, and the evidence source. No explanations are shown
-          because none were stored.
+          stored answer, the evidence source, and the stored explanation
+          where one exists. Explanations are never invented — a question
+          with no stored explanation shows none.
         </p>
         {bookmarkError ? (
           <Alert tone="danger" title="Bookmark failed">
@@ -398,6 +400,18 @@ export function ResultClient({ id }: { id: string }) {
               {item.status === "unattempted" ? (
                 <p className="mt-3 text-sm text-slate-600">
                   You did not answer this question.
+                </p>
+              ) : null}
+              {item.explanation ? (
+                <div className="mt-3 rounded-md bg-info-50 px-3 py-2 ring-1 ring-info-200">
+                  <p className="text-xs font-semibold text-info-800">Explanation</p>
+                  <p className="mt-1 whitespace-pre-wrap text-sm text-info-900">
+                    {item.explanation}
+                  </p>
+                </div>
+              ) : item.status === "incorrect" ? (
+                <p className="mt-3 text-sm text-slate-600">
+                  No explanation was stored for this question.
                 </p>
               ) : null}
               <p className="mt-3 text-xs text-slate-500">

@@ -26,7 +26,7 @@ import uuid
 from datetime import UTC, datetime
 from uuid import UUID
 
-from sqlalchemy import func
+from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 
 from app.db import models as db
@@ -51,6 +51,7 @@ def _document_row(doc: db.Document) -> dict:
         "file_size_bytes": doc.file_size_bytes,
         "page_count": doc.page_count,
         "content_hash": doc.content_hash,
+        "is_shared": bool(doc.is_shared),
         "metadata": doc.metadata_json,
         "deleted_at": doc.deleted_at.isoformat() if doc.deleted_at else None,
         "created_at": doc.created_at.isoformat() if doc.created_at else None,
@@ -159,18 +160,30 @@ class SqlAlchemyDocumentRepository:
         return _document_row(row)
 
     def list_by_user(
-        self, user_id: str, *, limit: int, offset: int, status: str | None = None
+        self,
+        user_id: str,
+        *,
+        limit: int,
+        offset: int,
+        status: str | None = None,
+        include_shared: bool = False,
     ) -> tuple[list[dict], int]:
         """The user's documents, newest first, excluding soft-deleted
         rows. Returns (page, total) so the caller can paginate.
         `status` filters by the document's job status (one job per
         document — register/upload/async each create exactly one —
-        so the join is 1:1 in practice)."""
+        so the join is 1:1 in practice). With ``include_shared``
+        (M11, test builder only) shared bank documents of other
+        users are listed too, flagged by ``is_shared`` — the
+        dashboard list never passes it, so it stays own-only."""
         user_uuid = _as_uuid(user_id)
         if user_uuid is None:
             return [], 0
         base = self._session.query(db.Document).filter(
-            db.Document.user_id == user_uuid,
+            or_(
+                db.Document.user_id == user_uuid,
+                db.Document.is_shared.is_(True) if include_shared else False,
+            ),
             db.Document.deleted_at.is_(None),
         )
         if status is not None:

@@ -110,6 +110,7 @@ export interface DashboardDocument {
   job: DocumentJob | null;
   questions: number | null;
   answered: number | null;
+  is_shared: boolean;
 }
 
 export interface DocumentListResponse {
@@ -154,12 +155,13 @@ export async function getDashboardSummary(accessToken: string): Promise<Dashboar
 
 export async function listDocuments(
   accessToken: string,
-  opts: { limit?: number; offset?: number; status?: JobStatus },
+  opts: { limit?: number; offset?: number; status?: JobStatus; include_shared?: boolean },
 ): Promise<DocumentListResponse> {
   const params = new URLSearchParams();
   params.set("limit", String(opts.limit ?? 20));
   params.set("offset", String(opts.offset ?? 0));
   if (opts.status) params.set("status", opts.status);
+  if (opts.include_shared) params.set("include_shared", "true");
   return request<DocumentListResponse>(`/api/v1/documents?${params}`, accessToken);
 }
 
@@ -960,6 +962,8 @@ export interface ReviewItem {
   marked_for_review: boolean;
   status: "correct" | "incorrect" | "unattempted" | "unknown";
   answer_source: string | null;
+  // Stored verbatim explanation (M10). Null = none stored.
+  explanation: string | null;
   source_document_id: string | null;
   source_page: number | null;
   is_bookmarked: boolean;
@@ -1030,6 +1034,8 @@ export interface CollectionQuestion {
   options: string[];
   correct_index: number;
   answer_source: string;
+  // Stored verbatim explanation (M10). Null = none stored.
+  explanation: string | null;
 }
 
 export interface CollectionItem {
@@ -1170,6 +1176,7 @@ export interface AdminDocumentItem {
   file_size_bytes: number;
   page_count: number | null;
   latest_job_status: string | null;
+  is_shared: boolean;
   deleted_at: string | null;
   created_at: string | null;
 }
@@ -1246,6 +1253,25 @@ export async function listAdminDocuments(
   return request<AdminListResponse<AdminDocumentItem>>(
     `/api/v1/admin/documents?${params}`,
     accessToken,
+  );
+}
+
+export interface DocumentSharing {
+  id: string;
+  user_id: string;
+  title: string;
+  is_shared: boolean;
+}
+
+export async function setDocumentSharing(
+  accessToken: string,
+  documentId: string,
+  isShared: boolean,
+): Promise<DocumentSharing> {
+  return request<DocumentSharing>(
+    `/api/v1/admin/documents/${documentId}/sharing`,
+    accessToken,
+    { method: "PATCH", body: JSON.stringify({ is_shared: isShared }) },
   );
 }
 

@@ -15,6 +15,7 @@ from datetime import datetime
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
+from app.core.errors import ApiError
 from app.db import models as db
 
 
@@ -132,6 +133,7 @@ def list_documents(
                 "file_size_bytes": r.file_size_bytes,
                 "page_count": r.page_count,
                 "latest_job_status": job_status.get(r.id),
+                "is_shared": bool(r.is_shared),
                 "deleted_at": _iso(r.deleted_at),
                 "created_at": _iso(r.created_at),
             }
@@ -140,6 +142,31 @@ def list_documents(
         "total": total,
         "limit": limit,
         "offset": offset,
+    }
+
+
+def set_document_sharing(session: Session, *, document_id: str, is_shared: bool) -> dict:
+    """Mark a document shared / unshared (M11). Admin-only —
+    the route is behind ``require_admin``. Sharing makes the
+    document's questions visible to every authenticated student
+    in the test pool (read-only); unsharing removes them from
+    the pool at once. A soft-deleted or unknown document
+    answers 404 (never leaks existence)."""
+    row = (
+        session.query(db.Document)
+        .filter(db.Document.id == uuid.UUID(document_id))
+        .filter(db.Document.deleted_at.is_(None))
+        .first()
+    )
+    if row is None:
+        raise ApiError(status_code=404, code="not_found", message="Document not found.")
+    row.is_shared = bool(is_shared)
+    session.commit()
+    return {
+        "id": str(row.id),
+        "user_id": str(row.user_id),
+        "title": row.title,
+        "is_shared": bool(row.is_shared),
     }
 
 

@@ -39,6 +39,7 @@ def _item(document: dict, job: dict | None) -> dict:
         "page_count": document.get("page_count"),
         "created_at": document["created_at"],
         "job": job,
+        "is_shared": bool(document.get("is_shared", False)),
         "questions": summary.get("questions")
         if isinstance(summary.get("questions"), int)
         else None,
@@ -68,17 +69,22 @@ def list_documents(
     limit: int,
     offset: int,
     status: str | None = None,
+    include_shared: bool = False,
 ) -> tuple[list[dict], int]:
     """(page of items, total). `status` filters by the document's
     latest job status; a document with no job never matches a
-    status filter. Total counts the filtered set, not the page."""
+    status filter. Total counts the filtered set, not the page.
+    ``include_shared`` (M11, test builder only) also lists
+    shared bank documents, flagged by ``is_shared``."""
     if status is not None and status not in JOB_STATUSES:
         raise ApiError(
             status_code=422,
             code="validation_error",
             message=f"Unknown job status: {status!r}.",
         )
-    rows, total = documents.list_by_user(user["id"], limit=limit, offset=offset, status=status)
+    rows, total = documents.list_by_user(
+        user["id"], limit=limit, offset=offset, status=status, include_shared=include_shared
+    )
     job_map = jobs.find_latest_by_document_ids([r["id"] for r in rows])
     return [_item(row, job_map.get(row["id"])) for row in rows], total
 

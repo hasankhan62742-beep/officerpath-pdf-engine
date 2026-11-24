@@ -80,11 +80,21 @@ async def list_documents(
     status: str | None = Query(
         None, description=f"Filter by job status: {', '.join(JOB_STATUSES)}."
     ),
+    include_shared: bool = Query(
+        False,
+        description="Also list shared bank documents (M11, test builder only).",
+    ),
     user: dict = Depends(get_current_user),
 ) -> DocumentListResponse:
     with _repositories() as (_, documents, jobs):
         items, total = document_service.list_documents(
-            user, documents, jobs, limit=limit, offset=offset, status=status
+            user,
+            documents,
+            jobs,
+            limit=limit,
+            offset=offset,
+            status=status,
+            include_shared=include_shared,
         )
     return DocumentListResponse(
         documents=[_to_item(i) for i in items],
