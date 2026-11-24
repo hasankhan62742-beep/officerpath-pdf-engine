@@ -37,6 +37,19 @@ ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PATH="/opt/venv/bin:$PATH" \
     PORT=8000
+# M15 (Child A, measured 2026-11-24): OMP_THREAD_LIMIT=1. With
+# default 4-thread OpenMP, one PPSC-66 page (eng+urd, PSM 3,
+# 1700x2200) was STILL unfinished after 25 min wall / 15 min CPU
+# on the oversubscribed dev VM (load 8-19 on 4 vCPUs); with
+# OMP_THREAD_LIMIT=1 the same page took 11 s with the same OCR
+# text (baseline counts reproduced exactly). Mechanism: OpenMP
+# spin-wait barriers burn the tiny CPU share on an oversubscribed
+# machine. Set here (before the OpenMP runtime loads) so the
+# production image — web service AND the in-process worker, which
+# share this image — both get it. CI is NOT set: GitHub runners
+# are not this oversubscribed VM and the suite runs green there
+# without it; the local pytest run sets it in the shell instead.
+ENV OMP_THREAD_LIMIT=1
 WORKDIR /app
 # M3 note (ADR-005): Tesseract needs its binary + language data at
 # runtime (eng+urd+ara for Urdu/Arabic-script pages, osd for the

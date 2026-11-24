@@ -307,6 +307,68 @@ def _ocr_page(
     return sorted(blocks, key=lambda b: b.reading_order if b.reading_order is not None else 10**6)
 
 
+def _ocr_page_single(
+    png_bytes: bytes,
+    page_number: int,
+    settings: Settings,
+    *,
+    psm: int,
+    use_layout: bool,
+    analyzer: GeometryLayoutAnalyzer | None = None,
+) -> tuple[list, dict]:
+    """Single-path OCR for one page with the M15 confidence-gated
+    PSM-4 retry (ADR-008 addendum; rule in app/pipeline/ocr/psm.py):
+    OCR at ``psm`` (3), and if the page's mean word confidence is
+    below 85, retry with PSM 4 and keep the retry only if its mean
+    confidence is strictly higher. Returns (blocks, retry_info)
+    where retry_info is {"retried": bool, "kept": bool,
+    "mean_conf_psm3": float | None, "mean_conf_psm4": float | None}.
+    Multi-pass (M14/ADR-010) must NOT use this — it calls
+    _ocr_page directly with its three fixed variants, and a retry
+    inside it would change the union. A failed retry contributes
+    nothing: _ocr_page already isolates per-page OCR failures, so
+    the PSM-3 blocks stand."""
+    from app.pipeline.ocr.psm import (
+        PSM4_RETRY_PSM,
+        keep_psm4_retry,
+        mean_word_confidence,
+        should_retry_psm4,
+    )
+
+    blocks = _ocr_page(
+        png_bytes,
+        page_number,
+        settings,
+        psm=psm,
+        use_layout=use_layout,
+        analyzer=analyzer,
+    )
+    info: dict = {
+        "retried": False,
+        "kept": False,
+        "mean_conf_psm3": mean_word_confidence(blocks),
+        "mean_conf_psm4": None,
+    }
+    if psm == PSM4_RETRY_PSM:
+        return blocks, info
+    if not should_retry_psm4(info["mean_conf_psm3"]):
+        return blocks, info
+    retry_blocks = _ocr_page(
+        png_bytes,
+        page_number,
+        settings,
+        psm=PSM4_RETRY_PSM,
+        use_layout=use_layout,
+        analyzer=analyzer,
+    )
+    info["retried"] = True
+    info["mean_conf_psm4"] = mean_word_confidence(retry_blocks)
+    if keep_psm4_retry(info["mean_conf_psm3"], info["mean_conf_psm4"]):
+        info["kept"] = True
+        return retry_blocks, info
+    return blocks, info
+
+
 def _question_merge_key(question: ExtractedQuestion) -> tuple:
     """Identity of a question across OCR variants: (number,
     stem-prefix). Same number + same stem = the same question
@@ -520,6 +582,7 @@ def parse_document_bytes(
     psm_by_page: dict[int, int] = {}
     quality_by_page: dict[int, dict] = {}
     merge_report: dict | None = None
+    psm4_retry_by_page: dict[int, dict] = {}
     if is_digital:
         result = extract_from_digital_pdf(pdf_bytes, source_document_id)
         if on_stage is not None:
@@ -612,7 +675,10 @@ def parse_document_bytes(
             psm_by_page[page_number] = psm
             if on_stage is not None:
                 on_stage("render", {"page": page_number})
-            blocks = _ocr_page(
+            # Single path only: M15 confidence-gated PSM-4 retry
+            # (ADR-008 addendum). Multi-pass above calls _ocr_page
+            # directly and is untouched.
+            blocks, retry_info = _ocr_page_single(
                 png_bytes,
                 page_number,
                 settings,
@@ -620,6 +686,7 @@ def parse_document_bytes(
                 use_layout=True,
                 analyzer=analyzer,
             )
+            psm4_retry_by_page[page_number] = retry_info
             if on_stage is not None:
                 on_stage("ocr", {"page": page_number, "psm": psm})
                 on_stage("layout", {"page": page_number})
@@ -644,6 +711,7 @@ def parse_document_bytes(
             "psm_override": psm_override,
             "psm_by_page": {str(k): v for k, v in psm_by_page.items()},
             "quality_by_page": quality_by_page,
+            "psm4_retry_by_page": {str(k): v for k, v in psm4_retry_by_page.items()},
             "multi_pass": multi_pass,
             "merge": merge_report,
         },
@@ -701,6 +769,7 @@ def parse_image_bytes(
         raise ValueError(f"Image could not be decoded: {exc}") from exc
     quality = measure_quality(png_to_gray(png_bytes))
     psm = psm_override if psm_override is not None else select_psm(quality)
+    psm4_retry_by_page: dict[int, dict] = {}
     if on_stage is not None:
         on_stage("classify", {"is_digital": False, "page_count": 1})
         on_stage("render", {"page": 1})
@@ -744,7 +813,10 @@ def parse_image_bytes(
         merge_report["variant_seconds"] = variant_seconds
         psm = variants[0][1]
     else:
-        blocks = _ocr_page(
+        # Single path only: M15 confidence-gated PSM-4 retry
+        # (ADR-008 addendum). Multi-pass above calls _ocr_page
+        # directly and is untouched.
+        blocks, retry_info = _ocr_page_single(
             png_bytes,
             1,
             settings,
@@ -757,6 +829,7 @@ def parse_image_bytes(
             on_stage("layout", {"page": 1})
         lines = _lines_from_blocks(blocks)
         result = extract_from_ocr_blocks(blocks, source_document_id)
+        psm4_retry_by_page[1] = retry_info
     if on_stage is not None:
         on_stage(
             "extract",
@@ -775,6 +848,7 @@ def parse_image_bytes(
             "psm_override": psm_override,
             "psm_by_page": {"1": psm},
             "quality_by_page": {1: quality.to_dict()},
+            "psm4_retry_by_page": {"1": psm4_retry_by_page.get(1, {})},
             "multi_pass": multi_pass,
             "merge": merge_report,
         },

@@ -60,3 +60,38 @@
   - Route on page classification (scanned vs digital): rejected —
     all 7 PPSC-66 pages are scanned, so the signal does not vary
     where the PSMs disagree.
+
+## Addendum — M15: confidence-gated PSM-4 retry (IMPLEMENTED, 2026-11-24)
+
+- **Status:** IMPLEMENTED in the single path only
+  (`app/pipeline/ocr/psm.py` rule + `_ocr_page_single` in
+  `app/pipeline/matching/service.py`); `select_psm()` still
+  returns 3 for every page — the retry happens AFTER the PSM-3
+  pass, it does not replace the default.
+- **Rule (measured, Child A):** after a page's PSM-3 OCR,
+  compute the mean Tesseract word confidence (every non-empty
+  word with conf >= 0; conf -1 dropped — the exact TSV rule from
+  `bench_a.py`); if it is below **85**, retry the page with
+  PSM 4 and keep the retry only if its mean confidence is
+  **strictly higher** (keep margin 0).
+- **Measured (PPSC-66):** 41 -> **42 questions**, 40 -> **41
+  correct vs key, 0 wrong**; pending 27 -> 33. Only p5 retried
+  (PSM-3 mean 81.8 -> PSM-4 86.4, kept). Table photo (0/2) and
+  Paper 60 (4/4/9) unchanged. The pre-registered keep margin +5
+  scored 41 (PSM-4 was +4.6, just under), so the margin-0 rule
+  was chosen post-hoc — it was validated on a second paper
+  before adoption: NOA Urdu MCQs (9 pp, 135-question extracted
+  key) showed NO change (75 questions / 7 pending / 39 correct
+  / 29 wrong, baseline and retry identical — only p9 retried,
+  PSM-4 conf equal at 84.1, not kept), so no loss and no new
+  wrong answers. The acceptance test now pins 42 / 42 / 33.
+- **Scope:** single path only (PDF pages AND the image path).
+  Multi-pass (M14/ADR-010) is untouched — it calls `_ocr_page`
+  directly with its three fixed variants.
+- **OMP_THREAD_LIMIT=1** (`Dockerfile`, production image): Child
+  A measured that default 4-thread OpenMP left one PPSC-66 page
+  unfinished after 25 min on the oversubscribed dev VM (load
+  8–19), while `OMP_THREAD_LIMIT=1` finished the same page in
+  11 s with the same OCR text. The production image (web +
+  in-process worker) carries the ENV; CI does not set it — the
+  suite runs green on GitHub runners without it.

@@ -66,3 +66,71 @@ def select_psm(quality: PageQuality | None) -> int:
     (and may be None) so callers route per page through this one
     hook when a real signal is measured."""
     return DEFAULT_PSM
+
+
+#: M15 (Child A, measured 2026-11-24; ADR-008 addendum) — the
+#: confidence-gated PSM-4 retry for the SINGLE path. The signal the
+#: M2 quality metrics could not provide turned out to be Tesseract's
+#: own mean word confidence: on PPSC-66 the PSM-3 per-page means
+#: were p1 92.5, p2 90.2, p3 91.3, p4 88.7, p5 81.8, p6 90.5,
+#: p7 89.6 — p5 alone below 85, and exactly the page M5 showed
+#: wants PSM 4 (9/19 vs PSM 3's 4/19). Rule: retry a page with
+#: PSM 4 when its PSM-3 mean word confidence is below the
+#: threshold, and keep the retry only when its mean confidence is
+#: STRICTLY higher (keep margin 0). Measured: PPSC-66 41 -> 42
+#: questions, 40 -> 41 correct vs key, 0 wrong (only p5 retried;
+#: PSM-4 conf 86.4 vs 81.8); table photo and Paper 60 unchanged.
+#: CAVEAT: the margin-0 keep rule was chosen post-hoc (the
+#: pre-registered +5 rule scored 41 — PSM-4 was +4.6, just under),
+#: so it was validated on a second paper before adoption: NOA
+#: Urdu MCQs (9 pp, 135-question key) showed NO change
+#: (75 questions / 7 pending / 39 correct / 29 wrong, baseline
+#: and retry identical — only p9 retried, PSM-4 conf equal at
+#: 84.1, not kept). Applies to the single path only (PDF pages
+#: AND the image path); multi-pass (M14/ADR-010) is untouched —
+#: it calls _ocr_page directly with its three fixed variants.
+PSM4_RETRY_CONFIDENCE_THRESHOLD = 85.0
+
+#: PSM used for the retry pass.
+PSM4_RETRY_PSM = 4
+
+#: Keep margin (points of mean word confidence) the PSM-4 retry
+#: must beat the PSM-3 result by. 0.0 = keep only if strictly
+#: better (see the post-hoc caveat above).
+PSM4_RETRY_KEEP_MARGIN = 0.0
+
+
+def mean_word_confidence(blocks: list) -> float | None:
+    """Mean Tesseract word confidence (0-100) over a page's OCR
+    blocks — the exact rule Child A's ``bench_a.py`` computed from
+    the TSV: every word with non-empty text and conf >= 0 counts
+    once; conf -1 ("no confidence") is dropped, never averaged
+    in. ``word_confidences`` on each block already carries exactly
+    those words (empty words are dropped when blocks are grouped),
+    so the mean over its values >= 0 reproduces the TSV mean.
+    Returns None when the page has no scored words (blank page /
+    OCR failure) — such a page is never retried."""
+    confs: list[float] = []
+    for block in blocks:
+        word_confidences = getattr(block, "word_confidences", None) or {}
+        for conf in word_confidences.values():
+            if float(conf) >= 0:
+                confs.append(float(conf))
+    if not confs:
+        return None
+    return round(sum(confs) / len(confs), 1)
+
+
+def should_retry_psm4(mean_confidence: float | None) -> bool:
+    """True when a page's PSM-3 mean word confidence is below the
+    retry threshold (and a mean exists at all)."""
+    return mean_confidence is not None and mean_confidence < PSM4_RETRY_CONFIDENCE_THRESHOLD
+
+
+def keep_psm4_retry(mean_psm3: float | None, mean_psm4: float | None) -> bool:
+    """True when the PSM-4 retry's mean word confidence beats the
+    PSM-3 result by more than the keep margin — i.e. strictly
+    better at margin 0. Either mean missing means "do not keep"."""
+    if mean_psm3 is None or mean_psm4 is None:
+        return False
+    return mean_psm4 > mean_psm3 + PSM4_RETRY_KEEP_MARGIN

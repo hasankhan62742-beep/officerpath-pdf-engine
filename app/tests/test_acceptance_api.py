@@ -7,7 +7,10 @@
 # by the benchmark scripts, never by pytest.
 #
 # Expected values are the measured ones, not aspirations:
-# - PPSC-66 PDF: 7 pages, 41 questions, 41 answered (M6/M7).
+# - PPSC-66 PDF: 7 pages, 42 questions, 42 answered (M15: the
+#   confidence-gated PSM-4 retry lifts the M6/M7 baseline of 41
+#   to 42 — only p5 retried, 41 correct vs key, 0 wrong; pending
+#   33). The old 41/27 numbers are the pre-retry baseline.
 # - Computer table photo (Q67-81): 0 questions, 2 pending — live
 #   Tesseract does not recover this ruled table (M7 §2/§3). The
 #   test pins the honest outcome; a future OCR improvement must
@@ -67,12 +70,16 @@ def test_acceptance_ppsc66_pdf_via_parse_endpoint(client) -> None:
     assert body["page_count"] == 7
     assert body["persisted"] is False  # no DATABASE_URL in tests
     matched = body["matched"]
-    assert matched["counts"]["questions"] == 41
-    assert matched["answered"] == 41
-    assert matched["counts"]["pending"] == 27
+    # M15: PSM-4 retry lifts the M6/M7 baseline (41 questions /
+    # 41 answered / 27 pending) to 42 / 42 / 33 — only p5 retried
+    # (mean conf 81.8 -> PSM-4 86.4, kept), 41 correct vs key,
+    # 0 wrong. Child A results + NOA second-paper validation.
+    assert matched["counts"]["questions"] == 42
+    assert matched["answered"] == 42
+    assert matched["counts"]["pending"] == 33
     # Every answered question carries its evidence trail.
     answered = [q for q in matched["questions"] if q["status"] == "answered"]
-    assert len(answered) == 41
+    assert len(answered) == 42
     assert all(q["answer_source"] for q in answered)
 
 

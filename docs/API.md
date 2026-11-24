@@ -582,7 +582,9 @@ not invent that section.
 Auth. Multipart `file` (PDF), optional query `multi_pass`
 (`true` = union-merge mode, M7/ADR-010; default `false`).
 Parses one PDF end to end in-process (digital text first,
-else per-page Tesseract OCR at 200 DPI, PSM 3) and returns the
+else per-page Tesseract OCR at 200 DPI, PSM 3, with a
+confidence-gated PSM-4 retry on low-confidence pages — M15 /
+ADR-008) and returns the
 resolved MCQs + report. **Synchronous and slow on scans** —
 a 7-page PPSC-66 parse takes ~130 s on the dev VM (~20 min
 estimated at Render free's 0.1 CPU); long work belongs in the
@@ -594,9 +596,9 @@ Response (`ParseResponse`):
  "filename": "x.pdf", "is_digital": false, "page_count": 7,
  "matched": {"questions": [...], "qa_pairs": [...],
   "pending": [...], "validation_issues": [...],
-  "promotion": {...}, "counts": {"questions": 41,
-  "answered": 41, "pending": 27, ...}, "notes": [...],
-  "answered": 41, "unknown": 0},
+  "promotion": {...}, "counts": {"questions": 42,
+  "answered": 42, "pending": 33, ...}, "notes": [...],
+  "answered": 42, "unknown": 0},
  "report": {"counts": {...}, "by_status": {...},
   "by_answer_source": {...}, "confidence_distribution": {...},
   "pending": [...], "unknown": [...],
