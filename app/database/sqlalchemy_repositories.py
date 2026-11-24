@@ -179,11 +179,11 @@ class SqlAlchemyDocumentRepository:
         user_uuid = _as_uuid(user_id)
         if user_uuid is None:
             return [], 0
+        owner_or_shared = [db.Document.user_id == user_uuid]
+        if include_shared:
+            owner_or_shared.append(db.Document.is_shared.is_(True))
         base = self._session.query(db.Document).filter(
-            or_(
-                db.Document.user_id == user_uuid,
-                db.Document.is_shared.is_(True) if include_shared else False,
-            ),
+            or_(*owner_or_shared),
             db.Document.deleted_at.is_(None),
         )
         if status is not None:
