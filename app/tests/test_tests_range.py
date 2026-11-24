@@ -163,9 +163,7 @@ def seeded_sections(engine_db):
 
 
 def _availability(client, params, token="token-user-a"):
-    return client.get(
-        "/api/v1/tests/availability", params=params, headers=auth_headers(token)
-    )
+    return client.get("/api/v1/tests/availability", params=params, headers=auth_headers(token))
 
 
 def _create(client, payload, token="token-user-a"):
@@ -219,9 +217,7 @@ def test_availability_range_slice_is_bank_ordered(client, engine_db, seeded_sect
     assert [item["number"] for item in body["sample"]] == ["2", "3", "4"]
 
 
-def test_availability_range_end_beyond_pool_names_real_count(
-    client, engine_db, seeded_sections
-):
+def test_availability_range_end_beyond_pool_names_real_count(client, engine_db, seeded_sections):
     res = _availability(
         client,
         {
@@ -292,9 +288,7 @@ def test_pool_order_is_section_then_number(client, engine_db, seeded_sections):
 # ---------------------------------------------------------------------------
 
 
-def test_create_test_range_valid_picks_only_from_range(
-    client, engine_db, seeded_sections
-):
+def test_create_test_range_valid_picks_only_from_range(client, engine_db, seeded_sections):
     res = _create(
         client,
         {
@@ -350,9 +344,7 @@ def test_create_test_range_end_beyond_pool_is_422(client, engine_db, seeded_sect
     assert "7 question(s)" in res.json()["error"]["message"]
 
 
-def test_create_test_range_rejects_explicit_and_multi_topic(
-    client, engine_db, seeded_sections
-):
+def test_create_test_range_rejects_explicit_and_multi_topic(client, engine_db, seeded_sections):
     res = _create(
         client,
         {
@@ -419,9 +411,7 @@ def test_section_reading_returns_bank_order_with_answers_and_explanations(
     assert res.json()["total"] == 4
 
 
-def test_section_reading_shared_bank_visible_to_student(
-    client, engine_db, seeded_sections
-):
+def test_section_reading_shared_bank_visible_to_student(client, engine_db, seeded_sections):
     # USER_B sees only the shared bank questions in Section 1 —
     # USER_A's private questions never appear.
     res = client.get(

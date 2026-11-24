@@ -526,17 +526,12 @@ def _resolve_pool(
     # classification queries to pool rows only. Query.statement
     # is a Select for a plain select query — the cast tells
     # mypy so (its declared type is a wider union).
-    pool_ids = cast(
-        Select, base.with_entities(db.ExtractedQuestion.id).statement
-    )
-    columns = (
-        base.with_entities(
-            db.ExtractedQuestion.id,
-            db.ExtractedQuestion.question_number,
-            db.ExtractedQuestion.document_id,
-        )
-        .all()
-    )
+    pool_ids = cast(Select, base.with_entities(db.ExtractedQuestion.id).statement)
+    columns = base.with_entities(
+        db.ExtractedQuestion.id,
+        db.ExtractedQuestion.question_number,
+        db.ExtractedQuestion.document_id,
+    ).all()
     option_holders = {
         row[0]
         for row in session.query(db.QuestionOption.question_id)
@@ -585,8 +580,7 @@ def _resolve_pool(
             if not include_unknown:
                 continue
         topic_indexes = [
-            section_of.get(topic_id, 0)
-            for topic_id in per_question_topics.get(question_id, [])
+            section_of.get(topic_id, 0) for topic_id in per_question_topics.get(question_id, [])
         ]
         section_index = min(topic_indexes) if topic_indexes else 0
         ordered.append((question_id, number, document_id, section_index))
@@ -683,9 +677,7 @@ def resolve_explicit(
     return classified
 
 
-def _validate_range(
-    start: int | None, end: int | None
-) -> tuple[int, int] | None:
+def _validate_range(start: int | None, end: int | None) -> tuple[int, int] | None:
     """A question range, validated as a pair: both or neither,
     integers, 1 <= start <= end. Returns None when no range
     was given (both None). The upper bound is checked against
@@ -694,9 +686,7 @@ def _validate_range(
     if start is None and end is None:
         return None
     if start is None or end is None:
-        raise _validation(
-            "question_range_start and question_range_end must be given together."
-        )
+        raise _validation("question_range_start and question_range_end must be given together.")
     if (
         not isinstance(start, int)
         or isinstance(start, bool)
@@ -766,9 +756,7 @@ def _topic_breakdown(
     }
     for question_id, state in classification.items():
         row_topics = [
-            topic_id
-            for topic_id in per_question_topics.get(question_id, [])
-            if topic_id in tallies
+            topic_id for topic_id in per_question_topics.get(question_id, []) if topic_id in tallies
         ]
         if not row_topics:
             continue
@@ -822,9 +810,7 @@ def availability(
     # loaded — the old path materialised the whole pool here
     # and took ~53s on the live 52,573-question bank). The
     # sample is the first 5 candidates in bank order.
-    resolved = _resolve_pool(
-        session, user_uuid, source_type, source_ids, include_unknown
-    )
+    resolved = _resolve_pool(session, user_uuid, source_type, source_ids, include_unknown)
     ordered_ids = resolved["candidate_ids"]
     if question_range is not None:
         ordered_ids = _apply_range(ordered_ids, *question_range)
@@ -866,9 +852,7 @@ def availability(
         "sample": sample,
     }
     if source_type == "topics" and question_range is None and isinstance(source_ids, list):
-        result["by_topic"] = _topic_breakdown(
-            session, source_ids, include_unknown, resolved
-        )
+        result["by_topic"] = _topic_breakdown(session, source_ids, include_unknown, resolved)
     return result
 
 
@@ -894,17 +878,13 @@ def list_section_questions(
     # resolved (and classified) the whole section before
     # slicing. Full rows + options + answers load only for
     # this page.
-    resolved = _resolve_pool(
-        session, user_uuid, "topics", topic_ids, include_unknown=False
-    )
+    resolved = _resolve_pool(session, user_uuid, "topics", topic_ids, include_unknown=False)
     total = len(resolved["candidate_ids"])
     page_ids = resolved["candidate_ids"][offset : offset + limit]
     rows: list[db.ExtractedQuestion] = []
     if page_ids:
         loaded = (
-            session.query(db.ExtractedQuestion)
-            .filter(db.ExtractedQuestion.id.in_(page_ids))
-            .all()
+            session.query(db.ExtractedQuestion).filter(db.ExtractedQuestion.id.in_(page_ids)).all()
         )
         by_id = {row.id: row for row in loaded}
         rows = [by_id[pid] for pid in page_ids]
@@ -1129,9 +1109,7 @@ def create_test(session: Session, user: dict, payload: dict) -> dict:
             # the same seed over the same bank-ordered ids picks
             # the same questions as before.
             user_uuid = uuid.UUID(user["id"])
-            resolved = _resolve_pool(
-                session, user_uuid, source_type, source_ids, include_unknown
-            )
+            resolved = _resolve_pool(session, user_uuid, source_type, source_ids, include_unknown)
             pool_ids = resolved["candidate_ids"]
             if question_range is not None:
                 _require_single_topic_range(source_type, source_ids, question_range)

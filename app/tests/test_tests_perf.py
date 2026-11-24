@@ -255,7 +255,16 @@ def test_reading_large_section_paginates_in_bank_order(client, large_bank):
     assert body["total"] == AVAILABLE
     assert len(body["questions"]) == 10
     assert [q["number"] for q in body["questions"]] == [
-        "1", "1", "2", "2", "3", "3", "4", "4", "5", "5",
+        "1",
+        "1",
+        "2",
+        "2",
+        "3",
+        "3",
+        "4",
+        "4",
+        "5",
+        "5",
     ]
     res = client.get(
         "/api/v1/tests/sections/questions",
@@ -266,7 +275,16 @@ def test_reading_large_section_paginates_in_bank_order(client, large_bank):
     body = res.json()
     assert body["total"] == AVAILABLE
     assert [q["number"] for q in body["questions"]] == [
-        "51", "51", "52", "52", "53", "53", "54", "54", "55", "55",
+        "51",
+        "51",
+        "52",
+        "52",
+        "53",
+        "53",
+        "54",
+        "54",
+        "55",
+        "55",
     ]
     for q in body["questions"]:
         assert q["correct_index"] in (0, 1, 2, 3)
