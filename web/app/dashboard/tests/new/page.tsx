@@ -14,7 +14,6 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { Alert } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ErrorState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
@@ -280,7 +279,6 @@ export default function NewTestPage() {
                   )}
                 >
                   {doc.title}
-                  {doc.is_shared ? <Badge tone="success">Shared bank</Badge> : null}
                 </button>
               ))}
             </div>
