@@ -13,6 +13,7 @@
 import uuid
 
 import pytest
+from sqlalchemy import text as sa_text
 
 from app.db import models as db
 from app.services.community import fingerprint
@@ -51,7 +52,7 @@ def seeded_subjects(engine_db):
         title="General Knowledge Bank",
         storage_path="bank/gk",
         file_type="txt",
-        file_size_bytes=0,
+        file_size_bytes=1,
         is_shared=True,
     )
     session.add(doc)
@@ -353,6 +354,35 @@ def test_approve_mints_bank_rows_and_joins_the_pool(client, engine_db, seeded_su
     doc = session.query(db.Document).filter(db.Document.id == list(doc_ids)[0]).first()
     assert doc.is_shared is True
     assert (doc.metadata_json or {}).get("import_kind") == "community-questions"
+    session.close()
+
+
+def test_approved_community_document_satisfies_live_size_check(client, engine_db, seeded_subjects):
+    # Live regression (2026-11-25): every approval failed on
+    # production with documents_file_size_bytes_check — the lazy
+    # community document was created with file_size_bytes=0, but
+    # migration 015 requires file_size_bytes > 0. The test database
+    # (create_all from the models) carries no CHECK, so the failure
+    # only showed live. This test rebuilds the live constraint on a
+    # scratch table and inserts the created document's value into it:
+    # with 0 it raises IntegrityError, with the fix it passes.
+    submission = _submit(client, _payload(seeded_subjects)).json()
+    res = _approve(client, submission["id"])
+    assert res.status_code == 200, res.text
+    session = engine_db()
+    doc = session.query(db.Document).filter(db.Document.title == "Community Questions").first()
+    assert doc is not None
+    assert doc.file_size_bytes > 0
+    session.execute(
+        sa_text(
+            "CREATE TABLE _live_size_check (file_size_bytes INTEGER CHECK (file_size_bytes > 0))"
+        )
+    )
+    session.execute(
+        sa_text("INSERT INTO _live_size_check (file_size_bytes) VALUES (:n)"),
+        {"n": doc.file_size_bytes},
+    )
+    session.execute(sa_text("DROP TABLE _live_size_check"))
     session.close()
 
 

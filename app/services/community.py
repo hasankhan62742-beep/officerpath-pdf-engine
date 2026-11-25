@@ -407,7 +407,12 @@ def _get_or_create_community_document(session: Session, admin_id: uuid.UUID) -> 
         title=COMMUNITY_DOC_TITLE,
         storage_path=COMMUNITY_DOC_STORAGE_PATH,
         file_type="txt",
-        file_size_bytes=0,
+        # The community document is virtual — no file is stored — but
+        # the live documents table requires file_size_bytes > 0
+        # (migration 015 CHECK). 1 is the smallest legal placeholder;
+        # 0 failed live on every approval with
+        # documents_file_size_bytes_check (2026-11-25).
+        file_size_bytes=1,
         page_count=None,
         content_hash=None,
         is_shared=True,
