@@ -33,10 +33,15 @@ export default async function DashboardLayout({
     redirect("/login?next=/dashboard");
   }
 
+  // Admin link in the dashboard nav is UX only (same claim the admin
+  // layout reads); the engine enforces admin access server-side.
+  const appMetadata = (user.app_metadata ?? {}) as Record<string, unknown>;
+  const isAdmin = appMetadata.is_admin === true;
+
   return (
     <Providers>
       <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6">
-        <DashboardNav />
+        <DashboardNav isAdmin={isAdmin} />
         {children}
       </div>
     </Providers>

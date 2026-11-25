@@ -19,9 +19,20 @@ const LINKS = [
   { href: "/dashboard/profile", label: "Profile", exact: true },
 ];
 
-/** Dashboard section navigation with the current section marked. */
-export function DashboardNav() {
+const ADMIN_LINK = { href: "/admin", label: "Admin", exact: false };
+
+/**
+ * Dashboard section navigation with the current section marked.
+ *
+ * The Admin link is shown only when `isAdmin` is true — the dashboard
+ * layout reads `app_metadata.is_admin` from the server-side session
+ * (same claim as the admin layout). This is UX only: the real
+ * enforcement is the engine's require_admin (non-admins get 404 on
+ * every /api/v1/admin/* route, and /admin redirects them away).
+ */
+export function DashboardNav({ isAdmin = false }: { isAdmin?: boolean }) {
   const pathname = usePathname();
+  const links = isAdmin ? [...LINKS, ADMIN_LINK] : LINKS;
   // Unread notification count (M9): the badge shows real rows
   // only; a missing token or failed fetch simply hides it.
   const { data: unreadCount } = useQuery({
@@ -36,7 +47,7 @@ export function DashboardNav() {
   });
   return (
     <nav aria-label="Dashboard" className="mb-8 flex flex-wrap gap-2">
-      {LINKS.map((link) => {
+      {links.map((link) => {
         const active = link.exact
           ? pathname === link.href
           : pathname === link.href || pathname.startsWith(`${link.href}/`);
