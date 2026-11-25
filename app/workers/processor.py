@@ -56,6 +56,7 @@ from app.pipeline.ingestion.service import SqlAlchemyStageRecorder
 from app.pipeline.interfaces import PipelineStage
 from app.pipeline.matching.service import parse_document_bytes, parse_image_bytes
 from app.pipeline.matching.store import persist_matched_document
+from app.pipeline.matching.text import parse_text_bytes
 from app.storage.base import StorageBackend
 from app.utils import metrics
 from app.utils.logging import get_logger
@@ -253,18 +254,33 @@ def process_job(
             )
         on_stage("ingest", {"storage_path": "stored", "file_type": document.file_type})
         data = storage.get(document.storage_path)
-        parse = (
-            parse_image_bytes
-            if document.file_type in ("jpg", "png", "jpeg")
-            else parse_document_bytes
-        )
-        matched, report, debug = parse(
-            data,
-            str(document.id),
-            settings=settings,
-            multi_pass=multi_pass,
-            on_stage=on_stage,
-        )
+        if document.file_type in ("txt", "docx"):
+            # A2 (gap-report F4): plain-text files never go near
+            # PyMuPDF — parse_document_bytes opens bytes with fitz
+            # and fails on them ("Failed to open stream"). The text
+            # path runs the same extraction tail over the decoded
+            # text instead (multi_pass is meaningless here: plain
+            # text has no OCR variants to union).
+            matched, report, debug = parse_text_bytes(
+                data,
+                str(document.id),
+                file_type=document.file_type,
+                settings=settings,
+                on_stage=on_stage,
+            )
+        else:
+            parse = (
+                parse_image_bytes
+                if document.file_type in ("jpg", "png", "jpeg")
+                else parse_document_bytes
+            )
+            matched, report, debug = parse(
+                data,
+                str(document.id),
+                settings=settings,
+                multi_pass=multi_pass,
+                on_stage=on_stage,
+            )
         persist_matched_document(
             session,
             document_id=document.id,

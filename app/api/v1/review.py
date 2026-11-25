@@ -2,12 +2,13 @@
 # Review API: synchronous document parse, review list, manual
 # corrections, stored report.
 #
-# POST /documents/parse parses one PDF end to end in-process
-# (digital text first, else per-page Tesseract OCR) and returns
-# the resolved MCQs + report. When DATABASE_URL is configured it
-# also persists the Document + Job rows and the matched result, so
-# the review endpoints below can find the items; without a
-# database it still returns the parse result with
+# POST /documents/parse parses one PDF, TXT, or DOCX end to end
+# in-process (digital text first, else per-page Tesseract OCR for
+# PDFs; TXT/DOCX take the plain-text path, never PyMuPDF — A2) and
+# returns the resolved MCQs + report. When DATABASE_URL is
+# configured it also persists the Document + Job rows and the
+# matched result, so the review endpoints below can find the
+# items; without a database it still returns the parse result with
 # ``persisted: false`` (a good parse never fails on bookkeeping).
 #
 # Manual corrections are the top of the answer-precedence chain
@@ -35,6 +36,7 @@ from app.pipeline.matching.store import (
     list_review_items,
     persist_matched_document,
 )
+from app.pipeline.matching.text import parse_text_bytes
 from app.schemas.review import (
     CorrectionRequest,
     CorrectionResponse,
@@ -149,15 +151,31 @@ def parse_document(
             code="file_too_large",
             message=f"File is {len(data)} bytes; limit is {settings.max_file_size_bytes}.",
         )
-    if not data.startswith(PDF_MAGIC):
+    # A2 (gap-report F4): the sync endpoint used to accept PDF only.
+    # TXT/DOCX take the text path — never PyMuPDF. The kind is
+    # decided by magic for PDF (unforgeable) and by extension for
+    # txt/docx (plain text has no magic bytes); a mislabelled file
+    # parses to zero questions or a named ValueError, never a crash.
+    filename = file.filename or "upload.pdf"
+    ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
+    if data.startswith(PDF_MAGIC):
+        kind = "pdf"
+    elif ext in ("txt", "docx"):
+        kind = ext
+    else:
         raise ApiError(
             status_code=422,
             code="invalid_file",
-            message="Upload must be a PDF file.",
+            message="Upload must be a PDF, TXT, or DOCX file.",
         )
     document_id = uuid.uuid4()
     try:
-        matched, report, debug = parse_document_bytes(data, str(document_id), multi_pass=multi_pass)
+        if kind == "pdf":
+            matched, report, debug = parse_document_bytes(
+                data, str(document_id), multi_pass=multi_pass
+            )
+        else:
+            matched, report, debug = parse_text_bytes(data, str(document_id), file_type=kind)
     except ValueError as exc:
         raise ApiError(status_code=422, code="invalid_file", message=str(exc)) from exc
     # M7 metrics: one documents_parsed sample + one OCR-call sample
@@ -182,6 +200,7 @@ def parse_document(
                 data=data,
                 page_count=debug["page_count"],
                 matched=matched,
+                file_type=kind,
             )
             persisted = True
         except Exception:

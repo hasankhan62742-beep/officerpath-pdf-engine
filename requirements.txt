@@ -24,6 +24,10 @@ pytesseract==0.3.13
 # adds value for ruled answer-key grids; NOT a text extractor — PyMuPDF
 # stays the digital extractor). Pure Python over pdfminer.six.
 pdfplumber==0.11.11
+# --- A2: TXT/DOCX text path (gap-report F4) ---
+# python-docx: Word document text extraction (paragraphs + tables).
+# Pure Python over lxml (wheels ship — no system package needed).
+python-docx==1.2.0
 # PaddleOCR + onnxruntime: OPTIONAL and HEAVY. PaddleOCR 3.7 ships
 # without paddlepaddle; the adapter runs the ONNX Runtime engine
 # (onnxruntime) with the PP-OCRv5 Arabic-script models. The venv grows

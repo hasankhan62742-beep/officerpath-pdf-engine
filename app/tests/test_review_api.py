@@ -79,10 +79,12 @@ def test_parse_without_database_still_returns_result(client, monkeypatch) -> Non
     assert body["matched"]["counts"]["questions"] == 40
 
 
-def test_parse_rejects_non_pdf(client) -> None:
+def test_parse_rejects_unsupported_type(client) -> None:
+    # A2: TXT/DOCX are accepted now, so the rejection case is a
+    # genuinely unsupported type — same 422 contract as before.
     resp = client.post(
         "/api/v1/documents/parse",
-        files={"file": ("x.txt", b"hello", "text/plain")},
+        files={"file": ("x.xyz", b"hello", "application/octet-stream")},
         headers=auth_headers("token-user-a"),
     )
     assert resp.status_code == 422
