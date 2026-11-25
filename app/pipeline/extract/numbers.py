@@ -70,7 +70,7 @@ def decode_ocr_number(token: str) -> int | None:
 # (``92.97 m ...``) is never a question number.
 QUESTION_NUMBER_RE = re.compile(r"^(?:Q\s*\.?\s*)?(\d+)\s*[.\)\:](?!\d)", re.IGNORECASE)
 # Spec §1.2: OCR-misread fallback — separator ``.`` or ``)`` ONLY,
-# never ``:`` (``S1:``/``S6:`` are Examveda sequence labels, and ``S1``
+# never ``:`` (``S1:``/``S6:`` are source-bank sequence labels, and ``S1``
 # decodes to 51).
 OCR_NUMBER_RE = re.compile(
     r"^(?:Q\s*\.?\s*)?(" + OCR_NUMBER_TOKEN + r")\s*[.\)](?!\d)",

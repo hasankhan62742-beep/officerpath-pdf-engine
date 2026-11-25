@@ -96,7 +96,7 @@ def seeded_bank(engine_db):
     admin_doc, admin_qs = _seed_doc(
         session,
         USER_ADMIN,
-        "ExamVeda Bank — Computer",
+        "Seed Bank — Computer",
         [
             (
                 1,

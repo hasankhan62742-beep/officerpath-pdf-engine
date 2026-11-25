@@ -23,7 +23,7 @@ def test_clean_number_regex():
 
 def test_ocr_misread_fallback():
     # "S1" decodes to 51 but the separator must be "." or ")" — never
-    # ":" (S1:/S6: are Examveda sequence labels).
+    # ":" (S1:/S6: are source-bank sequence labels).
     assert question_number_detailed("S1. What?") == (51, True)
     assert question_number_detailed("S1: What?") is None
     assert question_number_detailed("l2. What?") == (12, True)

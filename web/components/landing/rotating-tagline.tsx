@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 // Rotating typewriter tagline for the homepage hero (M17 v2).
 // The three lines are honest, live facts — no invented numbers:
-// the bank count is the live ExamVeda import total (52,573).
+// the bank count is the live seed-bank import total (52,573).
 const LINES = [
   "52,573+ real MCQs in the bank",
   "Timed exam-style tests",

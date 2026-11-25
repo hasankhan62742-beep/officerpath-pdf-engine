@@ -28,7 +28,7 @@ def decode_text_bytes(data: bytes) -> str:
     """Decode plain-text bytes without ever raising: UTF-8 (with
     or without BOM) first, UTF-16 when a BOM says so, Latin-1 as
     the last resort (it maps every byte). NUL bytes are stripped
-    — PostgreSQL text cannot store them (the ExamVeda import hit
+    — PostgreSQL text cannot store them (the seed-bank import hit
     the same wall) and they carry no meaning in plain text."""
     if data.startswith((codecs.BOM_UTF16_LE, codecs.BOM_UTF16_BE)):
         try:
