@@ -36,6 +36,7 @@ def _repositories():
         )
     try:
         yield (
+            session,
             SqlAlchemyDocumentRepository(session),
             SqlAlchemyJobRepository(session),
         )
@@ -47,8 +48,8 @@ def _repositories():
 async def dashboard_summary(
     user: dict = Depends(get_current_user),
 ) -> DashboardSummaryResponse:
-    with _repositories() as (documents, jobs):
-        summary = document_service.get_dashboard_summary(user, documents, jobs)
+    with _repositories() as (session, documents, jobs):
+        summary = document_service.get_dashboard_summary(user, documents, jobs, session=session)
     return DashboardSummaryResponse(
         documents_total=summary["documents_total"],
         jobs_by_status=summary["jobs_by_status"],

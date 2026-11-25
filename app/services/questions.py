@@ -23,7 +23,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 
-from sqlalchemy import exists
+from sqlalchemy import and_, distinct, exists, func
 from sqlalchemy.orm import Session
 
 from app.core.errors import ApiError
@@ -75,6 +75,66 @@ def _own_document(session: Session, user_id: str, document_id: uuid.UUID) -> db.
     if row is None:
         raise ApiError(status_code=404, code="not_found", message="Document not found.")
     return row
+
+
+def _valid_label_clause(label_column) -> object:
+    """The ``_correct_index(...) >= 0`` rule in SQL: a single
+    letter A-Z (case-insensitive, surrounding space ignored).
+    Portable across SQLite and Postgres (LENGTH/TRIM/UPPER/
+    BETWEEN all exist in both)."""
+    trimmed = func.trim(label_column)
+    return and_(
+        func.length(trimmed) == 1,
+        func.upper(trimmed).between("A", "Z"),
+    )
+
+
+def _latest_answer_label(
+    session: Session,
+    *,
+    topic_ids: list[uuid.UUID] | None = None,
+    document_id: uuid.UUID | None = None,
+):
+    """Latest answer per question, as a subquery: one row per
+    question that has any answer row, the latest by created_at
+    (the same rule ``_batch_answers`` uses). Ties on created_at
+    are broken by the caller's DISTINCT, never by inventing an
+    order. ``topic_ids`` / ``document_id`` restrict the grouping
+    to the questions the caller needs — without a restriction
+    the grouping scans every answer row. The subquery also
+    carries resolution_method/status, so callers can classify
+    inferred answers from the same latest row."""
+    latest_query = session.query(
+        db.ExtractedAnswer.question_id,
+        func.max(db.ExtractedAnswer.created_at).label("max_created"),
+    )
+    if topic_ids is not None:
+        latest_query = latest_query.join(
+            db.QuestionSubject,
+            db.QuestionSubject.question_id == db.ExtractedAnswer.question_id,
+        ).filter(db.QuestionSubject.topic_id.in_(topic_ids))
+    elif document_id is not None:
+        latest_query = latest_query.join(
+            db.ExtractedQuestion,
+            db.ExtractedQuestion.id == db.ExtractedAnswer.question_id,
+        ).filter(db.ExtractedQuestion.document_id == document_id)
+    latest = latest_query.group_by(db.ExtractedAnswer.question_id).subquery()
+    return (
+        session.query(
+            db.ExtractedAnswer.question_id,
+            db.ExtractedAnswer.resolved_label,
+            db.ExtractedAnswer.resolution_method,
+            db.ExtractedAnswer.status,
+        )
+        .join(
+            latest,
+            and_(
+                db.ExtractedAnswer.question_id == latest.c.question_id,
+                db.ExtractedAnswer.created_at == latest.c.max_created,
+            ),
+        )
+        .subquery()
+    )
 
 
 def _latest_answer(session: Session, question_id: uuid.UUID) -> db.ExtractedAnswer | None:
@@ -250,13 +310,19 @@ def _assemble(
     ]
 
 
+def _number_key_value(number: str | None) -> tuple[int, int]:
+    """Printed-number order for one question number. Numeric
+    numbers sort numerically; unnumbered rows sort last."""
+    text = (number or "").strip()
+    if text.isdigit():
+        return (0, int(text))
+    return (1, 0)
+
+
 def _number_key(row: db.ExtractedQuestion) -> tuple[int, int]:
     """Printed-number order for one document's questions. Numeric
     numbers sort numerically; unnumbered rows sort last."""
-    number = (row.question_number or "").strip()
-    if number.isdigit():
-        return (0, int(number))
-    return (1, 0)
+    return _number_key_value(row.question_number)
 
 
 def _status_exists(status: str) -> object:
@@ -425,6 +491,143 @@ def list_corrections(session: Session, user: dict, document_id: str, question_id
     return {"question_id": str(row.id), "corrections": corrections, "total": len(corrections)}
 
 
+def _document_question_counts(session: Session, document: db.Document, total: int) -> dict:
+    """One document's counts from SQL aggregates — same numbers
+    the old full-load path computed from assembled items, but
+    without loading every row. ``answered`` is the count of
+    questions whose LATEST answer is a single letter A-Z (the
+    ``_correct_index(...) >= 0`` rule); ``unknown`` is the rest.
+    ``inferred`` uses the latest answer's method/status; a
+    question counts as corrected when any manual correction
+    targets it."""
+    document_id = document.id
+    pending = (
+        session.query(func.count(db.ExtractedQuestion.id))
+        .filter(db.ExtractedQuestion.document_id == document_id)
+        .filter(db.ExtractedQuestion.validation_status == "pending")
+        .scalar()
+        or 0
+    )
+    latest_answer = _latest_answer_label(session, document_id=document_id)
+    # The subquery already holds only the latest answer per
+    # question, so the counts read straight off it — no second
+    # join back to extracted_answers. COUNT(DISTINCT) covers
+    # created_at ties (two rows sharing the max timestamp).
+    answered = (
+        session.query(func.count(distinct(latest_answer.c.question_id)))
+        .select_from(latest_answer)
+        .filter(_valid_label_clause(latest_answer.c.resolved_label))
+        .scalar()
+        or 0
+    )
+    inferred = (
+        session.query(func.count(distinct(latest_answer.c.question_id)))
+        .select_from(latest_answer)
+        .filter(
+            (latest_answer.c.resolution_method.in_(_INFERRED))
+            | (latest_answer.c.status.in_(_INFERRED))
+        )
+        .scalar()
+        or 0
+    )
+    corrected = (
+        session.query(func.count(distinct(db.ManualCorrection.target_id)))
+        .filter(db.ManualCorrection.document_id == document_id)
+        .scalar()
+        or 0
+    )
+    return {
+        "questions": total,
+        "answered": answered,
+        "unknown": total - answered,
+        "pending": pending,
+        "inferred": inferred,
+        "corrected": corrected,
+    }
+
+
+def _list_questions_for_document(
+    session: Session,
+    document: db.Document,
+    *,
+    limit: int = 50,
+    offset: int = 0,
+) -> dict:
+    """One document's extraction results: every stored question
+    in printed-number order, with counts. Q&A pairs are stored
+    question rows here (``kind`` "qa_pair") AND — for processed
+    documents — a count-only figure in the extraction report
+    (Phase 1 stores their count, not rows); ``qa_pairs`` is the
+    honest sum of both, never one at the expense of the other.
+
+    Pagination is done in the database: only the lightweight
+    (id, number, created_at) columns are loaded for the whole
+    document, sorted in Python by printed number (the same
+    ``_number_key`` order — a SQL ORDER BY cannot express it
+    portably, and SQLite timestamps have second precision so
+    created_at ties would scramble it), then full rows load for
+    the page only. The old path loaded every row and assembled
+    every option/answer — 10.6s locally on the 31,609-question
+    bank doc, past every proxy timeout live. Counts come from
+    SQL aggregates over the same rules."""
+    columns = (
+        session.query(
+            db.ExtractedQuestion.id,
+            db.ExtractedQuestion.question_number,
+            db.ExtractedQuestion.created_at,
+        )
+        .filter(db.ExtractedQuestion.document_id == document.id)
+        .all()
+    )
+    ordered = sorted(
+        columns,
+        key=lambda c: (_number_key_value(c[1]), c[2] or datetime.min),
+    )
+    total = len(ordered)
+    page_ids = [c[0] for c in ordered[offset : offset + limit]]
+    rows: list[db.ExtractedQuestion] = []
+    if page_ids:
+        loaded = (
+            session.query(db.ExtractedQuestion).filter(db.ExtractedQuestion.id.in_(page_ids)).all()
+        )
+        by_id = {row.id: row for row in loaded}
+        rows = [by_id[pid] for pid in page_ids]
+    items = _assemble(session, rows, {document.id: document.title})
+    counts = _document_question_counts(session, document, total)
+    # Stored Q&A rows (kind "qa_pair": a question with no
+    # options) plus the report's count-only pairs, which Phase 1
+    # never stored as rows. Either side may be zero; the sum is
+    # the honest total — the imported bank's 57 one-liners are
+    # rows with no report, a processed scan's pairs are a report
+    # with no rows, and neither is ever double-counted.
+    stored_qa_pairs = (
+        session.query(func.count(db.ExtractedQuestion.id))
+        .filter(db.ExtractedQuestion.document_id == document.id)
+        .filter(~exists().where(db.QuestionOption.question_id == db.ExtractedQuestion.id))
+        .scalar()
+        or 0
+    )
+    report = (
+        session.query(db.ExtractionReport)
+        .filter(db.ExtractionReport.document_id == document.id)
+        .order_by(db.ExtractionReport.created_at.desc())
+        .first()
+    )
+    report_qa_pairs = 0
+    if report is not None and isinstance(report.summary, dict):
+        raw = report.summary.get("qa_pairs")
+        report_qa_pairs = raw if isinstance(raw, int) else 0
+    return {
+        "document_id": str(document.id),
+        "questions": items,
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+        "counts": counts,
+        "qa_pairs": stored_qa_pairs + report_qa_pairs,
+    }
+
+
 def list_document_questions(
     session: Session,
     user: dict,
@@ -434,45 +637,11 @@ def list_document_questions(
     offset: int = 0,
 ) -> dict:
     """One document's extraction results: every stored question
-    in printed-number order, with counts. Q&A pairs are NOT stored
-    as question rows (Phase 1 store keeps their count only) — the
-    ``qa_pairs`` count comes from the stored report and the UI
-    shows it as a count, never as fake questions."""
+    in printed-number order, with counts. The caller's own
+    document only — shared-bank reads go through the study
+    collections endpoint, which delegates to the same core."""
     document = _own_document(session, user["id"], _parse_uuid(document_id, "Document not found."))
-    rows = (
-        session.query(db.ExtractedQuestion)
-        .filter(db.ExtractedQuestion.document_id == document.id)
-        .all()
-    )
-    rows.sort(key=lambda r: (_number_key(r), r.created_at or datetime.min))
-    items = _assemble(session, rows, {document.id: document.title})
-    counts = {
-        "questions": len(items),
-        "answered": sum(1 for i in items if i["correct_index"] >= 0),
-        "unknown": sum(1 for i in items if i["correct_index"] < 0),
-        "pending": sum(1 for i in items if i["status"] == "pending"),
-        "inferred": sum(1 for i in items if i["inferred"]),
-        "corrected": sum(1 for i in items if i["corrected"]),
-    }
-    report = (
-        session.query(db.ExtractionReport)
-        .filter(db.ExtractionReport.document_id == document.id)
-        .order_by(db.ExtractionReport.created_at.desc())
-        .first()
-    )
-    qa_pairs = 0
-    if report is not None and isinstance(report.summary, dict):
-        raw = report.summary.get("qa_pairs")
-        qa_pairs = raw if isinstance(raw, int) else 0
-    return {
-        "document_id": str(document.id),
-        "questions": items[offset : offset + limit],
-        "total": len(items),
-        "limit": limit,
-        "offset": offset,
-        "counts": counts,
-        "qa_pairs": qa_pairs,
-    }
+    return _list_questions_for_document(session, document, limit=limit, offset=offset)
 
 
 def list_subjects(session: Session) -> dict:

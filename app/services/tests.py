@@ -35,7 +35,7 @@ import uuid
 from decimal import Decimal
 from typing import Any, cast
 
-from sqlalchemy import Select, exists, or_
+from sqlalchemy import Select, case, exists, func, or_
 from sqlalchemy.orm import Query, Session
 
 from app.core.errors import ApiError
@@ -46,8 +46,10 @@ from app.services.questions import (
     _batch_options,
     _batch_subjects,
     _correct_index,
+    _latest_answer_label,
     _parse_uuid,
     _to_item,
+    _valid_label_clause,
 )
 from app.utils.logging import get_logger
 
@@ -273,48 +275,57 @@ def _accessible_document_ids(
     """Document ids the caller may build a test from: their own
     documents, or shared bank documents (M11). A private
     document of another student answers 404 — never leaks
-    existence (the Phase 1 pattern)."""
-    out = []
-    for raw in ids:
-        doc_uuid = _parse_uuid(raw, "Document not found.")
-        row = (
-            session.query(db.Document)
-            .filter(db.Document.id == doc_uuid)
-            .filter(
-                or_(
-                    db.Document.user_id == user_uuid,
-                    db.Document.is_shared.is_(True),
-                )
+    existence (the Phase 1 pattern). One query for the whole
+    list, not one per id: the Read view passes hundreds of ids
+    and the per-id loop was a round-trip per topic."""
+    parsed = [_parse_uuid(raw, "Document not found.") for raw in ids]
+    rows = (
+        session.query(db.Document.id)
+        .filter(db.Document.id.in_(parsed))
+        .filter(
+            or_(
+                db.Document.user_id == user_uuid,
+                db.Document.is_shared.is_(True),
             )
-            .filter(db.Document.deleted_at.is_(None))
-            .first()
         )
-        if row is None:
+        .filter(db.Document.deleted_at.is_(None))
+        .all()
+    )
+    found = {row[0] for row in rows}
+    for doc_uuid in parsed:
+        if doc_uuid not in found:
             raise ApiError(status_code=404, code="not_found", message="Document not found.")
-        out.append(doc_uuid)
-    return out
+    return parsed
 
 
 def _existing_subject_ids(session: Session, ids: list[str]) -> list[uuid.UUID]:
-    out = []
-    for raw in ids:
-        subject_uuid = _parse_uuid(raw, "Subject not found.")
-        row = session.query(db.Subject).filter(db.Subject.id == subject_uuid).first()
-        if row is None or not row.is_active:
+    """One query for the whole list (see _accessible_document_ids)."""
+    parsed = [_parse_uuid(raw, "Subject not found.") for raw in ids]
+    rows = (
+        session.query(db.Subject.id)
+        .filter(db.Subject.id.in_(parsed))
+        .filter(db.Subject.is_active.is_(True))
+        .all()
+    )
+    found = {row[0] for row in rows}
+    for subject_uuid in parsed:
+        if subject_uuid not in found:
             raise ApiError(status_code=404, code="not_found", message="Subject not found.")
-        out.append(subject_uuid)
-    return out
+    return parsed
 
 
 def _existing_topic_ids(session: Session, ids: list[str]) -> list[uuid.UUID]:
-    out = []
-    for raw in ids:
-        topic_uuid = _parse_uuid(raw, "Topic not found.")
-        row = session.query(db.Topic).filter(db.Topic.id == topic_uuid).first()
-        if row is None:
+    """One query for the whole list (see _accessible_document_ids).
+    The Read view passes every topic of a subject (350 for
+    Computer Science) — the per-id loop was 350 sequential
+    round-trips before the availability query even started."""
+    parsed = [_parse_uuid(raw, "Topic not found.") for raw in ids]
+    rows = session.query(db.Topic.id).filter(db.Topic.id.in_(parsed)).all()
+    found = {row[0] for row in rows}
+    for topic_uuid in parsed:
+        if topic_uuid not in found:
             raise ApiError(status_code=404, code="not_found", message="Topic not found.")
-        out.append(topic_uuid)
-    return out
+    return parsed
 
 
 def _pool_query(
@@ -734,6 +745,95 @@ def _apply_range(
     return pool[start - 1 : end]
 
 
+def _topic_counts_sql(
+    session: Session,
+    user_uuid: uuid.UUID,
+    topic_ids: list[str],
+    include_unknown: bool,
+) -> list[dict]:
+    """Per-topic availability counts from ONE aggregate query —
+    no pool resolution, no rows loaded. The Read view only
+    needs these counts (it never shows the sample or the
+    total), and resolving the whole subject pool for them took
+    2.8s locally on a 33k-question subject (profiled
+    2026-11-26) — 40s+ on the live 0.1-CPU box, past every
+    proxy timeout, which is why the section counts never
+    loaded. Classification follows ``_classify_pool`` exactly:
+    no options -> excluded_no_options; options + latest answer
+    a single letter A-Z -> available; options + no known answer
+    -> available iff include_unknown else excluded_unknown.
+    A question assigned to several requested topics counts
+    under each; topics with no questions are included with
+    zeros, so the UI can show every section tab."""
+    topic_uuids = _existing_topic_ids(session, topic_ids)
+    latest_answer = _latest_answer_label(session, topic_ids=topic_uuids)
+    label_valid = _valid_label_clause(latest_answer.c.resolved_label)
+    has_options = exists().where(db.QuestionOption.question_id == db.ExtractedQuestion.id)
+    state = case(
+        (~has_options, "no_options"),
+        (label_valid, "known"),
+        else_="unknown",
+    )
+    classified = (
+        session.query(
+            db.QuestionSubject.topic_id.label("topic_id"),
+            db.ExtractedQuestion.id.label("question_id"),
+            state.label("state"),
+        )
+        .join(
+            db.ExtractedQuestion,
+            db.ExtractedQuestion.id == db.QuestionSubject.question_id,
+        )
+        .join(db.Document, db.Document.id == db.ExtractedQuestion.document_id)
+        .outerjoin(
+            latest_answer,
+            latest_answer.c.question_id == db.ExtractedQuestion.id,
+        )
+        .filter(db.QuestionSubject.topic_id.in_(topic_uuids))
+        .filter(
+            or_(
+                db.Document.user_id == user_uuid,
+                db.Document.is_shared.is_(True),
+            )
+        )
+        .filter(db.Document.deleted_at.is_(None))
+        .distinct()
+        .subquery()
+    )
+    tallies = (
+        session.query(
+            classified.c.topic_id,
+            func.sum(case((classified.c.state == "known", 1), else_=0)).label("known"),
+            func.sum(case((classified.c.state == "unknown", 1), else_=0)).label("unknown"),
+            func.sum(case((classified.c.state == "no_options", 1), else_=0)).label("no_options"),
+        )
+        .group_by(classified.c.topic_id)
+        .all()
+    )
+    names = {
+        topic.id: topic.name
+        for topic in session.query(db.Topic).filter(db.Topic.id.in_(topic_uuids)).all()
+    }
+    by_id = {
+        row[0]: {"known": row[1] or 0, "unknown": row[2] or 0, "no_options": row[3] or 0}
+        for row in tallies
+    }
+    out = []
+    for topic_id in topic_uuids:
+        counts = by_id.get(topic_id, {"known": 0, "unknown": 0, "no_options": 0})
+        unknown = counts["unknown"]
+        out.append(
+            {
+                "topic_id": str(topic_id),
+                "topic_name": names.get(topic_id, ""),
+                "available": counts["known"] + (unknown if include_unknown else 0),
+                "excluded_unknown": 0 if include_unknown else unknown,
+                "excluded_no_options": counts["no_options"],
+            }
+        )
+    return out
+
+
 def _topic_breakdown(
     session: Session,
     topic_ids: list[str],
@@ -793,12 +893,18 @@ def availability(
     include_unknown: bool,
     question_range_start: int | None = None,
     question_range_end: int | None = None,
+    counts_only: bool = False,
 ) -> dict:
     """How many questions a source filter can supply, before the
     user commits to building a test. The sample is the first 5
     candidates in bank order. With a range, the numbers describe
     the range slice only. ``by_topic`` (topics mode, no range)
-    breaks the counts down per requested topic."""
+    breaks the counts down per requested topic.
+
+    ``counts_only`` (Read view): only the per-topic counts are
+    needed, so the pool is never resolved — one aggregate query
+    instead of loading tens of thousands of rows. Only valid
+    for source_type "topics" with no range."""
     if source_type not in SOURCE_TYPES:
         raise _validation(f"source_type must be one of: {', '.join(SOURCE_TYPES)}.")
     if source_type == "explicit":
@@ -806,6 +912,19 @@ def availability(
     question_range = _validate_range(question_range_start, question_range_end)
     _require_single_topic_range(source_type, source_ids, question_range)
     user_uuid = uuid.UUID(user["id"])
+    if counts_only:
+        if source_type != "topics" or question_range is not None:
+            raise _validation("counts_only needs source_type 'topics' with topic ids and no range.")
+        if not isinstance(source_ids, list) or not source_ids:
+            raise _validation("counts_only needs a non-empty list of topic ids.")
+        by_topic = _topic_counts_sql(session, user_uuid, source_ids, include_unknown)
+        return {
+            "available": sum(row["available"] for row in by_topic),
+            "excluded_unknown": sum(row["excluded_unknown"] for row in by_topic),
+            "excluded_no_options": sum(row["excluded_no_options"] for row in by_topic),
+            "sample": [],
+            "by_topic": by_topic,
+        }
     # One pool resolution (four small queries, no pool rows
     # loaded — the old path materialised the whole pool here
     # and took ~53s on the live 52,573-question bank). The

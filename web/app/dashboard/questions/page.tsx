@@ -27,6 +27,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { QuestionBadges } from "@/components/dashboard/question-result";
+import { ReadingCard } from "@/components/dashboard/reading-card";
 import {
   BANK_STATUSES,
   getSessionToken,
@@ -37,7 +38,6 @@ import {
   listSectionQuestions,
   listSubjects,
   type BankStatus,
-  type QuestionItem,
 } from "@/lib/api";
 import { formatMathText } from "@/lib/mathText";
 import { cn } from "@/lib/utils";
@@ -153,6 +153,11 @@ export default function QuestionsPage() {
       return getTestAvailability(token, {
         source_type: "topics",
         topic_ids: readAllTopicIds,
+        // Counts only: the Read view never shows the sample or the
+        // pool total — resolving the whole subject pool for these
+        // counts took 2.8 s locally on Computer Science (40 s+
+        // live) and the section counts never loaded.
+        counts_only: true,
       });
     },
   });
@@ -663,73 +668,5 @@ export default function QuestionsPage() {
         </div>
       ) : null}
     </div>
-  );
-}
-
-/**
- * One question in reading mode (M12): all four options, the
- * correct one pre-ticked, and the stored explanation
- * underneath. Nothing is invented — a missing explanation
- * says so, and an unknown answer stays unknown.
- */
-function ReadingCard({ q, position }: { q: QuestionItem; position: number }) {
-  return (
-    <article className="rounded-2xl border border-slate-200 bg-white p-4">
-      <p className="text-sm font-semibold text-slate-900">
-        Question {position}
-        {q.number ? <span className="font-normal text-slate-500"> (Q{q.number})</span> : null}
-      </p>
-      <p className="mt-2 text-slate-900">{formatMathText(q.text)}</p>
-      {q.options.length > 0 ? (
-        <ol className="mt-3 space-y-2">
-          {q.options.map((option, i) => {
-            const isCorrect = q.correct_index === i;
-            return (
-              <li
-                key={i}
-                className={cn(
-                  "flex items-start gap-2 rounded-lg border px-3 py-2 text-sm",
-                  isCorrect
-                    ? "border-green-600 bg-green-50 font-semibold text-green-900"
-                    : "border-slate-200 text-slate-700",
-                )}
-              >
-                <span className="font-semibold">{String.fromCharCode(65 + i)}.</span>
-                <span>{formatMathText(option)}</span>
-                {isCorrect ? (
-                  <span className="ml-auto shrink-0 text-xs font-semibold">Correct answer</span>
-                ) : null}
-              </li>
-            );
-          })}
-        </ol>
-      ) : (
-        <p className="mt-3 text-sm text-slate-500">
-          This question has no options — it is a question-and-answer pair.
-        </p>
-      )}
-      {q.correct_index !== null && q.correct_index < 0 ? (
-        <p className="mt-3 text-sm text-slate-500">
-          Answer unknown — the engine could not resolve this one, so nothing is marked.
-        </p>
-      ) : null}
-      {q.explanation ? (
-        <div className="mt-3 rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-700">
-          <p className="font-semibold text-slate-900">Explanation</p>
-          <p className="mt-1 whitespace-pre-wrap">{formatMathText(q.explanation)}</p>
-        </div>
-      ) : (
-        <p className="mt-3 text-sm text-slate-500">
-          No explanation was stored for this question.
-        </p>
-      )}
-      {q.submitted_by || q.paper ? (
-        <p className="mt-3 text-xs text-slate-500">
-          {q.submitted_by ? `Submitted by ${q.submitted_by}` : ""}
-          {q.submitted_by && q.paper ? " · " : ""}
-          {q.paper ? `Paper: ${q.paper}` : ""}
-        </p>
-      ) : null}
-    </article>
   );
 }

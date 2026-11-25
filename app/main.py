@@ -29,6 +29,7 @@ from app.api.v1 import questions as questions_routes
 from app.api.v1 import results as results_routes
 from app.api.v1 import review as review_routes
 from app.api.v1 import routes as v1_routes
+from app.api.v1 import study_collections as study_collections_routes
 from app.api.v1 import tests as tests_routes
 from app.config import settings
 from app.core.errors import (
@@ -196,6 +197,7 @@ app.include_router(community_routes.router)
 app.include_router(tests_routes.router)
 app.include_router(results_routes.router)
 app.include_router(collections_routes.router)
+app.include_router(study_collections_routes.router)
 app.include_router(admin_routes.router)
 app.include_router(notifications_routes.router)
 

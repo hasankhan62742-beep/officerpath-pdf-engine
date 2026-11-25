@@ -255,8 +255,16 @@ export default function DocumentsPage() {
                     <TableCell>{doc.file_type.toUpperCase()}</TableCell>
                     <TableCell>{formatBytes(doc.file_size_bytes)}</TableCell>
                     <TableCell>
-                      {doc.job?.status === "done" && doc.questions !== null
-                        ? `${doc.answered ?? 0} / ${doc.questions}`
+                      {/* The count comes from the stored rows, not
+                          the job: imported bank documents have no
+                          processing job, and their questions are
+                          real. Show "answered / questions" when
+                          both are known, the count alone when only
+                          it is, and "—" only when there is none. */}
+                      {doc.questions !== null
+                        ? doc.answered !== null
+                          ? `${doc.answered} / ${doc.questions}`
+                          : `${doc.questions}`
                         : "—"}
                     </TableCell>
                     <TableCell>

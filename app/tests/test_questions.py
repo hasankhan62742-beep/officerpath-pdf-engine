@@ -172,6 +172,48 @@ def test_document_questions_counts_order_and_unknown(client, engine_db, seeded_d
     assert q3["status"] == "pending"
 
 
+def test_document_questions_pagination_matches_full_read(client, engine_db, seeded_doc):
+    """Bug (b)'s fix, same endpoint: pages slice the same
+    printed-number order and carry the same counts/total as the
+    full read — pagination must never change what a page holds."""
+    doc_id, _ = seeded_doc
+    base = f"/api/v1/documents/{doc_id}/questions"
+    full = client.get(base, headers=auth_headers("token-user-a")).json()
+    assert full["total"] == 4
+    page1 = client.get(f"{base}?limit=2&offset=0", headers=auth_headers("token-user-a")).json()
+    page2 = client.get(f"{base}?limit=2&offset=2", headers=auth_headers("token-user-a")).json()
+    assert [q["number"] for q in page1["questions"]] == ["1", "2"]
+    assert [q["number"] for q in page2["questions"]] == ["3", "4"]
+    assert page1["questions"] + page2["questions"] == full["questions"]
+    assert page1["counts"] == full["counts"]
+    assert page2["counts"] == full["counts"]
+    assert page1["total"] == full["total"] == 4
+    assert page1["qa_pairs"] == full["qa_pairs"] == 1
+    # Past the end: an empty page, still with the real counts.
+    empty = client.get(f"{base}?limit=2&offset=10", headers=auth_headers("token-user-a")).json()
+    assert empty["questions"] == []
+    assert empty["total"] == 4
+    assert empty["counts"] == full["counts"]
+
+
+def test_read_path_indexes_exist_in_models():
+    """Bug (a)/(b) root cause, pinned in the model metadata:
+    the read paths seq-scanned question_options and
+    extracted_answers because no index keyed them by
+    question_id, and question_subjects had no topic index for
+    the counts query. The migration must create these exact
+    names (023_read_indexes)."""
+    assert "ix_question_options_question" in {
+        idx.name for idx in db.QuestionOption.__table__.indexes
+    }
+    assert "ix_extracted_answers_question_created" in {
+        idx.name for idx in db.ExtractedAnswer.__table__.indexes
+    }
+    assert "ix_question_subjects_topic" in {
+        idx.name for idx in db.QuestionSubject.__table__.indexes
+    }
+
+
 def test_question_detail_has_evidence_trail(client, engine_db, seeded_doc):
     _, by_number = seeded_doc
     res = client.get(f"/api/v1/questions/{by_number['1']}", headers=auth_headers("token-user-a"))

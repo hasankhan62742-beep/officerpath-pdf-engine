@@ -309,6 +309,58 @@ def test_availability_excludes_unknown_and_counts_them(client, engine_db, seeded
     assert res.status_code == 422
 
 
+def test_availability_counts_only_matches_full_counts(client, engine_db, seeded_doc):
+    """Read view (bug a): ``counts_only`` must return exactly
+    the same per-topic counts as the full pool resolution — it
+    is only a faster path to the same numbers, never a different
+    classification. The sample is empty: the Read view never
+    shows it."""
+    _, by_number = seeded_doc
+    factory = engine_db
+    session = factory()
+    subject_id = uuid.uuid4()
+    topic_id = uuid.uuid4()
+    session.add(db.Subject(id=subject_id, name="General Knowledge", slug="general-knowledge"))
+    session.add(
+        db.Topic(id=topic_id, subject_id=subject_id, name="Section One", slug="section-one")
+    )
+    for qid in by_number.values():
+        session.add(
+            db.QuestionSubject(
+                question_id=uuid.UUID(qid),
+                subject_id=subject_id,
+                topic_id=topic_id,
+                assigned_by=uuid.UUID(USER_A),
+            )
+        )
+    session.commit()
+    session.close()
+
+    base = f"/api/v1/tests/availability?source_type=topics&topic_ids={topic_id}"
+    full = client.get(base, headers=auth_headers("token-user-a"))
+    assert full.status_code == 200, full.text
+    fast = client.get(f"{base}&counts_only=true", headers=auth_headers("token-user-a"))
+    assert fast.status_code == 200, fast.text
+    assert fast.json()["sample"] == []
+    for key in ("available", "excluded_unknown", "excluded_no_options", "by_topic"):
+        assert fast.json()[key] == full.json()[key], key
+    assert fast.json()["available"] == 2  # Q1 + Q4 (answered); Q2 + Q3 unknown
+    assert fast.json()["excluded_unknown"] == 2
+    assert fast.json()["by_topic"][0]["topic_name"] == "Section One"
+
+    # counts_only needs topics mode with no range — anything else is a 422.
+    res = client.get(
+        "/api/v1/tests/availability?source_type=all&counts_only=true",
+        headers=auth_headers("token-user-a"),
+    )
+    assert res.status_code == 422
+    res = client.get(
+        f"{base}&counts_only=true&question_range_start=1&question_range_end=2",
+        headers=auth_headers("token-user-a"),
+    )
+    assert res.status_code == 422
+
+
 def test_create_test_from_all_freezes_ppsc_default(client, engine_db, seeded_doc):
     res = _create(client, _create_payload())
     assert res.status_code == 201, res.text

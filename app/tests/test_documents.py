@@ -8,10 +8,12 @@
 # token-user-b -> USER_B). The database is a throwaway SQLite
 # file per test; the worker runs in-process via run_once.
 
+import hashlib
 import uuid
 from pathlib import Path
 
-from app.tests.conftest import auth_headers
+from app.db import models as db
+from app.tests.conftest import USER_A, auth_headers
 from app.tests.test_ingestion import _pdf
 from app.workers.runner import run_once
 
@@ -161,6 +163,79 @@ def test_list_pagination_and_status_filter(client, engine_db):
     # Bad status is a 422, never a 500.
     res = client.get("/api/v1/documents?status=bogus", headers=auth_headers("token-user-a"))
     assert res.status_code == 422
+
+
+def test_list_shows_counts_for_jobless_imported_document(client, engine_db):
+    """Bug (c): the shared bank documents were imported straight
+    into the database — no processing job — so the list read
+    their counts from the (absent) job summary and showed "—"
+    for every TXT document. Counts must come from the stored
+    rows, job or no job."""
+    factory = engine_db
+    session = factory()
+    doc_id = uuid.uuid4()
+    session.add(
+        db.Document(
+            id=doc_id,
+            user_id=uuid.UUID(USER_A),
+            title="Most Important Questions — Computer",
+            storage_path="staging://test",
+            file_type="txt",
+            file_size_bytes=100,
+            page_count=None,
+            content_hash=hashlib.sha256(str(doc_id).encode()).hexdigest(),
+            is_shared=True,
+            metadata_json={"collection": "Most Important Questions — Computer"},
+        )
+    )
+    session.commit()
+    for number, options in ((1, ["A", "B", "C", "D"]), (2, ["A", "B", "C", "D"]), (3, [])):
+        qid = uuid.uuid4()
+        session.add(
+            db.ExtractedQuestion(
+                id=qid,
+                document_id=doc_id,
+                question_number=str(number),
+                original_text=f"Question {number}",
+                normalized_text=f"Question {number}",
+                validation_status="answered" if options else "unreviewed",
+                content_fingerprint=f"{doc_id}-{number}",
+            )
+        )
+        session.flush()
+        for position, option in enumerate(options):
+            session.add(
+                db.QuestionOption(
+                    question_id=qid,
+                    original_text=option,
+                    normalized_text=option,
+                    position=position,
+                )
+            )
+        if options:
+            session.add(
+                db.ExtractedAnswer(
+                    question_id=qid,
+                    document_id=doc_id,
+                    status="verified_explicit_key",
+                    resolved_label="A",
+                    resolution_method="explicit-key",
+                    resolution_score=1.0,
+                )
+            )
+    session.commit()
+    session.close()
+
+    res = client.get("/api/v1/documents", headers=auth_headers("token-user-a"))
+    assert res.status_code == 200
+    body = res.json()
+    assert body["total"] == 1
+    item = body["documents"][0]
+    assert item["job"] is None
+    assert item["questions"] == 3
+    # The dashboard's recent documents carry the same counts.
+    summary = _summary(client)
+    assert summary["recent_documents"][0]["questions"] == 3
 
 
 def test_detail_and_list_are_per_user(client, engine_db):

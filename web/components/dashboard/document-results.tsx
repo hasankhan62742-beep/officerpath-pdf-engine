@@ -110,10 +110,10 @@ export function DocumentResults({ documentId }: { documentId: string }) {
       {qa_pairs > 0 ? (
         <Alert tone="info" title={`Q&A pairs: ${qa_pairs}`}>
           This document also contains {qa_pairs} question-and-answer pair
-          {qa_pairs === 1 ? "" : "s"} (answers without options). They are
-          counted in the report but not listed as questions — the engine
-          stores their count only, and they are never forced into four
-          options.
+          {qa_pairs === 1 ? "" : "s"} (answers without options). Pairs the
+          engine stored as questions appear below as Q&amp;A cards; pairs
+          it counted but did not store as rows are counted here only.
+          Either way, they are never forced into four options.
         </Alert>
       ) : null}
 

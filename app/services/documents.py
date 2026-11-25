@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import uuid
 
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.core.errors import ApiError
@@ -29,8 +30,49 @@ log = get_logger(__name__)
 TERMINAL_STATUSES = ("done", "failed", "cancelled")
 
 
-def _item(document: dict, job: dict | None) -> dict:
+def _stored_question_counts(session: Session | None, document_ids: list[str]) -> dict[str, int]:
+    """Real stored question counts for a page of documents, from
+    ONE grouped query. The job's result_summary is NOT the truth
+    here: documents added by a verified-text import (the whole
+    shared bank) have no processing job at all, so the summary
+    path returned None and the list showed "—" for every TXT
+    document. Stored rows are what the question browser reads,
+    so they are what the list shows."""
+    if session is None or not document_ids:
+        return {}
+    rows = (
+        session.query(
+            db.ExtractedQuestion.document_id,
+            func.count(db.ExtractedQuestion.id),
+        )
+        .filter(
+            db.ExtractedQuestion.document_id.in_([uuid.UUID(doc_id) for doc_id in document_ids])
+        )
+        .group_by(db.ExtractedQuestion.document_id)
+        .all()
+    )
+    return {str(doc_id): count for doc_id, count in rows}
+
+
+def _item(document: dict, job: dict | None, stored_questions: int | None = None) -> dict:
     summary = (job or {}).get("result_summary") or {}
+    summary_questions = (
+        summary.get("questions") if isinstance(summary.get("questions"), int) else None
+    )
+    # Stored rows win: they are what the question browser reads.
+    # A job summary survives only as a fallback for callers that
+    # cannot pass a session (none in the API today — both routes
+    # do). When the stored total disagrees with the summary, the
+    # summary's answered count is stale too and must not be shown
+    # next to it (it could exceed the stored total).
+    questions = stored_questions if stored_questions is not None else summary_questions
+    answered = summary.get("answered") if isinstance(summary.get("answered"), int) else None
+    if (
+        stored_questions is not None
+        and summary_questions is not None
+        and summary_questions != stored_questions
+    ):
+        answered = None
     return {
         "id": document["id"],
         "title": document["title"],
@@ -40,10 +82,8 @@ def _item(document: dict, job: dict | None) -> dict:
         "created_at": document["created_at"],
         "job": job,
         "is_shared": bool(document.get("is_shared", False)),
-        "questions": summary.get("questions")
-        if isinstance(summary.get("questions"), int)
-        else None,
-        "answered": summary.get("answered") if isinstance(summary.get("answered"), int) else None,
+        "questions": questions,
+        "answered": answered,
     }
 
 
@@ -70,12 +110,16 @@ def list_documents(
     offset: int,
     status: str | None = None,
     include_shared: bool = False,
+    session: Session | None = None,
 ) -> tuple[list[dict], int]:
     """(page of items, total). `status` filters by the document's
     latest job status; a document with no job never matches a
     status filter. Total counts the filtered set, not the page.
     ``include_shared`` (M11, test builder only) also lists
-    shared bank documents, flagged by ``is_shared``."""
+    shared bank documents, flagged by ``is_shared``. Question
+    counts come from one batched stored-rows query (``session``),
+    never from the job summary alone — jobless imported
+    documents have counts too."""
     if status is not None and status not in JOB_STATUSES:
         raise ApiError(
             status_code=422,
@@ -86,7 +130,8 @@ def list_documents(
         user["id"], limit=limit, offset=offset, status=status, include_shared=include_shared
     )
     job_map = jobs.find_latest_by_document_ids([r["id"] for r in rows])
-    return [_item(row, job_map.get(row["id"])) for row in rows], total
+    stored = _stored_question_counts(session, [r["id"] for r in rows])
+    return [_item(row, job_map.get(row["id"]), stored.get(row["id"])) for row in rows], total
 
 
 def get_document_detail(
@@ -129,16 +174,19 @@ def get_dashboard_summary(
     jobs: SqlAlchemyJobRepository,
     *,
     recent_limit: int = 5,
+    session: Session | None = None,
 ) -> dict:
     """Real dashboard numbers: document total, job counts by
     status (all six vocabulary values, zeros included), and the
-    newest documents with their jobs."""
+    newest documents with their jobs. Recent documents carry
+    the same batched stored question counts as the list."""
     rows, total = documents.list_by_user(user["id"], limit=recent_limit, offset=0)
     job_map = jobs.find_latest_by_document_ids([r["id"] for r in rows])
+    stored = _stored_question_counts(session, [r["id"] for r in rows])
     return {
         "documents_total": total,
         "jobs_by_status": jobs.count_by_status_for_user(user["id"]),
-        "recent_documents": [_item(r, job_map.get(r["id"])) for r in rows],
+        "recent_documents": [_item(r, job_map.get(r["id"]), stored.get(r["id"])) for r in rows],
     }
 
 

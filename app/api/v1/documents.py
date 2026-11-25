@@ -94,7 +94,7 @@ async def list_documents(
     ),
     user: dict = Depends(get_current_user),
 ) -> DocumentListResponse:
-    with _repositories() as (_, documents, jobs):
+    with _repositories() as (session, documents, jobs):
         items, total = document_service.list_documents(
             user,
             documents,
@@ -103,6 +103,7 @@ async def list_documents(
             offset=offset,
             status=status,
             include_shared=include_shared,
+            session=session,
         )
     return DocumentListResponse(
         documents=[_to_item(i) for i in items],

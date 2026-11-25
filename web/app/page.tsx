@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { PakistanMapWatermark } from "@/components/landing/pakistan-map";
+import { CollectionsSection } from "@/components/landing/collections-section";
 import { RotatingTagline } from "@/components/landing/rotating-tagline";
 import { EXAMS, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 
@@ -174,6 +175,13 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Named study collections (B1/B2): the three shared
+          collections as tabs — PPSC Past Paper 2026, Most
+          Important Questions — Computer, Fact Book for PMS and
+          CSS 2027. Titles + counts are public; reading needs a
+          login. */}
+      <CollectionsSection />
 
       {/* Features */}
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">

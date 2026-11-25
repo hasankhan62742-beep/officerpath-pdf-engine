@@ -19,6 +19,16 @@ export class ApiError extends Error {
   }
 }
 
+// Reads fail fast instead of hanging forever: the live engine
+// runs on a 0.1-CPU free tier, and a request that never returns
+// left the Read view spinning for 2+ minutes and the Table view
+// showing "Failed to fetch" with no explanation. 60 s is generous
+// for any read after the query fixes (the slowest honest read,
+// the 31,609-question bank doc, answers in under 1 s locally).
+// Uploads are NOT timed out here — uploadForm has its own path
+// and a large file legitimately takes longer than a read.
+const READ_TIMEOUT_MS = 60_000;
+
 async function request<T>(
   path: string,
   accessToken: string,
@@ -26,9 +36,35 @@ async function request<T>(
 ): Promise<T> {
   const res = await fetch(`${API_URL}${path}`, {
     ...init,
+    signal: init?.signal ?? AbortSignal.timeout(READ_TIMEOUT_MS),
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${accessToken}`,
+      ...(init?.headers ?? {}),
+    },
+  });
+  const body = await res.json().catch(() => null);
+  if (!res.ok) {
+    const err = body?.error ?? {};
+    throw new ApiError(
+      res.status,
+      typeof err.code === "string" ? err.code : "request_failed",
+      typeof err.message === "string" ? err.message : `Request failed (${res.status}).`,
+    );
+  }
+  return body as T;
+}
+
+// B1/B2 — public reads (no session): the named study
+// collections list/detail. These return titles + counts only
+// — never question text or answers — so the Main Page and the
+// public collections list can call them without a login.
+async function requestPublic<T>(path: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(`${API_URL}${path}`, {
+    ...init,
+    signal: init?.signal ?? AbortSignal.timeout(READ_TIMEOUT_MS),
+    headers: {
+      "Content-Type": "application/json",
       ...(init?.headers ?? {}),
     },
   });
@@ -623,6 +659,62 @@ export async function listDocumentQuestions(
   );
 }
 
+// ---------------------------------------------------------------------------
+// Named study collections (B1/B2): the shared bank documents
+// grouped by the ``collection`` value in their metadata — PPSC
+// Past Paper 2026, Most Important Questions — Computer, Fact
+// Book for PMS and CSS 2027. The list is public (titles +
+// counts only); reading a document's questions needs a login.
+// ---------------------------------------------------------------------------
+
+export interface StudyCollectionDocument {
+  id: string;
+  title: string;
+  paper: string | null;
+  question_count: number;
+  sections: Record<string, number | string>;
+  created_at: string | null;
+}
+
+export interface StudyCollection {
+  name: string;
+  slug: string;
+  question_count: number;
+  document_count: number;
+  documents: StudyCollectionDocument[];
+}
+
+export interface StudyCollectionListResponse {
+  collections: StudyCollection[];
+  total: number;
+  // Live bank total (all shared documents) — the home page
+  // reads this instead of hardcoding a count.
+  bank_total: number;
+}
+
+export async function listStudyCollections(): Promise<StudyCollectionListResponse> {
+  return requestPublic<StudyCollectionListResponse>("/api/v1/study-collections");
+}
+
+export async function getStudyCollection(slug: string): Promise<StudyCollection> {
+  return requestPublic<StudyCollection>(`/api/v1/study-collections/${slug}`);
+}
+
+export async function listStudyCollectionDocumentQuestions(
+  accessToken: string,
+  slug: string,
+  documentId: string,
+  opts: { limit?: number; offset?: number } = {},
+): Promise<DocumentQuestionsResponse> {
+  const params = new URLSearchParams();
+  params.set("limit", String(opts.limit ?? 50));
+  params.set("offset", String(opts.offset ?? 0));
+  return request<DocumentQuestionsResponse>(
+    `/api/v1/study-collections/${slug}/documents/${documentId}/questions?${params}`,
+    accessToken,
+  );
+}
+
 export async function getDocumentReport(
   accessToken: string,
   documentId: string,
@@ -869,6 +961,12 @@ export async function getTestAvailability(
     include_unknown?: boolean;
     question_range_start?: number | null;
     question_range_end?: number | null;
+    // Read view only: per-topic counts from one aggregate query,
+    // without resolving the pool or a sample. Only valid with
+    // source_type "topics" and no range. Without it, a 33k-question
+    // subject took 2.8 s locally (40 s+ live) and the section
+    // counts never loaded.
+    counts_only?: boolean;
   },
 ): Promise<Availability> {
   const params = new URLSearchParams();
@@ -881,6 +979,7 @@ export async function getTestAvailability(
     params.set("question_range_start", String(opts.question_range_start));
   if (opts.question_range_end != null)
     params.set("question_range_end", String(opts.question_range_end));
+  if (opts.counts_only) params.set("counts_only", "true");
   return request<Availability>(`/api/v1/tests/availability?${params}`, accessToken);
 }
 

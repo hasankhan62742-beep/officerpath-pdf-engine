@@ -29,6 +29,7 @@ import {
   deleteDocument,
   getDocument,
   getSessionToken,
+  listDocumentQuestions,
   retryJob,
 } from "@/lib/api";
 import { formatBytes, formatDateTime } from "@/lib/utils";
@@ -56,12 +57,26 @@ export function DocumentDetailClient({ id }: { id: string }) {
     },
   });
 
+  // Whether this document actually holds questions, asked of
+  // the stored rows — not of the job. Imported bank documents
+  // have no processing job, so the job alone cannot answer it;
+  // limit 1 keeps this cheap (the endpoint paginates in SQL).
+  const questionsQuery = useQuery({
+    queryKey: ["document-questions-count", id],
+    queryFn: async () => {
+      const token = await getSessionToken();
+      if (!token) throw new Error("Your session has expired. Please log in again.");
+      return listDocumentQuestions(token, id, { limit: 1, offset: 0 });
+    },
+  });
+
   const [actionError, setActionError] = useState<string | null>(null);
   const [acting, setActing] = useState<"cancel" | "retry" | "delete" | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   async function refreshAll() {
     await queryClient.invalidateQueries({ queryKey: ["document", id] });
+    await queryClient.invalidateQueries({ queryKey: ["document-questions-count", id] });
     await queryClient.invalidateQueries({ queryKey: ["documents"] });
     await queryClient.invalidateQueries({ queryKey: ["dashboard-summary"] });
   }
@@ -125,6 +140,12 @@ export function DocumentDetailClient({ id }: { id: string }) {
   const questions = typeof summary.questions === "number" ? summary.questions : null;
   const answered = typeof summary.answered === "number" ? summary.answered : null;
   const pending = typeof summary.pending === "number" ? summary.pending : null;
+  // Stored-row truth for jobless documents (the imported bank):
+  // the job summary is empty there, so the counts below come
+  // from the document-questions endpoint instead.
+  const storedTotal = questionsQuery.data?.total ?? null;
+  const storedCounts = questionsQuery.data?.counts ?? null;
+  const hasStoredQuestions = (storedTotal ?? 0) > 0;
   const cancellable = job?.status === "queued" || job?.status === "processing";
   const retryable = job?.status === "failed" || job?.status === "cancelled";
 
@@ -158,9 +179,33 @@ export function DocumentDetailClient({ id }: { id: string }) {
         <CardDescription>
           {job
             ? "Live from the engine — this page updates while the job runs."
-            : "No processing job exists for this document."}
+            : hasStoredQuestions
+              ? "Imported questions — this document was added to the bank directly, so there is no processing job."
+              : "No processing job exists for this document."}
         </CardDescription>
         <div className="mt-4 space-y-3">
+          {!job && hasStoredQuestions ? (
+            <dl className="grid grid-cols-3 gap-4 text-center">
+              <div className="rounded-xl bg-slate-50 px-2 py-3">
+                <dt className="text-xs font-medium text-slate-500">Questions</dt>
+                <dd className="text-2xl font-bold text-slate-900">
+                  {storedCounts?.questions ?? storedTotal ?? "—"}
+                </dd>
+              </div>
+              <div className="rounded-xl bg-slate-50 px-2 py-3">
+                <dt className="text-xs font-medium text-slate-500">Answered</dt>
+                <dd className="text-2xl font-bold text-slate-900">
+                  {storedCounts?.answered ?? "—"}
+                </dd>
+              </div>
+              <div className="rounded-xl bg-slate-50 px-2 py-3">
+                <dt className="text-xs font-medium text-slate-500">Needs review</dt>
+                <dd className="text-2xl font-bold text-slate-900">
+                  {storedCounts?.pending ?? "—"}
+                </dd>
+              </div>
+            </dl>
+          ) : null}
           {job ? (
             <>
               <div className="flex flex-wrap items-center gap-2">
@@ -273,7 +318,7 @@ export function DocumentDetailClient({ id }: { id: string }) {
 
       <DocumentPages documentId={id} jobActive={isJobActive(job?.status)} />
 
-      {job?.status === "done" ? (
+      {job?.status === "done" || hasStoredQuestions ? (
         <div id="extraction-results">
           <Card className="p-5">
             <CardTitle>Extraction results</CardTitle>

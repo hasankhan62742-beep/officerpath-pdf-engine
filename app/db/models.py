@@ -273,6 +273,11 @@ class QuestionSubject(Base):
             unique=True,
         ),
         Index("ix_question_subjects_subject", "subject_id", "created_at"),
+        # B-bugfix (2026-11-26): the counts-only availability
+        # query drives from topic_id (``question_subjects.topic_id
+        # IN (...)``) — the question-first index cannot serve
+        # that lookup. Mirrored by Alembic 0014 / Supabase 023.
+        Index("ix_question_subjects_topic", "topic_id", "question_id"),
     )
 
 
@@ -514,6 +519,13 @@ class QuestionOption(Base):
 
     question: Mapped[ExtractedQuestion] = relationship(back_populates="options")
 
+    # B-bugfix (2026-11-26): every read path filters options by
+    # question_id (``_batch_options`` and the pool option-holder
+    # query) — without this index each call scanned the whole
+    # ~216k-row table (profiled: SCAN question_options on the
+    # 54k-question bank). Mirrored by Alembic 0014 / Supabase 023.
+    __table_args__ = (Index("ix_question_options_question", "question_id"),)
+
 
 class QuestionAsset(Base):
     """A figure/diagram cropped from a page and linked to a question."""
@@ -568,6 +580,16 @@ class ExtractedAnswer(Base):
     evidence: Mapped[list[AnswerEvidence]] = relationship(
         back_populates="answer", cascade="all, delete-orphan"
     )
+
+    # B-bugfix (2026-11-26): every read path filters answers by
+    # question_id and takes the latest by created_at
+    # (``_batch_answers``, ``_resolve_pool``) — without this
+    # index each call scanned the whole answers table and sorted
+    # it (profiled: SCAN extracted_answers + TEMP B-TREE FOR
+    # ORDER BY on the 54k-question bank). The composite serves
+    # both the filter and the latest-first order (read
+    # backwards). Mirrored by Alembic 0014 / Supabase 023.
+    __table_args__ = (Index("ix_extracted_answers_question_created", "question_id", "created_at"),)
 
 
 class AnswerEvidence(Base):

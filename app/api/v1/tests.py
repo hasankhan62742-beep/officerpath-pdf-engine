@@ -104,6 +104,12 @@ async def test_availability(
         None,
         description="M12: range end, 1-based inclusive, single-topic only.",
     ),
+    counts_only: bool = Query(
+        False,
+        description="Read view only: return per-topic counts from one "
+        "aggregate query, without resolving the pool or a sample. "
+        "Only valid with source_type 'topics' and no range.",
+    ),
     user: dict = Depends(get_current_user),
 ) -> AvailabilityResponse:
     if source_type == "documents":
@@ -134,6 +140,7 @@ async def test_availability(
             include_unknown=include_unknown,
             question_range_start=question_range_start,
             question_range_end=question_range_end,
+            counts_only=counts_only,
         )
     return AvailabilityResponse(**result)
 
