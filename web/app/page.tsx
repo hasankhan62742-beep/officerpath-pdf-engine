@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
@@ -112,33 +113,48 @@ export default function HomePage() {
       />
       {/* Hero */}
       <section className="relative overflow-hidden bg-gradient-to-b from-brand-50 via-white to-white">
-        <PakistanMapWatermark className="right-[-4%] top-8 hidden h-[420px] w-[420px] text-brand-600 opacity-[0.07] md:block" />
         <div className="relative mx-auto max-w-7xl px-4 pb-16 pt-14 sm:px-6 sm:pt-20 lg:px-8">
-          <div className="max-w-3xl animate-[fade-up_0.45s_ease_both]">
-            <p className="inline-flex items-center rounded-full bg-white px-3 py-1 text-xs font-bold uppercase tracking-widest text-brand-700 ring-1 ring-brand-200">
-              PPSC · FPSC · CSS · PMS · NTS & more
-            </p>
-            <h1 className="mt-5 text-4xl font-extrabold leading-[1.1] tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
-              Prepare Smarter. Practice Better.{" "}
-              <span className="text-brand-600">Become Exam Ready.</span>
-            </h1>
-            <p className="mt-5 max-w-2xl text-lg leading-relaxed text-slate-600">
-              OfficerPath AI turns your own books, PDFs and past papers into
-              structured, traceable MCQs — then helps you practise with timed,
-              exam-style tests and see exactly where you stand.
-            </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Button href="/register" size="lg">
-                Start Your Preparation
-              </Button>
-              <Button href="/how-it-works" variant="secondary" size="lg">
-                See how it works
-              </Button>
+          <div className="grid items-center gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:gap-12">
+            <div className="max-w-3xl animate-[fade-up_0.45s_ease_both]">
+              <p className="inline-flex items-center rounded-full bg-white px-3 py-1 text-xs font-bold uppercase tracking-widest text-brand-700 ring-1 ring-brand-200">
+                PPSC · FPSC · CSS · PMS · NTS & more
+              </p>
+              <h1 className="mt-5 text-4xl font-extrabold leading-[1.1] tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
+                Prepare Smarter. Practice Better.{" "}
+                <span className="text-brand-600">Become Exam Ready.</span>
+              </h1>
+              <p className="mt-5 max-w-2xl text-lg leading-relaxed text-slate-600">
+                OfficerPath AI turns your own books, PDFs and past papers into
+                structured, traceable MCQs — then helps you practise with timed,
+                exam-style tests and see exactly where you stand.
+              </p>
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <Button href="/register" size="lg">
+                  Start Your Preparation
+                </Button>
+                <Button href="/how-it-works" variant="secondary" size="lg">
+                  See how it works
+                </Button>
+              </div>
+              <p className="mt-4 text-sm text-slate-500">
+                Free during this phase. No APK to install — it works in your
+                phone browser.
+              </p>
             </div>
-            <p className="mt-4 text-sm text-slate-500">
-              Free during this phase. No APK to install — it works in your
-              phone browser.
-            </p>
+            <figure className="mx-auto w-fit animate-[fade-up_0.45s_ease_both]">
+              <Image
+                src="/images/pakistan-map-hero.webp"
+                width={1120}
+                height={2240}
+                alt="Illustrated map of Pakistan showing the Indus River, northern mountains, green plains and the Thar desert"
+                sizes="(max-width: 1023px) 340px, 320px"
+                preload
+                className="h-auto w-full max-w-[300px] sm:max-w-[340px] lg:h-[600px] lg:w-auto lg:max-w-none"
+              />
+              <figcaption className="mt-3 text-center text-sm font-medium text-slate-500">
+                Indus River · Karakoram · Thar Desert
+              </figcaption>
+            </figure>
           </div>
         </div>
       </section>
