@@ -98,3 +98,60 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Hero animations (M17 v2).
+   fade-up was referenced by the hero since M17 but never defined,
+   so it silently did nothing until now. float-soft gives the tilted
+   map poster a slow, subtle life; cursor-blink drives the typewriter
+   cursor of the rotating tagline. All three stop entirely under
+   prefers-reduced-motion. */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float-soft {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes cursor-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+.hero-enter {
+  animation: fade-up 0.45s ease both;
+}
+
+.hero-float {
+  animation: float-soft 7s ease-in-out infinite;
+}
+
+.hero-cursor {
+  animation: cursor-blink 1s step-end infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-enter,
+  .hero-float,
+  .hero-cursor {
+    animation: none;
+  }
+}

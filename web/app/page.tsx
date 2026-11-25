@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { PakistanMapWatermark } from "@/components/landing/pakistan-map";
+import { RotatingTagline } from "@/components/landing/rotating-tagline";
 import { EXAMS, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -115,7 +116,7 @@ export default function HomePage() {
       <section className="relative overflow-hidden bg-gradient-to-b from-brand-50 via-white to-white">
         <div className="relative mx-auto max-w-7xl px-4 pb-16 pt-14 sm:px-6 sm:pt-20 lg:px-8">
           <div className="grid items-center gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:gap-12">
-            <div className="max-w-3xl animate-[fade-up_0.45s_ease_both]">
+            <div className="hero-enter max-w-3xl">
               <p className="inline-flex items-center rounded-full bg-white px-3 py-1 text-xs font-bold uppercase tracking-widest text-brand-700 ring-1 ring-brand-200">
                 PPSC · FPSC · CSS · PMS · NTS & more
               </p>
@@ -128,6 +129,7 @@ export default function HomePage() {
                 structured, traceable MCQs — then helps you practise with timed,
                 exam-style tests and see exactly where you stand.
               </p>
+              <RotatingTagline />
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Button href="/register" size="lg">
                   Start Your Preparation
@@ -141,20 +143,34 @@ export default function HomePage() {
                 phone browser.
               </p>
             </div>
-            <figure className="mx-auto w-fit animate-[fade-up_0.45s_ease_both]">
-              <Image
-                src="/images/pakistan-map-hero.webp"
-                width={1120}
-                height={2240}
-                alt="Illustrated map of Pakistan showing the Indus River, northern mountains, green plains and the Thar desert"
-                sizes="(max-width: 1023px) 340px, 320px"
-                preload
-                className="h-auto w-full max-w-[300px] sm:max-w-[340px] lg:h-[600px] lg:w-auto lg:max-w-none"
-              />
-              <figcaption className="mt-3 text-center text-sm font-medium text-slate-500">
-                Indus River · Karakoram · Thar Desert
-              </figcaption>
-            </figure>
+            {/* Map poster: tilted on desktop, framed as a deliberate
+                card (white frame + ring + shadow + gradient glow) so
+                the illustration's cream background reads as a poster,
+                not an accidental box. Gentle float; no tilt on mobile. */}
+            <div className="hero-enter mx-auto w-fit">
+              <figure className="relative rotate-0 lg:-rotate-5">
+                <div className="hero-float relative">
+                  <div
+                    aria-hidden
+                    className="absolute -inset-5 -z-10 rounded-[2.5rem] bg-gradient-to-br from-brand-300/60 via-amber-200/50 to-emerald-200/60 blur-2xl"
+                  />
+                  <div className="rounded-[1.75rem] bg-white p-2.5 shadow-[var(--shadow-lift)] ring-1 ring-slate-200/80">
+                    <Image
+                      src="/images/pakistan-map-hero.webp"
+                      width={1120}
+                      height={2240}
+                      alt="Illustrated map of Pakistan showing the Indus River, northern mountains, green plains and the Thar desert"
+                      sizes="(max-width: 1023px) 340px, 320px"
+                      preload
+                      className="h-auto w-full max-w-[300px] rounded-[1.25rem] sm:max-w-[340px] lg:h-[540px] lg:w-auto lg:max-w-none"
+                    />
+                    <figcaption className="px-2 pb-1.5 pt-2.5 text-center text-sm font-medium text-slate-500">
+                      Indus River · Karakoram · Thar Desert
+                    </figcaption>
+                  </div>
+                </div>
+              </figure>
+            </div>
           </div>
         </div>
       </section>
