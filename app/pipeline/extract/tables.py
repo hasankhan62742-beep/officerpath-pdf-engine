@@ -20,6 +20,7 @@ from app.pipeline.extract.markers import (
     clean_stored,
     option_line_match,
     split_option_line,
+    symbol_option_match,
 )
 from app.pipeline.extract.numbers import (
     normalize_urdu_digits,
@@ -719,6 +720,7 @@ def parse_table_rows_grid(
             and "؟" not in anchor
             and ":" not in anchor
             and not option_line_match(anchor)
+            and symbol_option_match(anchor) is None
             and question_number_detailed(anchor) is None
             and _looks_like_type_label(anchor)
         ):
@@ -750,7 +752,15 @@ def parse_table_rows_grid(
         # stem line is an option line, the "row" is really a standard
         # block (e.g. CA40's A)-D) lines + "Correct Answer:" line
         # under a section heading used as a type-label anchor).
-        if any(option_line_match(lines[p]["text"].strip()) is not None for p in stem_positions):
+        # A1: symbol options count too — a NOA Maths stem's "© 274"
+        # / "O None Of These" lines are options, and the "O None Of
+        # These" 4th option itself looks like a type label, so the
+        # anchor above must not fire on it either.
+        if any(
+            option_line_match(lines[p]["text"].strip()) is not None
+            or symbol_option_match(lines[p]["text"].strip()) is not None
+            for p in stem_positions
+        ):
             i += 1
             continue
         stem = clean_stored(

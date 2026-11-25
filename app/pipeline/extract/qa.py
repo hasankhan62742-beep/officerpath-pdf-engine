@@ -138,6 +138,18 @@ def scan_flashcards(
             if stem:
                 split = (stem, answer)
         if split is None:
+            # A1: a bare answer line ("Correct Answer Is: 171", or
+            # "_ Correct Answer Is: 1116" with OCR junk in front) is
+            # not a question — it belongs to a block that failed to
+            # parse, not to a flashcard. Without this guard the
+            # trailing-answer split below turns it into a junk pair
+            # with question "Correct Answer Is:". The match is
+            # start-anchored (after junk): a stem that merely ends
+            # with an answer phrase still goes to the split below.
+            stripped = text.strip().lstrip("_•-–—· ")
+            if ANSWER_LINE_RE.match(stripped):
+                i += 1
+                continue
             split = _split_trailing_answer(text) or _split_dash_answer(text)
         if split is None:
             i += 1

@@ -21,6 +21,7 @@ from app.pipeline.extract.markers import (
     option_line_match,
     split_option_line,
     strip_answer_tail,
+    symbol_option_match,
 )
 from app.pipeline.extract.numbers import (
     bare_number_at_start,
@@ -65,6 +66,7 @@ def _is_option_line(text: str) -> bool:
         option_line_match(text) is not None
         or BARE_MARKER_RE.match(text.strip()) is not None
         or split_option_line(text) is not None
+        or symbol_option_match(text) is not None
     )
 
 
@@ -386,6 +388,17 @@ def parse_standard_block(block: list[dict]) -> tuple[dict | None, str | None, st
             e_match = OPTION_E_RE.match(stripped)
             if e_match is not None:
                 single = ("E", e_match.group(2))
+        if single is None:
+            # A1: symbol-marked option ("© 274", "O None Of These").
+            # Positional — the 1st symbol option is A, the 2nd B, ...
+            symbol_text = symbol_option_match(stripped)
+            if symbol_text is not None:
+                if len(options) < 5:
+                    options.append(symbol_text)
+                    option_signals.append(extract_option_signals(symbol_text))
+                    marker_styles.append("symbol")
+                i += 1
+                continue
         if single is not None:
             letter, opt_text = single
             if len(options) >= 5:
@@ -446,7 +459,10 @@ def parse_standard_block(block: list[dict]) -> tuple[dict | None, str | None, st
     if len(options) == 5:
         resolved = None
         if answer_line_token is not None:
-            resolved = resolve_answer_token(answer_line_token, options)
+            # A1: the inline answer line states a VALUE ("Correct
+            # Answer Is: 1"), so an exact option-text match wins
+            # over the bare-number index reading.
+            resolved = resolve_answer_token(answer_line_token, options, prefer_text=True)
         if resolved is None:
             return (
                 None,
@@ -464,7 +480,8 @@ def parse_standard_block(block: list[dict]) -> tuple[dict | None, str | None, st
         answer_line_token,
         None,
         options,
-        resolve_token=resolve_answer_token,
+        # A1: the inline answer line states a VALUE (see above).
+        resolve_token=lambda tok, opts: resolve_answer_token(tok, opts, prefer_text=True),
     )
     if final_answer_value and correct_index >= 0:
         conflict = final_answer_value_conflict(correct_index, final_answer_value, options)

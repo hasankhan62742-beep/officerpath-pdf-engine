@@ -118,6 +118,31 @@ def decode_ocr_option_letter(char: str) -> str | None:
     return None
 
 
+# Spec §2.2a (A1): radio-button option markers — a printed circle
+# OCRs as a glyph, not a letter: "© 274", "@ 364.50", "O None Of
+# These" (NOA Maths scan). The set is the shapes Tesseract returns
+# for filled/empty circles. "O" counts only as a SINGLE glyph
+# followed by whitespace — "Of ..."/"On ..." never match.
+SYMBOL_OPTION_RE = re.compile(r"^([©@O○●◉◎◯])\s+(.+)$")
+# No-space form: Tesseract sometimes drops the gap before a numeric
+# option ("@171", "O8"). The digit-led guard keeps a prose line such
+# as "O2 is a gas" (number + words) from matching.
+SYMBOL_OPTION_NOSPACE_RE = re.compile(r"^([©@O○●◉◎◯])(\d[\d.,%]*\s*[a-zA-Z°]*)$")
+
+
+def symbol_option_match(line: str) -> str | None:
+    """Match a symbol-marked option on its own line. Returns the
+    option text, or None. The glyph carries no letter — the caller
+    assigns options positionally (1st = A, 2nd = B, ...)."""
+    match = SYMBOL_OPTION_RE.match(line.strip())
+    if not match:
+        match = SYMBOL_OPTION_NOSPACE_RE.match(line.strip())
+    if not match:
+        return None
+    text = match.group(2).strip()
+    return text or None
+
+
 def option_line_match(line: str) -> tuple[str, str] | None:
     """Match an option on its own line. Returns (letter, rest) with
     misread digits decoded, or None. The single extraction site reads

@@ -95,6 +95,19 @@ BLOCK_SPLIT_START_RE = re.compile(r"^(Q\s*\d*[.\)\:]|\d+[.\)](?!\d))\s*\S", re.I
 BARE_NUMBER_RE = re.compile(r"^(\d+)\s+(?![a-z0-9])")
 
 
+# Spec §1.1a (A1): "Question#N" marker — the NOA Maths scan numbers
+# its questions "Question#1" ... on their own line, with no
+# separator after the number. Only the #-form is recognised:
+# "Question 12" in prose is never a marker, and the #-form never
+# appears in any other fixture's text layer (checked A1).
+QUESTION_HASH_RE = re.compile(r"^question\s*#\s*(\d+|[0-9IiLlOoSsBbZz$§]{1,3})\b", re.IGNORECASE)
+# Spec §1.8a (A1): the same #-form, for prefix stripping.
+QUESTION_HASH_PREFIX_RE = re.compile(
+    r"^question\s*#\s*(?:\d+|[0-9IiLlOoSsBbZz$§]{1,3})\s*[.\)\:]?\s*",
+    re.IGNORECASE,
+)
+
+
 def question_number_detailed(line: str) -> tuple[int, bool] | None:
     """Spec §1.1-1.2. Returns (number, decoded) or None. ``decoded``
     is True only when the number came from a misread token."""
@@ -107,6 +120,12 @@ def question_number_detailed(line: str) -> tuple[int, bool] | None:
         value = decode_ocr_number(match.group(1))
         if value is not None:
             return value, True
+    match = QUESTION_HASH_RE.match(text)
+    if match:
+        token = match.group(1)
+        value = int(token) if token.isdigit() else decode_ocr_number(token)
+        if value is not None:
+            return value, not token.isdigit()
     return None
 
 
@@ -140,7 +159,11 @@ def strip_question_number_prefix(text: str) -> str:
     """Spec §1.7. Strips dotted/``Q`` forms via questionPrefixRe, plus
     a BARE number only when the text ends with ``?``/``؟`` (a complete
     question stem). Known ambiguity (ported, not fixed): a question
-    OPENING with a year (``1947 Was a leap year?``) loses the year."""
+    OPENING with a year (``1947 Was a leap year?``) loses the year.
+    A1: the ``Question#N`` form is stripped the same way."""
+    stripped = QUESTION_HASH_PREFIX_RE.sub("", text, count=1)
+    if stripped != text:
+        return stripped
     stripped = QUESTION_PREFIX_RE.sub("", text, count=1)
     if stripped != text:
         return stripped

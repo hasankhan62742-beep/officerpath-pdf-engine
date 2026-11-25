@@ -16,10 +16,14 @@ from app.pipeline.extract.markers import (
     strip_ticks,
 )
 
-#: Spec §6.2: explicit answer line.
+#: Spec §6.2: explicit answer line. A1: "Correct Answer Is: X"
+#: (NOA Maths scan) — the "Is" is the paper's wording, not prose;
+#: the colon after it is still required, so "Correct answer is 42"
+#: (no colon) never matches. A1: OCR often misreads "Is" as "|s",
+#: "I5" or "1s" — those are accepted too.
 ANSWER_LINE_RE = re.compile(
-    r"^(?:Final\s+Answers?|(?:Correct|Right)\s+Answers?|Answer\s+Keys?"
-    r"|Correct|Right|Answers?|Ans|Key)\s*[:\-]\s*(.+)$",
+    r"^(?:Final\s+Answers?|(?:Correct|Right)\s+Answers?(?:\s+(?:Is|\|s|I5|1s))?"
+    r"|Answer\s+Keys?|Correct|Right|Answers?|Ans|Key)\s*[:\-]\s*(.+)$",
     re.IGNORECASE,
 )
 #: Spec §6.3: bare answer line — a lone ``(c)`` / ``C`` / ``3``.

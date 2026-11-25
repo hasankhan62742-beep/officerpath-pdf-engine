@@ -526,6 +526,120 @@ def _finish_parse(
     return matched, report, debug
 
 
+def _classify_pdf_pages(pdf_bytes: bytes) -> tuple[list, int]:
+    """A1: per-page classification from PyMuPDF evidence (never the
+    document-level total_chars heuristic). Returns
+    (classifications, total_text_chars) — the char total is kept for
+    debug only; it no longer decides anything."""
+    from app.pipeline.pdf.analysis import analyze_pdf
+    from app.pipeline.pdf.classifier import classify_pages_from_analysis
+
+    analysis = analyze_pdf(pdf_bytes)
+    classifications = classify_pages_from_analysis(analysis.pages)
+    total_chars = sum(p.text_char_count for p in analysis.pages)
+    return classifications, total_chars
+
+
+def _route_pdf_pages(classifications: list, settings: Settings) -> dict[int, list[str]]:
+    """A1: route each classified page through the router (ADR-002).
+    Returns {page_number: [engine names]}. This parse path can only
+    run digital-pymupdf + tesseract, so those are the available
+    engines — PaddleOCR is never a routing target here (it is not
+    instantiated by this path), and the deployment gate still
+    applies to whatever is listed."""
+    from app.pipeline.ocr.deployment import deployment_profile_from_settings
+    from app.pipeline.ocr.router import route_page
+
+    available = ["digital-pymupdf", "tesseract"]
+    deployment = deployment_profile_from_settings(settings)
+    return {
+        cls.page_number: route_page(cls.classification, available, deployment)
+        for cls in classifications
+    }
+
+
+def _repeated_line_texts(blocks_by_page: dict[int, list], *, min_pages: int = 3) -> set[str]:
+    """Normalised digital line texts that repeat on >= min_pages
+    distinct pages. Watermarks and running headers repeat verbatim;
+    question text never repeats across pages, so a repeated line is
+    furniture, not content."""
+    from collections import Counter
+
+    counts: Counter[str] = Counter()
+    for blocks in blocks_by_page.values():
+        seen: set[str] = set()
+        for block in blocks:
+            for line in block.text.split("\n"):
+                norm = " ".join(line.strip().lower().split())
+                if norm:
+                    seen.add(norm)
+        counts.update(seen)
+    return {line for line, n in counts.items() if n >= min_pages}
+
+
+def _drop_furniture_blocks(blocks: list, furniture: set[str]) -> tuple[list, int]:
+    """Drop digital blocks whose every line is repeated furniture
+    (A1: watermark-only text must not become questions). A block
+    mixing furniture with real text is kept whole — partial drops
+    would shift the block's per-line bold indices."""
+    kept: list = []
+    dropped = 0
+    for block in blocks:
+        lines = [ln for ln in block.text.split("\n") if ln.strip()]
+        if lines and all(" ".join(ln.strip().lower().split()) in furniture for ln in lines):
+            dropped += 1
+            continue
+        kept.append(block)
+    return kept, dropped
+
+
+def _merge_page_blocks(digital_blocks: list, ocr_blocks: list) -> list:
+    """A1: merge one mixed page's exact digital blocks with its
+    (deduped) OCR blocks, then re-derive reading order from the
+    block bboxes — the two engines number reading_order from 0
+    independently, so their orders cannot just be concatenated.
+    Blocks are copied; the shared digital blocks are never mutated
+    (multi-pass reuses them across variants)."""
+    import copy
+
+    from app.pipeline.layout.columns import reading_order_indices
+
+    merged = [copy.copy(b) for b in digital_blocks] + [copy.copy(b) for b in ocr_blocks]
+    bboxes = [b.bbox for b in merged]
+    if any(b is None for b in bboxes):
+        return merged
+    ranks = reading_order_indices(bboxes)
+    ordered = sorted(enumerate(merged), key=lambda pair: ranks[pair[0]])
+    for rank, (_index, block) in enumerate(ordered):
+        block.reading_order = rank
+    return [block for _index, block in ordered]
+
+
+def _build_page_lines(
+    digital_blocks_by_page: dict[int, list],
+    ocr_blocks_by_page: dict[int, list],
+    page_count: int,
+) -> list:
+    """A1: one PageLines per page that produced blocks. Mixed pages
+    carry digital + OCR blocks together (is_ocr=True — the page
+    needed OCR); pure digital pages carry is_ocr=False. Pages with
+    no blocks are skipped (they contribute no lines either way)."""
+    from app.pipeline.extract.service import PageLines
+
+    pages = []
+    for page_number in range(1, page_count + 1):
+        digital = digital_blocks_by_page.get(page_number)
+        ocr = ocr_blocks_by_page.get(page_number)
+        if digital and ocr:
+            blocks = _merge_page_blocks(digital, ocr)
+            pages.append(PageLines(page_number=page_number, blocks=blocks, is_ocr=True))
+        elif digital:
+            pages.append(PageLines(page_number=page_number, blocks=digital, is_ocr=False))
+        elif ocr:
+            pages.append(PageLines(page_number=page_number, blocks=ocr, is_ocr=True))
+    return pages
+
+
 def parse_document_bytes(
     pdf_bytes: bytes,
     source_document_id: str,
@@ -537,80 +651,133 @@ def parse_document_bytes(
     on_stage: Callable[[str, dict], None] | None = None,
 ) -> tuple[MatchedDocument, dict, dict]:
     """Parse one PDF's bytes end to end (in-process, synchronous):
-    digital text layer first, else per-page Tesseract OCR with
-    per-page PSM selection, layout, extraction, key-region-located
-    key detection, resolution, promotion, matching, validation.
+    per-page routing (A1) — every page is classified on its own
+    PyMuPDF evidence and routed through ``route_page``: digital
+    pages take the exact digital extractor, scanned / mixed /
+    unknown / unreadable pages take per-page Tesseract OCR with
+    per-page PSM selection, blank pages take nothing. The old
+    document-level ``total_chars >= 100`` rule is gone: a scanned
+    paper whose repeated watermark text summed past 100 chars was
+    misread as digital and OCR never ran (NOA Maths: 13 pages,
+    0 questions). Then layout, extraction, key-region-located key
+    detection, resolution, promotion, matching, validation.
     Returns (matched, report, debug) where debug carries the key
-    region, the per-page PSM choices, and the promotion report.
-    Raises ValueError on an unreadable PDF; OCR failures are
-    per-page (a failed page contributes no blocks, never fails the
-    document). ``psm_override`` forces one PSM on every scanned
-    page instead of the per-page selection (benchmarking / debug
-    only — the parse API never sets it). ``promote=False`` skips
+    region, the per-page PSM choices, the per-page classifications
+    and routes, and the promotion report. Raises ValueError on an
+    unreadable PDF; OCR failures are per-page (a failed page
+    contributes no blocks, never fails the document).
+    ``psm_override`` forces one PSM on every scanned page instead
+    of the per-page selection (benchmarking / debug only — the
+    parse API never sets it). ``promote=False`` skips
     pending-question promotion (benchmarking only — the parse API
     always promotes); the promotion report is then empty and
     pendings stay pending. ``multi_pass=True`` (M7, optional,
     never the default) runs three OCR variants — PSM 3 + layout,
-    PSM 3 raw, PSM 4 raw — and union-merges the recovered
-    questions (M5 measured 59/100 vs 41/100 single-path, at 2–3x
-    OCR cost); the key is still detected on the layout variant's
-    lines only."""
-    import fitz
-
-    from app.pipeline.extract.service import (
-        extract_from_digital_pdf,
-        extract_from_ocr_blocks,
-    )
+    PSM 3 raw, PSM 4 raw — on the OCR-routed pages only, and
+    union-merges the recovered questions (M5 measured 59/100 vs
+    41/100 single-path, at 2–3x OCR cost); the key is still
+    detected on the layout variant's lines only."""
+    from app.pipeline.extract.service import extract_document
     from app.pipeline.interfaces import PageContext
     from app.pipeline.ocr.digital import DigitalExtractor
     from app.pipeline.ocr.psm import select_psm
+    from app.pipeline.ocr.router import deduplicate_blocks
 
     settings = settings or Settings()
-    doc = fitz.open(stream=pdf_bytes, filetype="pdf")
-    page_count = len(doc)
-    total_chars = sum(len(doc[i].get_text()) for i in range(page_count))
-    doc.close()
-    # Digital when the text layer carries real content (>= 100 chars
-    # total — PPSC-66's scanned pages carry ~11 chars of watermark
-    # text, CA40 carries thousands). Below that the text layer is
-    # furniture, not content: OCR the renders instead.
-    is_digital = total_chars >= 100
+    classifications, total_chars = _classify_pdf_pages(pdf_bytes)
+    page_count = len(classifications)
+    routes = _route_pdf_pages(classifications, settings)
+    # "Digital" now means no page needed OCR at all (every page
+    # digital). A mixed document is not digital — its scanned pages
+    # were OCR'd. A zero-page PDF has no digital pages either.
+    is_digital = page_count > 0 and all(
+        routes[p] == ["digital-pymupdf"] for p in range(1, page_count + 1)
+    )
     if on_stage is not None:
-        on_stage("classify", {"is_digital": is_digital, "page_count": page_count})
+        on_stage(
+            "classify",
+            {
+                "is_digital": is_digital,
+                "page_count": page_count,
+                "page_classifications": {
+                    str(c.page_number): c.classification for c in classifications
+                },
+            },
+        )
+    # Exact digital blocks, collected once, for every page the router
+    # sends to the digital extractor (shared across multi-pass
+    # variants — the digital text does not change per variant).
+    extractor = DigitalExtractor()
+    digital_blocks_by_page: dict[int, list] = {}
+    for page_number in range(1, page_count + 1):
+        if "digital-pymupdf" not in routes[page_number]:
+            continue
+        context = PageContext(
+            document_id=uuid.uuid4(),
+            page_number=page_number,
+            storage_path="",
+            pdf_bytes=pdf_bytes,
+        )
+        try:
+            blocks = extractor.recognize(context)
+        except ValueError:
+            blocks = []
+        digital_blocks_by_page[page_number] = blocks
+    # A1: on a mixed page the text layer is usually furniture — a
+    # watermark repeated on every page. Drop whole digital blocks
+    # made only of lines that repeat on >= 3 pages, so watermark
+    # text cannot become questions. Pure digital pages keep their
+    # blocks untouched (their behaviour is unchanged from before A1).
+    mixed_pages = [
+        p for p in range(1, page_count + 1) if routes[p] == ["digital-pymupdf", "tesseract"]
+    ]
+    furniture_blocks_dropped = 0
+    if mixed_pages:
+        furniture = _repeated_line_texts(digital_blocks_by_page)
+        for page_number in mixed_pages:
+            kept, dropped = _drop_furniture_blocks(
+                digital_blocks_by_page.get(page_number, []), furniture
+            )
+            digital_blocks_by_page[page_number] = kept
+            furniture_blocks_dropped += dropped
+    ocr_pages = [
+        page_number
+        for page_number in range(1, page_count + 1)
+        if "tesseract" in routes[page_number]
+    ]
+    has_digital_pages = bool(digital_blocks_by_page)
     all_blocks: list = []
     lines: list[str] = []
     psm_by_page: dict[int, int] = {}
     quality_by_page: dict[int, dict] = {}
     merge_report: dict | None = None
     psm4_retry_by_page: dict[int, dict] = {}
-    if is_digital:
-        result = extract_from_digital_pdf(pdf_bytes, source_document_id)
+    if not ocr_pages:
+        # Fully digital document: the pre-A1 digital path, unchanged
+        # (same extractor, same pdfplumber table fallback).
+        result = extract_document(
+            _build_page_lines(digital_blocks_by_page, {}, page_count),
+            source_document_id,
+            pdf_bytes=pdf_bytes,
+        )
         if on_stage is not None:
             on_stage(
                 "extract",
                 {"questions": len(result.questions), "pending": len(result.pending)},
             )
-        extractor = DigitalExtractor()
         for page_number in range(1, page_count + 1):
-            context = PageContext(
-                document_id=uuid.uuid4(),
-                page_number=page_number,
-                storage_path="",
-                pdf_bytes=pdf_bytes,
-            )
-            try:
-                blocks = extractor.recognize(context)
-            except ValueError:
-                blocks = []
-            lines.extend(_lines_from_blocks(blocks))
+            page_blocks = digital_blocks_by_page.get(page_number, [])
+            all_blocks.extend(page_blocks)
+            lines.extend(_lines_from_blocks(page_blocks))
     elif multi_pass:
-        # Three OCR variants, same pages: (PSM 3 + layout), (PSM 3
-        # raw), (PSM 4 raw) — the M5 full-run experiment's variants.
-        # M7 optimisation (measured: render is ~8.5s of a 130s
-        # parse, and the old code paid it 3x): each page is rendered
-        # ONCE and the same PNG bytes are OCR'd by all three
-        # variants. Identical OCR input per variant, so the union
-        # is unchanged — only the two wasted renders are gone.
+        # Three OCR variants, OCR-routed pages only: (PSM 3 +
+        # layout), (PSM 3 raw), (PSM 4 raw) — the M5 full-run
+        # experiment's variants. M7 optimisation (measured: render
+        # is ~8.5s of a 130s parse, and the old code paid it 3x):
+        # each page is rendered ONCE and the same PNG bytes are
+        # OCR'd by all three variants. Digital pages contribute the
+        # same exact blocks to every variant, so the union keeps
+        # them once (merge dedup by question key).
         from app.pipeline.layout.analyzer import GeometryLayoutAnalyzer
 
         analyzer = GeometryLayoutAnalyzer()
@@ -620,7 +787,7 @@ def parse_document_bytes(
             ("psm4-raw", 4, False),
         ]
         renders: dict[int, bytes] = {}
-        for page_number in range(1, page_count + 1):
+        for page_number in ocr_pages:
             png_bytes, quality = _render_scanned_page(pdf_bytes, page_number)
             renders[page_number] = png_bytes
             quality_by_page[page_number] = quality.to_dict()
@@ -634,9 +801,8 @@ def parse_document_bytes(
             import time as _time
 
             started = _time.monotonic()
-            v_blocks: list = []
-            v_lines: list[str] = []
-            for page_number in range(1, page_count + 1):
+            v_ocr_blocks: dict[int, list] = {}
+            for page_number in ocr_pages:
                 blocks = _ocr_page(
                     renders[page_number],
                     page_number,
@@ -649,14 +815,28 @@ def parse_document_bytes(
                     on_stage("ocr", {"page": page_number, "psm": psm, "variant": label})
                     if use_layout:
                         on_stage("layout", {"page": page_number, "variant": label})
-                v_blocks.extend(blocks)
-                v_lines.extend(_lines_from_blocks(blocks))
-            variant_results.append(extract_from_ocr_blocks(v_blocks, source_document_id))
+                if page_number in mixed_pages:
+                    # A1 (router rule): OCR blocks duplicating the
+                    # exact digital blocks are dropped — digital wins.
+                    blocks, _dropped = deduplicate_blocks(
+                        digital_blocks_by_page.get(page_number, []), blocks
+                    )
+                v_ocr_blocks[page_number] = blocks
+            variant_pages = _build_page_lines(digital_blocks_by_page, v_ocr_blocks, page_count)
+            variant_results.append(
+                extract_document(
+                    variant_pages,
+                    source_document_id,
+                    pdf_bytes=pdf_bytes if has_digital_pages else None,
+                )
+            )
             variant_labels.append(label)
             variant_seconds[label] = round(_time.monotonic() - started, 1)
             if label == "psm3-layout":
-                all_blocks = v_blocks
-                lines = v_lines
+                all_blocks = [block for page in variant_pages for block in (page.blocks or [])]
+                lines = []
+                for page in variant_pages:
+                    lines.extend(_lines_from_blocks(page.blocks or []))
         result, merge_report = _merge_parse_results(variant_results, labels=variant_labels)
         merge_report["variant_seconds"] = variant_seconds
         if on_stage is not None:
@@ -668,7 +848,8 @@ def parse_document_bytes(
         from app.pipeline.layout.analyzer import GeometryLayoutAnalyzer
 
         analyzer = GeometryLayoutAnalyzer()
-        for page_number in range(1, page_count + 1):
+        ocr_blocks_by_page: dict[int, list] = {}
+        for page_number in ocr_pages:
             png_bytes, quality = _render_scanned_page(pdf_bytes, page_number)
             quality_by_page[page_number] = quality.to_dict()
             psm = psm_override if psm_override is not None else select_psm(quality)
@@ -690,14 +871,27 @@ def parse_document_bytes(
             if on_stage is not None:
                 on_stage("ocr", {"page": page_number, "psm": psm})
                 on_stage("layout", {"page": page_number})
-            all_blocks.extend(blocks)
-            lines.extend(_lines_from_blocks(blocks))
-        result = extract_from_ocr_blocks(all_blocks, source_document_id)
+            if page_number in mixed_pages:
+                # A1 (router rule): OCR blocks duplicating the exact
+                # digital blocks are dropped — the digital text wins.
+                blocks, _dropped = deduplicate_blocks(
+                    digital_blocks_by_page.get(page_number, []), blocks
+                )
+            ocr_blocks_by_page[page_number] = blocks
+        pages = _build_page_lines(digital_blocks_by_page, ocr_blocks_by_page, page_count)
+        result = extract_document(
+            pages,
+            source_document_id,
+            pdf_bytes=pdf_bytes if has_digital_pages else None,
+        )
         if on_stage is not None:
             on_stage(
                 "extract",
                 {"questions": len(result.questions), "pending": len(result.pending)},
             )
+        for page in pages:
+            all_blocks.extend(page.blocks or [])
+            lines.extend(_lines_from_blocks(page.blocks or []))
     matched, report, debug = _finish_parse(
         result,
         lines,
@@ -714,6 +908,9 @@ def parse_document_bytes(
             "psm4_retry_by_page": {str(k): v for k, v in psm4_retry_by_page.items()},
             "multi_pass": multi_pass,
             "merge": merge_report,
+            "page_classifications": {str(c.page_number): c.classification for c in classifications},
+            "page_routes": {str(p): routes[p] for p in range(1, page_count + 1)},
+            "furniture_blocks_dropped": furniture_blocks_dropped,
         },
     )
     return matched, report, debug

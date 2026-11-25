@@ -240,7 +240,9 @@ def parse_key_entries(text: str) -> dict[int, str]:
     return entries
 
 
-def resolve_answer_token(token: str, options: list[str]) -> int | None:
+def resolve_answer_token(
+    token: str, options: list[str], *, prefer_text: bool = False
+) -> int | None:
     """Spec §6.7, tried IN ORDER (the order is load-bearing — e.g.
     bare-number-before-text means ``3`` resolves as an index, not as
     option text ``3``):
@@ -250,7 +252,15 @@ def resolve_answer_token(token: str, options: list[str]) -> int | None:
     (6) exact case-insensitive text match; (7) bare misread letter
     ``8``/``0`` -> B/D (only AFTER the text match, so a real numeric
     option value ``8`` still wins). Returns None when nothing
-    matches."""
+    matches.
+
+    A1: ``prefer_text`` flips (4) and (6) — the exact text match wins
+    over the bare-number index reading. It is for inline answer
+    lines ("Correct Answer Is: <value>"), which state a VALUE, not
+    an index: NOA Maths Q8 prints "Correct Answer Is: 1" and the
+    options contain the text "1" (option C) — the default order
+    resolved it to option A ("1/2"). The trailing-key path keeps
+    the default order (a key's bare number IS an index)."""
     raw = clean_answer_token(token)
     if not raw:
         return None
@@ -284,11 +294,16 @@ def resolve_answer_token(token: str, options: list[str]) -> int | None:
         fallback = _text_to_index(match.group(2), options)
         if fallback is not None:
             return fallback
-    # (4) bare number 1..len(options) -> index-1.
+    # (4) bare number 1..len(options) -> index-1. Computed once; in
+    # the default order it wins before the text match, in prefer_text
+    # order it is the fallback after it (see the docstring).
+    bare_number_index: int | None = None
     if re.fullmatch(r"\d+", text):
         number = int(text)
         if 1 <= number <= len(options):
-            return number - 1
+            bare_number_index = number - 1
+    if not prefer_text and bare_number_index is not None:
+        return bare_number_index
     # (5) single letter A..(A+len).
     if re.fullmatch(r"[A-Ea-e]", text):
         return _letter_to_index(text, options)
@@ -296,6 +311,8 @@ def resolve_answer_token(token: str, options: list[str]) -> int | None:
     matched = _text_to_index(text, options)
     if matched is not None:
         return matched
+    if bare_number_index is not None:
+        return bare_number_index
     # (7) bare misread letter 8/0 -> B/D.
     if text == "8":
         return _letter_to_index("B", options)
