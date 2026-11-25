@@ -565,6 +565,59 @@ Admin only. `{items, total, limit, offset}` — bank rows with
 `?search=` and `?validation_status=` filters; `correct_index`
 comes from the latest answer's resolved label, −1 = unknown.
 
+## Community questions — "Add Questions" (M16)
+
+A student submits a question + four options + the correct
+answer + an explanation + subject + source + the paper it
+appeared in. The submission waits (status `pending`) until an
+admin approves it; only approved questions reach the bank.
+The bank row is created under the one shared community
+document (`is_shared`, `metadata.import_kind =
+"community-questions"`) with a subject assignment, so the
+question joins that subject's pool at once — test builder,
+reading mode and the questions browser all see it. Wherever
+it is shown, the bank row carries `submitted_by` (display
+name snapshot — never an email) and `paper` (e.g. "PPSC
+Tehsildar BS-16 2021"). Table: `community_questions`
+(Alembic 0012; live Supabase file 021). Live apply is by the
+owner in the SQL Editor, as for 019/020 — the engine never
+writes live schema itself.
+
+### `POST /api/v1/community/questions` → 201
+Auth. Body: `{question, options[4], correct_index (0-3),
+explanation?, subject_id, topic_id?, source?, paper?}`.
+Guards in order: field validation (exactly four distinct
+non-empty options, exactly one correct, live subject, topic
+inside that subject) → **429** past 20 submissions a day →
+**409** `duplicate` when the same question was already
+submitted for that subject or is already in that subject's
+bank — the refusal names the paper it already came from
+("This question is already in the General Knowledge bank
+(paper: PPSC Tehsildar BS-16 2021)."). The paper field is
+optional (a contributor may not know it); the duplicate
+check runs on the question text either way. Returns
+`{id, status: "pending", contributor_name, created_at}`.
+
+### `GET /api/v1/community/questions/mine` → 200
+Auth. The caller's own submissions, newest first, with
+review status and the admin's note: `{items,
+total, limit, offset}`.
+
+### `GET /api/v1/admin/community/questions` → 200
+Admin only. The review queue, pending first, with
+`?status=` / `?subject_id=` / `?search=` filters. Each item
+carries its paper, source and contributor name — the paper
+is what lets the admin spot a repetition at review time.
+
+### `PATCH /api/v1/admin/community/questions/{id}/review` → 200
+Admin only. Body: `{approved: bool, note?}`. Approving
+mints the bank rows (question + 4 options + answer
+`manually_verified` + subject assignment) and returns the
+submission with `bank_question_id` set; rejecting records
+the note. Reviewing an already-reviewed submission is
+refused (**409** `already_reviewed`), so an approval can
+never mint the same bank question twice.
+
 ## Dashboard — summary (Phase 2, M4)
 
 ### `GET /api/v1/dashboard/summary` → 200

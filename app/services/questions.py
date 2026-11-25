@@ -209,6 +209,11 @@ def _to_item(
         # underneath the question; test snapshots withhold it
         # until submission (see tests.py _snapshot_dict).
         "explanation": row.explanation,
+        # M16: community attribution (None for parsed/imported
+        # rows) — reading mode / the questions browser show
+        # "Submitted by ..." and "Paper: ..." when present.
+        "submitted_by": row.contributor_name,
+        "paper": row.paper,
         "confidence": answer.resolution_score if answer else None,
         "verified": bool(
             answer and answer.status in ("verified_explicit_key", "manually_verified")

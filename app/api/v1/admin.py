@@ -21,8 +21,14 @@ from app.schemas.admin import (
     DocumentSharingRequest,
     DocumentSharingResponse,
 )
+from app.schemas.community import (
+    CommunityQuestionItem,
+    CommunityQuestionListResponse,
+    CommunityReviewRequest,
+)
 from app.security.dependencies import require_admin
 from app.services import admin as admin_service
+from app.services import community as community_service
 
 router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
 
@@ -126,5 +132,56 @@ async def get_questions(
                 search=search,
                 limit=limit,
                 offset=offset,
+            )
+        )
+
+
+@router.get("/community/questions", response_model=CommunityQuestionListResponse)
+async def get_community_questions(
+    status: str | None = Query(None, description="Filter: pending | approved | rejected."),
+    subject_id: str | None = Query(None, description="Filter by subject id."),
+    search: str | None = Query(None, description="Substring match on the question text."),
+    limit: int = Query(DEFAULT_LIMIT, ge=1, le=MAX_LIST_LIMIT),
+    offset: int = Query(0, ge=0),
+    user: dict = Depends(require_admin),
+) -> CommunityQuestionListResponse:
+    """M16 review queue, pending first. Each item carries its
+    paper, source and contributor name — the paper is what lets
+    the admin spot a repetition at review time."""
+    with _session_or_503() as session:
+        return CommunityQuestionListResponse(
+            **community_service.list_for_admin(
+                session,
+                status=status,
+                subject_id=subject_id,
+                search=search,
+                limit=limit,
+                offset=offset,
+            )
+        )
+
+
+@router.patch(
+    "/community/questions/{submission_id}/review",
+    response_model=CommunityQuestionItem,
+)
+async def review_community_question(
+    submission_id: str,
+    payload: CommunityReviewRequest,
+    user: dict = Depends(require_admin),
+) -> CommunityQuestionItem:
+    """M16 approve / reject. Approving mints the bank rows
+    (question + options + answer + subject assignment) under
+    the shared community document, so the question joins that
+    subject's pool at once; rejecting records the reason.
+    Reviewing an already-reviewed submission is refused."""
+    with _session_or_503() as session:
+        return CommunityQuestionItem(
+            **community_service.review(
+                session,
+                user,
+                submission_id,
+                approved=payload.approved,
+                note=payload.note,
             )
         )

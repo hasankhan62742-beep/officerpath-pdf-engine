@@ -20,6 +20,7 @@ from app.api import metrics as metrics_api
 from app.api.v1 import admin as admin_routes
 from app.api.v1 import async_jobs as async_jobs_routes
 from app.api.v1 import collections as collections_routes
+from app.api.v1 import community as community_routes
 from app.api.v1 import dashboard as dashboard_routes
 from app.api.v1 import documents as documents_routes
 from app.api.v1 import me as me_routes
@@ -191,6 +192,7 @@ app.include_router(me_routes.router)
 app.include_router(documents_routes.router)
 app.include_router(dashboard_routes.router)
 app.include_router(questions_routes.router)
+app.include_router(community_routes.router)
 app.include_router(tests_routes.router)
 app.include_router(results_routes.router)
 app.include_router(collections_routes.router)

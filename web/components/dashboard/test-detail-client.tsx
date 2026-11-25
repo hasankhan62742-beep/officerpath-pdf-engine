@@ -53,6 +53,11 @@ function snapshotToQuestionItem(snap: TestSnapshot): QuestionItem {
         : "",
     answer_source: snap.answer_source ?? "",
     explanation: snap.explanation ?? null,
+    // Snapshots freeze the question at test creation and carry
+    // no community attribution (M16 shows it in reading mode /
+    // the questions browser, not in test snapshots).
+    submitted_by: null,
+    paper: null,
     confidence: null,
     verified: false,
     inferred: false,

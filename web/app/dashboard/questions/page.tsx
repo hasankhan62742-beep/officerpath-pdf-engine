@@ -434,6 +434,13 @@ export default function QuestionsPage() {
                         {q.number ? `Q${q.number} — ` : ""}
                         {truncateMathText(q.text, 120)}
                       </Link>
+                      {q.submitted_by || q.paper ? (
+                        <p className="mt-1 text-xs text-slate-500">
+                          {q.submitted_by ? `Submitted by ${q.submitted_by}` : ""}
+                          {q.submitted_by && q.paper ? " · " : ""}
+                          {q.paper ? `Paper: ${q.paper}` : ""}
+                        </p>
+                      ) : null}
                       <div className="mt-1">
                         <QuestionBadges item={q} />
                       </div>
@@ -716,6 +723,13 @@ function ReadingCard({ q, position }: { q: QuestionItem; position: number }) {
           No explanation was stored for this question.
         </p>
       )}
+      {q.submitted_by || q.paper ? (
+        <p className="mt-3 text-xs text-slate-500">
+          {q.submitted_by ? `Submitted by ${q.submitted_by}` : ""}
+          {q.submitted_by && q.paper ? " · " : ""}
+          {q.paper ? `Paper: ${q.paper}` : ""}
+        </p>
+      ) : null}
     </article>
   );
 }

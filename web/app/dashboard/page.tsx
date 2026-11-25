@@ -23,6 +23,7 @@ import {
   getSessionToken,
   type DashboardDocument,
 } from "@/lib/api";
+import { DASHBOARD_ORGS } from "@/lib/site";
 import { formatDateTime } from "@/lib/utils";
 
 function activeJobCount(jobsByStatus: Record<string, number>): number {
@@ -130,6 +131,14 @@ export default function DashboardPage() {
         />
         <Button href="/dashboard/upload">Upload a document</Button>
       </div>
+
+      {/* M16 — exam organisations, bold, wrapping on mobile. */}
+      <p
+        aria-label="Exams covered"
+        className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-900 sm:text-base"
+      >
+        {DASHBOARD_ORGS.join(" · ")}
+      </p>
 
       {active > 0 ? (
         <Alert tone="info" title={`${active} job${active === 1 ? "" : "s"} still processing`}>

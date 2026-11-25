@@ -213,6 +213,13 @@ export function QuestionDetailClient({ id }: { id: string }) {
         <p className="mt-3 text-base leading-relaxed text-slate-900" dir="auto">
           {formatMathText(item.text)}
         </p>
+        {item.submitted_by || item.paper ? (
+          <p className="mt-2 text-sm text-slate-500">
+            {item.submitted_by ? `Submitted by ${item.submitted_by}` : ""}
+            {item.submitted_by && item.paper ? " · " : ""}
+            {item.paper ? `Paper: ${item.paper}` : ""}
+          </p>
+        ) : null}
         <QuestionOptions item={item} />
         <AnswerLine item={item} />
       </Card>

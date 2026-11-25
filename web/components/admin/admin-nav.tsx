@@ -13,6 +13,7 @@ const LINKS = [
   { href: "/admin/documents", label: "Documents", exact: false },
   { href: "/admin/jobs", label: "Jobs", exact: false },
   { href: "/admin/errors", label: "Errors", exact: false },
+  { href: "/admin/community", label: "Community", exact: false },
   { href: "/admin/questions", label: "Questions", exact: false },
 ];
 

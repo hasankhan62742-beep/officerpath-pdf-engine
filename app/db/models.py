@@ -435,6 +435,26 @@ class ExtractedQuestion(Base):
         ForeignKey("extracted_questions.id", ondelete="SET NULL"),
         nullable=True,
     )
+    # M16 (community questions): who contributed this bank row.
+    # Set only for questions approved from a community
+    # submission; NULL for every parsed/imported question. The
+    # display name snapshot — never an email — is what the UI
+    # shows as "Submitted by ...". The staging row stays the
+    # audit trail (contributor id, source, review).
+    contributor_name: Mapped[str | None] = mapped_column(Text, nullable=True)
+    community_question_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid,
+        ForeignKey("community_questions.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    # M16: the paper the question appeared in, as written by the
+    # contributor (e.g. "PPSC Tehsildar BS-16 2021"). Copied
+    # from the submission on approval; NULL for parsed/imported
+    # questions, which never had one. Shown as "Paper: ..." where
+    # the question is displayed, and returned in the duplicate
+    # refusal so the contributor learns which paper already has
+    # the question.
+    paper: Mapped[str | None] = mapped_column(Text, nullable=True)
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = _created_at()
     updated_at: Mapped[datetime] = _updated_at()
@@ -1034,4 +1054,81 @@ class Notification(Base):
         ),
         Index("ix_notifications_user_created", "user_id", "created_at"),
         Index("ix_notifications_user_unread", "user_id", "is_read", "created_at"),
+    )
+
+
+# ---------------------------------------------------------------------------
+# Tables created by Alembic 0012 (M16 — community questions)
+# ---------------------------------------------------------------------------
+
+
+class CommunityQuestion(Base):
+    """One student-submitted question (M16, "Add Questions").
+
+    A submission is a staging row, NOT a bank row: it enters
+    the question bank only when an admin approves it, and the
+    approval creates the real ExtractedQuestion (+ options,
+    answer, subject assignment) under the shared community
+    document. Until then it is invisible to every pool —
+    students only ever see approved questions.
+
+    ``contributor_name`` is the display-name snapshot taken at
+    submit time (profile full name, else the email local part —
+    never a full email); it is copied onto the bank row on
+    approval so reading mode can show "Submitted by ...".
+    ``fingerprint`` is the SHA-256 of the normalized question
+    text (lowercase, collapsed whitespace) and is the
+    duplicate key within one subject — the same question
+    submitted twice, or already in the bank for that subject,
+    is refused.
+    """
+
+    __tablename__ = "community_questions"
+
+    id: Mapped[uuid.UUID] = _uuid_pk()
+    contributor_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
+    contributor_name: Mapped[str] = mapped_column(Text, nullable=False)
+    question_text: Mapped[str] = mapped_column(Text, nullable=False)
+    options: Mapped[list[str]] = mapped_column(JSONVariant, nullable=False)
+    correct_index: Mapped[int] = mapped_column(Integer, nullable=False)
+    explanation: Mapped[str | None] = mapped_column(Text, nullable=True)
+    subject_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid, ForeignKey("subjects.id", ondelete="SET NULL"), nullable=True
+    )
+    topic_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid, ForeignKey("topics.id", ondelete="SET NULL"), nullable=True
+    )
+    source: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # M16 paper field: the paper the question appeared in, as
+    # written by the contributor (e.g. "PPSC Tehsildar BS-16
+    # 2021"). Free text, exact as possible; nullable — a
+    # contributor may not know it, and the duplicate check runs
+    # on the question text either way.
+    paper: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # pending | approved | rejected
+    status: Mapped[str] = mapped_column(String(16), nullable=False, default="pending")
+    review_note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    reviewed_by: Mapped[uuid.UUID | None] = mapped_column(Uuid, nullable=True)
+    reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    bank_question_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid,
+        ForeignKey("extracted_questions.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    fingerprint: Mapped[str] = mapped_column(String(64), nullable=False)
+    created_at: Mapped[datetime] = _created_at()
+    updated_at: Mapped[datetime] = _updated_at()
+
+    __table_args__ = (
+        CheckConstraint(
+            "status IN ('pending', 'approved', 'rejected')",
+            name="ck_community_questions_status",
+        ),
+        CheckConstraint(
+            "correct_index >= 0 AND correct_index <= 3",
+            name="ck_community_questions_correct_index",
+        ),
+        Index("ix_community_questions_contributor_created", "contributor_id", "created_at"),
+        Index("ix_community_questions_status_created", "status", "created_at"),
+        Index("ix_community_questions_fingerprint", "fingerprint"),
     )

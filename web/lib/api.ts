@@ -381,6 +381,12 @@ export interface QuestionItem {
   // gave none — never invented. Reading mode shows it under
   // the question.
   explanation: string | null;
+  // M16: community attribution, copied onto the bank row on
+  // approval. Null for every parsed/imported question.
+  // Reading mode shows "Submitted by ..." and "Paper: ..."
+  // when present.
+  submitted_by: string | null;
+  paper: string | null;
   confidence: number | null;
   verified: boolean;
   inferred: boolean;
@@ -1404,5 +1410,104 @@ export async function listAdminQuestions(
   return request<AdminListResponse<AdminQuestionItem>>(
     `/api/v1/admin/questions?${params}`,
     accessToken,
+  );
+}
+
+// M16 — community-contributed questions ("Add Questions").
+// A submission waits (pending) until an admin approves it;
+// only approved questions reach the bank. contributor_name is
+// a display name only — a full email address is never exposed.
+
+export interface CommunitySubjectRef {
+  subject_id: string | null;
+  subject_name: string | null;
+  subject_slug: string | null;
+  topic_id: string | null;
+  topic_name: string | null;
+}
+
+export interface CommunityQuestionItem {
+  id: string;
+  question: string;
+  options: string[];
+  correct_index: number;
+  correct_letter: string;
+  explanation: string | null;
+  subject: CommunitySubjectRef;
+  source: string | null;
+  paper: string | null;
+  status: "pending" | "approved" | "rejected";
+  review_note: string | null;
+  contributor_name: string;
+  bank_question_id: string | null;
+  created_at: string | null;
+}
+
+export interface CommunityQuestionList {
+  items: CommunityQuestionItem[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export interface CommunityQuestionCreate {
+  question: string;
+  options: string[];
+  correct_index: number;
+  explanation?: string | null;
+  subject_id: string;
+  topic_id?: string | null;
+  source?: string | null;
+  paper?: string | null;
+}
+
+export async function submitCommunityQuestion(
+  accessToken: string,
+  payload: CommunityQuestionCreate,
+): Promise<{ id: string; status: string; contributor_name: string; created_at: string | null }> {
+  return request<{ id: string; status: string; contributor_name: string; created_at: string | null }>(
+    "/api/v1/community/questions",
+    accessToken,
+    { method: "POST", body: JSON.stringify(payload) },
+  );
+}
+
+export async function listMyCommunityQuestions(
+  accessToken: string,
+  opts: { limit?: number; offset?: number },
+): Promise<CommunityQuestionList> {
+  const params = new URLSearchParams();
+  params.set("limit", String(opts.limit ?? 20));
+  params.set("offset", String(opts.offset ?? 0));
+  return request<CommunityQuestionList>(
+    `/api/v1/community/questions/mine?${params}`,
+    accessToken,
+  );
+}
+
+export async function listAdminCommunityQuestions(
+  accessToken: string,
+  opts: { status?: string; search?: string; limit?: number; offset?: number },
+): Promise<CommunityQuestionList> {
+  const params = new URLSearchParams();
+  if (opts.status) params.set("status", opts.status);
+  if (opts.search) params.set("search", opts.search);
+  params.set("limit", String(opts.limit ?? 20));
+  params.set("offset", String(opts.offset ?? 0));
+  return request<CommunityQuestionList>(
+    `/api/v1/admin/community/questions?${params}`,
+    accessToken,
+  );
+}
+
+export async function reviewCommunityQuestion(
+  accessToken: string,
+  submissionId: string,
+  payload: { approved: boolean; note?: string | null },
+): Promise<CommunityQuestionItem> {
+  return request<CommunityQuestionItem>(
+    `/api/v1/admin/community/questions/${submissionId}/review`,
+    accessToken,
+    { method: "PATCH", body: JSON.stringify(payload) },
   );
 }

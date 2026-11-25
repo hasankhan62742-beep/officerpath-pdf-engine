@@ -25,6 +25,34 @@ export const EXAMS = [
   { short: "NTS", name: "National Testing Service" },
 ] as const;
 
+/**
+ * M16 — the exam organisations named on the student dashboard
+ * (bold strip under the heading). One place, in the same order
+ * as the bank titles list ("PPSC, FPSC, SPSC, KPSC, BPSC,
+ * AJKPSC, CSS, PMS, NTS, FIA, ASF, IB, MOD, ANF, FBR"). UI
+ * only — no relation to the bank documents in the DB. Kept
+ * separate from EXAMS (8 entries, used by the homepage /
+ * register / footer) so the dashboard strip can carry the full
+ * 15 without changing those pages.
+ */
+export const DASHBOARD_ORGS = [
+  "PPSC",
+  "FPSC",
+  "SPSC",
+  "KPSC",
+  "BPSC",
+  "AJKPSC",
+  "CSS",
+  "PMS",
+  "NTS",
+  "FIA",
+  "ASF",
+  "IB",
+  "MOD",
+  "ANF",
+  "FBR",
+] as const;
+
 export const SUBJECTS = [
   "General Knowledge",
   "Pakistan Affairs",

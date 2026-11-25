@@ -51,6 +51,11 @@ class QuestionItem(BaseModel):
     # Stored verbatim explanation (M10); None when the source
     # gave none — never invented.
     explanation: str | None = None
+    # M16: community attribution, copied onto the bank row on
+    # approval. None for every parsed/imported question. The UI
+    # shows "Submitted by ..." and "Paper: ..." when present.
+    submitted_by: str | None = None
+    paper: str | None = None
     confidence: float | None
     verified: bool
     inferred: bool

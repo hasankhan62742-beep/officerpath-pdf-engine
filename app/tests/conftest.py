@@ -22,6 +22,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 import app.api.v1.async_jobs as async_jobs_api
+import app.api.v1.community as community_api
 import app.api.v1.dashboard as dashboard_api
 import app.api.v1.documents as documents_api
 import app.api.v1.me as me_api
@@ -126,6 +127,7 @@ def engine_db(tmp_path, monkeypatch):
     monkeypatch.setattr(routes_api, "get_session", lambda: factory())
     monkeypatch.setattr(me_api, "get_session", lambda: factory())
     monkeypatch.setattr(async_jobs_api, "get_session", lambda: factory())
+    monkeypatch.setattr(community_api, "get_session", lambda: factory())
     monkeypatch.setattr(review_api, "get_session", lambda: factory())
     monkeypatch.setattr(documents_api, "get_session", lambda: factory())
     monkeypatch.setattr(dashboard_api, "get_session", lambda: factory())
