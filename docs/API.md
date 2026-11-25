@@ -161,6 +161,63 @@ response). Local bytes are deleted best-effort; bucket bytes
 are never touched. Returns `{document_id, deleted: true,
 job_cancelled}`.
 
+## Page inventory + completeness + per-page retry (Phase A, A3)
+
+All owner-only (other user: **404**). The worker records one
+inventory row per page (`document_pages`) after every parse:
+status `processed` / `no_questions` / `failed` /
+`low_confidence` (mean OCR confidence below the system's own
+PSM-4 retry bar, 85), the question count found on that page,
+and the failure reason when failed. The sync parse path
+records inventory too.
+
+### `GET /api/v1/documents/{document_id}/pages` → 200
+Auth. Returns `{document_id, page_count, pages: [{page_number,
+classification, extraction_status, question_count,
+error_message}], expected_question_count,
+extracted_question_count, pending_question_count,
+missing_question_count, missing_numbers,
+missing_numbers_truncated, zero_question_pages, failed_pages,
+low_confidence_pages}`. A page's `question_count` covers the
+questions AND the pending items found on that page, so the
+per-page counts sum to `extracted + pending`; the headline
+`extracted_question_count` keeps the engine's standing
+questions/pending split.
+`missing_numbers` is parsed from the latest report's
+`number-gap` validation message (at most 200 numbers);
+`missing_question_count` is null until an expected count is
+set. Pages without a stored row yet (an old document parsed
+before A3) are listed with `extraction_status: null`.
+
+### `PATCH /api/v1/documents/{document_id}` → 200
+Auth. Body `{expected_question_count: <int 1–100000> | null}`.
+Stores the expected count in the document's `metadata`
+(`expected_question_count`); `null` clears it. Returns
+`{document_id, expected_question_count,
+missing_question_count}`. Out-of-range values: **422**.
+This is the same endpoint M4 used for delete; the PATCH
+method is new in A3.
+
+### `POST /api/v1/documents/{document_id}/pages/{page_number}/retry` → 202
+Auth. Queues a page-retry job (same per-minute retry rate
+limit as a whole-job retry). The worker re-runs the full
+parse — answer-key detection and promotion are document-level,
+so a page-only re-run would silently downgrade trailing-key
+answers to UNKNOWN — then replaces ONLY that page's stored
+questions. Other pages keep their row ids, timestamps, and
+corrections; a fresh question that duplicates a question
+stored on another page is skipped (counted, never inserted
+twice); repeats inside the retried page itself are stored
+as-is, exactly like the original parse stored them. Returns
+`{document_id, page_number, job_id, status: "queued",
+existing_job}` — a second identical request while a retry is
+queued/processing returns the existing job instead of a
+duplicate. Errors: page out of range **422**; document parsed
+inline with no stored bytes **409**
+(`page_retry_no_stored_bytes`); a question on the page has a
+manual correction **409** (`page_has_corrections`); the page
+retry rate limit is hit **429**.
+
 ## Question bank + extraction results (Phase 2, M5)
 
 All owner-only (other user: **404**), all read the engine DB

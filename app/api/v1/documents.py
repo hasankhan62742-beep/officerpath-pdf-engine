@@ -26,9 +26,17 @@ from app.schemas.dashboard import (
     JobDetailResponse,
     JobStageItem,
 )
-from app.schemas.documents import DocumentResponse
+from app.schemas.documents import (
+    DocumentResponse,
+    ExpectedCountRequest,
+    ExpectedCountResponse,
+    PageInventoryResponse,
+    PageRetryResponse,
+)
 from app.security.dependencies import get_current_user
+from app.security.rate_limit import rate_limiter
 from app.services import documents as document_service
+from app.services import pages as page_service
 from app.storage.base import StorageBackend
 from app.storage.local import LocalDiskStorage
 
@@ -117,6 +125,71 @@ async def get_document(
         job=JobDetailResponse(**job) if job is not None else None,
         stages=[JobStageItem(**s) for s in detail["stages"]],
     )
+
+
+@router.get("/{document_id}/pages", response_model=PageInventoryResponse)
+async def get_document_pages(
+    document_id: str,
+    user: dict = Depends(get_current_user),
+) -> PageInventoryResponse:
+    """A3 page inventory: per-page status/counts/errors plus the
+    completeness comparison (expected vs extracted, missing
+    numbers, zero / low-confidence / failed pages). 404 for
+    unknown, deleted, or another user's documents."""
+    with _repositories() as (session, documents, jobs):
+        document = page_service.require_document_for_user(session, document_id, user["id"])
+        return PageInventoryResponse(
+            **page_service.get_page_inventory(session, document_id=document.id)
+        )
+
+
+@router.patch("/{document_id}", response_model=ExpectedCountResponse)
+async def set_document_expected_count(
+    document_id: str,
+    body: ExpectedCountRequest,
+    user: dict = Depends(get_current_user),
+) -> ExpectedCountResponse:
+    """A3: store (or clear, with null) the expected question
+    count for a document — the owner's statement of how many
+    questions the paper holds. Stored in Document.metadata;
+    no migration, no re-parse."""
+    with _repositories() as (session, documents, jobs):
+        document = page_service.require_document_for_user(session, document_id, user["id"])
+        return ExpectedCountResponse(
+            **page_service.set_expected_question_count(
+                session, document=document, expected_count=body.expected_question_count
+            )
+        )
+
+
+@router.post(
+    "/{document_id}/pages/{page_number}/retry",
+    response_model=PageRetryResponse,
+    status_code=202,
+)
+async def retry_document_page(
+    document_id: str,
+    page_number: int,
+    user: dict = Depends(get_current_user),
+) -> PageRetryResponse:
+    """A3: queue a background job that reprocesses ONE page.
+    The worker re-runs the full parse (answer-key detection is
+    document-level) and replaces only that page's stored rows —
+    every other page's rows keep their ids and corrections. A
+    page with manually corrected questions is refused (409);
+    a page outside the document is 422."""
+    rate_limiter.check(
+        f"retry:{user['id']}",
+        settings.rate_limit_retry_per_minute,
+        settings.rate_limit_window_seconds,
+    )
+    with _repositories() as (session, documents, jobs):
+        document = page_service.require_document_for_user(session, document_id, user["id"])
+        return PageRetryResponse(
+            **page_service.create_page_retry_job(
+                session, document=document, user_id=user["id"], page_number=page_number
+            )
+        )
 
 
 @router.delete("/{document_id}", response_model=DocumentDeleteResponse)

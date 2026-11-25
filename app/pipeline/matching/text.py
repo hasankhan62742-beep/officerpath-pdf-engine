@@ -125,6 +125,9 @@ def parse_text_bytes(
             "page_count": 1,
             "file_type": file_type,
             "source": "text",
+            # A3 (page inventory): the virtual single page is
+            # exact text, never OCR.
+            "page_classifications": {"1": "digital"},
         },
     )
     return matched, report, debug

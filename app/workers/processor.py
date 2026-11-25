@@ -281,27 +281,65 @@ def process_job(
                 multi_pass=multi_pass,
                 on_stage=on_stage,
             )
-        persist_matched_document(
-            session,
-            document_id=document.id,
-            job_id=job.id,
-            matched=matched,
-        )
+        # A3 (page inventory + per-page retry): a page-retry job
+        # re-runs the full parse (answer-key detection is
+        # document-level) and then replaces ONLY that page's
+        # stored rows — apply_page_retry, not the whole-document
+        # persist, so every other page's rows keep their ids and
+        # corrections. A normal job persists the whole document
+        # and then records the page inventory.
+        page_retry = (job.result_summary or {}).get("page_retry")
+        if page_retry is not None:
+            from app.services.pages import apply_page_retry, count_stored_questions
+
+            retry_outcome = apply_page_retry(
+                session,
+                document_id=document.id,
+                job_id=job.id,
+                page_number=int(page_retry),
+                matched=matched,
+                debug=debug,
+            )
+            totals = count_stored_questions(session, document_id=document.id)
+        else:
+            persist_matched_document(
+                session,
+                document_id=document.id,
+                job_id=job.id,
+                matched=matched,
+            )
+            from app.services.pages import record_page_inventory
+
+            record_page_inventory(
+                session,
+                document_id=document.id,
+                job_id=job.id,
+                matched=matched,
+                debug=debug,
+            )
+            totals = {
+                "questions": matched.counts["questions"],
+                "answered": matched.answered,
+                "pending": len(matched.pending),
+            }
+            retry_outcome = None
         total_seconds = round(time.monotonic() - started, 1)
         # ADR-011: terminal job status is "done" (the live 015 check
         # constraint rejects "completed").
         job.status = "done"
         job.completed_at = _utcnow()
         job.result_summary = {
-            "questions": matched.counts["questions"],
-            "answered": matched.answered,
-            "pending": len(matched.pending),
+            **(job.result_summary or {}),
+            "questions": totals["questions"],
+            "answered": totals["answered"],
+            "pending": totals["pending"],
             "qa_pairs": len(matched.qa_pairs),
             "seconds": total_seconds,
             "stages": dict(stage_totals),
             "is_digital": debug["is_digital"],
             "page_count": debug["page_count"],
             "multi_pass": multi_pass,
+            **({"page_retry_outcome": retry_outcome} if retry_outcome is not None else {}),
         }
         recorder.record(
             document_id=document.id,
@@ -318,39 +356,59 @@ def process_job(
         # pending (unknown answers); a clean parse writes one row.
         from app.services.notifications import create_notification
 
-        create_notification(
-            session,
-            job.user_id,
-            type="upload_done",
-            title=f"Processing complete: {document.title}",
-            body=(
-                f"Your document {document.title} finished processing — "
-                f"{matched.counts['questions']} questions, "
-                f"{matched.answered} with answers."
-            ),
-            link=f"/dashboard/documents/{document.id}",
-        )
-        if matched.pending:
+        if retry_outcome is not None:
+            # A3: one notification for the page retry — no
+            # review_needed here, because matched.pending is the
+            # whole document's list and would duplicate the
+            # original job's notification.
             create_notification(
                 session,
                 job.user_id,
-                type="review_needed",
-                title=f"Review needed: {document.title}",
+                type="upload_done",
+                title=f"Page {page_retry} reprocessed: {document.title}",
                 body=(
-                    f"{len(matched.pending)} question(s) in {document.title} "
-                    "could not be answered from the paper — review them "
-                    "in the question bank."
+                    f"Page {page_retry} of {document.title} was reprocessed — "
+                    f"{retry_outcome['inserted']} question(s) stored "
+                    f"({retry_outcome['replaced']} replaced, "
+                    f"{retry_outcome['skipped_duplicates']} duplicate(s) skipped)."
                 ),
-                link=f"/dashboard/documents/{document.id}/questions",
+                link=f"/dashboard/documents/{document.id}",
             )
+        else:
+            create_notification(
+                session,
+                job.user_id,
+                type="upload_done",
+                title=f"Processing complete: {document.title}",
+                body=(
+                    f"Your document {document.title} finished processing — "
+                    f"{matched.counts['questions']} questions, "
+                    f"{matched.answered} with answers."
+                ),
+                link=f"/dashboard/documents/{document.id}",
+            )
+            if matched.pending:
+                create_notification(
+                    session,
+                    job.user_id,
+                    type="review_needed",
+                    title=f"Review needed: {document.title}",
+                    body=(
+                        f"{len(matched.pending)} question(s) in {document.title} "
+                        "could not be answered from the paper — review them "
+                        "in the question bank."
+                    ),
+                    link=f"/dashboard/documents/{document.id}/questions",
+                )
         session.commit()
         summary.update(
             {
                 "status": "done",
                 "seconds": total_seconds,
-                "questions": matched.counts["questions"],
-                "answered": matched.answered,
+                "questions": totals["questions"],
+                "answered": totals["answered"],
                 "multi_pass": multi_pass,
+                **({"page_retry_outcome": retry_outcome} if retry_outcome is not None else {}),
             }
         )
         log.info(
@@ -359,8 +417,8 @@ def process_job(
                 "fields": {
                     "job_id": str(job.id),
                     "seconds": total_seconds,
-                    "questions": matched.counts["questions"],
-                    "answered": matched.answered,
+                    "questions": totals["questions"],
+                    "answered": totals["answered"],
                 }
             },
         )

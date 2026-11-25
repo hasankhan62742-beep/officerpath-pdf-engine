@@ -315,6 +315,26 @@ class DocumentPage(Base):
     # M3: layout analysis result for the page (columns, regions,
     # tables, figures, continuation flags) — Alembic 0002.
     layout_applied: Mapped[dict[str, Any] | None] = mapped_column(JSONVariant, nullable=True)
+    # A3 (page inventory): what the EXTRACTION found on this page,
+    # recorded by the worker after a parse (see
+    # app/services/pages.py). NULL means the page was never
+    # inventoried (parsed before A3, or never parsed).
+    # extraction_status: processed (questions found) |
+    # no_questions (parsed, nothing found) | failed (the pipeline
+    # itself failed for this page — OCR returned no text from a
+    # page with ink, digital extraction errored, or the page was
+    # classified unreadable with no blocks) | low_confidence
+    # (parsed, but the kept OCR mean word confidence stayed below
+    # the system's own PSM-4 retry bar, 85 — see
+    # app/pipeline/ocr/psm.py).
+    extraction_status: Mapped[str | None] = mapped_column(String(24), nullable=True)
+    # Stored question rows (MCQs + pending items) attributed to
+    # this page. Q&A pairs are not stored as rows, so they are not
+    # counted here (documented in the inventory response).
+    question_count: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    # Short reason when extraction_status == "failed" (a code /
+    # page number only — never file contents or OCR text).
+    error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = _created_at()
 
     document: Mapped[Document] = relationship(back_populates="pages")

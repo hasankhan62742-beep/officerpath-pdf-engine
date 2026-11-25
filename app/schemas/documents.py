@@ -130,6 +130,73 @@ class ErrorResponse(BaseModel):
     error: ErrorDetail
 
 
+class PageInventoryItem(BaseModel):
+    """One page of a document's A3 inventory: classification +
+    what extraction found on it. ``extraction_status`` is None
+    when the page was never inventoried (parsed before A3)."""
+
+    page_number: int
+    classification: str
+    extraction_status: str | None = None
+    question_count: int = 0
+    answered_count: int = 0
+    unknown_count: int = 0
+    pending_count: int = 0
+    error_message: str | None = None
+
+
+class PageInventoryResponse(BaseModel):
+    """GET /documents/{id}/pages: the page inventory plus the
+    completeness comparison. ``missing_question_count`` is None
+    until the owner sets an expected count; ``missing_numbers``
+    comes from the report's number-gap validation (capped at 20
+    by the validator — see missing_numbers_truncated)."""
+
+    document_id: str
+    page_count: int
+    expected_question_count: int | None = None
+    extracted_question_count: int
+    # Pending items are questions the parse found but could not
+    # answer; they are stored as rows and counted in each page's
+    # question_count, so they are reported separately here rather
+    # than folded into extracted_question_count (the engine's
+    # standing questions/pending split).
+    pending_question_count: int
+    missing_question_count: int | None = None
+    missing_numbers: list[int] = []
+    missing_numbers_truncated: bool = False
+    zero_question_pages: list[int] = []
+    low_confidence_pages: list[int] = []
+    failed_pages: list[int] = []
+    pages: list[PageInventoryItem] = []
+
+
+class ExpectedCountRequest(BaseModel):
+    """PATCH /documents/{id}: the owner's statement of how many
+    questions the paper holds (None clears it). Never inferred."""
+
+    expected_question_count: int | None = Field(default=None, ge=0, le=100_000)
+
+
+class ExpectedCountResponse(BaseModel):
+    document_id: str
+    expected_question_count: int | None = None
+    extracted_question_count: int
+    missing_question_count: int | None = None
+
+
+class PageRetryResponse(BaseModel):
+    """POST /documents/{id}/pages/{page}/retry: the queued
+    background job. ``existing_job`` is True when an identical
+    retry was already queued/processing for that page."""
+
+    job_id: str
+    document_id: str
+    page_number: int
+    status: str
+    existing_job: bool = False
+
+
 class HealthResponse(BaseModel):
     status: str  # ok | degraded
     service: str

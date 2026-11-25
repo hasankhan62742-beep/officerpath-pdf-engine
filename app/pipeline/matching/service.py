@@ -704,6 +704,15 @@ def parse_document_bytes(
                 },
             },
         )
+    # A3 (page inventory): per-page OCR/extraction failures are
+    # recorded here (page -> short reason, no file contents) so
+    # the worker can store a real page inventory instead of
+    # guessing from question counts. A page that yields no blocks
+    # at all is only a failure when it had something to read —
+    # the ink heuristic below separates a failed OCR page from a
+    # genuinely blank one.
+    ocr_errors_by_page: dict[int, str] = {}
+    blocks_by_page: dict[int, int] = {}
     # Exact digital blocks, collected once, for every page the router
     # sends to the digital extractor (shared across multi-pass
     # variants — the digital text does not change per variant).
@@ -722,6 +731,7 @@ def parse_document_bytes(
             blocks = extractor.recognize(context)
         except ValueError:
             blocks = []
+            ocr_errors_by_page[page_number] = "digital_extraction_failed"
         digital_blocks_by_page[page_number] = blocks
     # A1: on a mixed page the text layer is usually furniture — a
     # watermark repeated on every page. Drop whole digital blocks
@@ -755,8 +765,10 @@ def parse_document_bytes(
     if not ocr_pages:
         # Fully digital document: the pre-A1 digital path, unchanged
         # (same extractor, same pdfplumber table fallback).
+        digital_pages = _build_page_lines(digital_blocks_by_page, {}, page_count)
+        blocks_by_page = {page.page_number: len(page.blocks or []) for page in digital_pages}
         result = extract_document(
-            _build_page_lines(digital_blocks_by_page, {}, page_count),
+            digital_pages,
             source_document_id,
             pdf_bytes=pdf_bytes,
         )
@@ -837,6 +849,18 @@ def parse_document_bytes(
                 lines = []
                 for page in variant_pages:
                     lines.extend(_lines_from_blocks(page.blocks or []))
+                # A3: block counts come from the layout variant
+                # (the representative one); an OCR page with ink
+                # but zero blocks in every variant is a failed
+                # page, not a blank one.
+                blocks_by_page = {
+                    page.page_number: len(page.blocks or []) for page in variant_pages
+                }
+                for page_number in ocr_pages:
+                    if blocks_by_page.get(page_number, 0) == 0:
+                        ink = (quality_by_page.get(page_number) or {}).get("ink_coverage")
+                        if ink is not None and ink > 0.01:
+                            ocr_errors_by_page[page_number] = "ocr_returned_no_text"
         result, merge_report = _merge_parse_results(variant_results, labels=variant_labels)
         merge_report["variant_seconds"] = variant_seconds
         if on_stage is not None:
@@ -878,7 +902,17 @@ def parse_document_bytes(
                     digital_blocks_by_page.get(page_number, []), blocks
                 )
             ocr_blocks_by_page[page_number] = blocks
+            # A3: OCR returned nothing from a page that visibly
+            # has ink — a failed page, not a blank one. (A mixed
+            # page whose digital half produced blocks is not
+            # failed: the inventory derivation checks block
+            # counts, not just this error.)
+            if not blocks:
+                ink = (quality_by_page.get(page_number) or {}).get("ink_coverage")
+                if ink is not None and ink > 0.01:
+                    ocr_errors_by_page[page_number] = "ocr_returned_no_text"
         pages = _build_page_lines(digital_blocks_by_page, ocr_blocks_by_page, page_count)
+        blocks_by_page = {page.page_number: len(page.blocks or []) for page in pages}
         result = extract_document(
             pages,
             source_document_id,
@@ -911,6 +945,12 @@ def parse_document_bytes(
             "page_classifications": {str(c.page_number): c.classification for c in classifications},
             "page_routes": {str(p): routes[p] for p in range(1, page_count + 1)},
             "furniture_blocks_dropped": furniture_blocks_dropped,
+            # A3 (page inventory): blocks found per page (merged
+            # digital + OCR, after dedup) and per-page pipeline
+            # failures (page -> short reason). The worker stores
+            # both on the DocumentPage rows.
+            "blocks_by_page": {str(k): v for k, v in blocks_by_page.items()},
+            "ocr_errors_by_page": {str(k): v for k, v in ocr_errors_by_page.items()},
         },
     )
     return matched, report, debug
@@ -987,6 +1027,7 @@ def parse_image_bytes(
         variant_labels: list[str] = []
         variant_seconds: dict[str, float] = {}
         lines: list[str] = []
+        layout_block_count: int | None = None
         for label, variant_psm, use_layout in variants:
             started = _time.monotonic()
             blocks = _ocr_page(
@@ -1003,6 +1044,7 @@ def parse_image_bytes(
                     on_stage("layout", {"page": 1, "variant": label})
             if label == "psm3-layout":
                 lines = _lines_from_blocks(blocks)
+                layout_block_count = len(blocks)
             variant_results.append(extract_from_ocr_blocks(blocks, source_document_id))
             variant_labels.append(label)
             variant_seconds[label] = round(_time.monotonic() - started, 1)
@@ -1027,6 +1069,16 @@ def parse_image_bytes(
         lines = _lines_from_blocks(blocks)
         result = extract_from_ocr_blocks(blocks, source_document_id)
         psm4_retry_by_page[1] = retry_info
+    # A3 (page inventory): the one page's block count, and a
+    # failure when OCR returned nothing from an image that
+    # visibly has ink (same rule as the PDF path).
+    block_count = layout_block_count if multi_pass else len(blocks)
+    blocks_by_page = {1: block_count}
+    ocr_errors_by_page: dict[int, str] = {}
+    if block_count == 0:
+        ink = quality.to_dict().get("ink_coverage")
+        if ink is not None and ink > 0.01:
+            ocr_errors_by_page[1] = "ocr_returned_no_text"
     if on_stage is not None:
         on_stage(
             "extract",
@@ -1048,6 +1100,10 @@ def parse_image_bytes(
             "psm4_retry_by_page": {"1": psm4_retry_by_page.get(1, {})},
             "multi_pass": multi_pass,
             "merge": merge_report,
+            # A3 (page inventory): see parse_document_bytes.
+            "blocks_by_page": {str(k): v for k, v in blocks_by_page.items()},
+            "ocr_errors_by_page": {str(k): v for k, v in ocr_errors_by_page.items()},
+            "page_classifications": {"1": "scanned"},
         },
     )
     return matched, report, debug

@@ -180,6 +180,76 @@ export async function deleteDocument(
   );
 }
 
+// A3 — page inventory + completeness + per-page retry.
+export type PageExtractionStatus = "processed" | "no_questions" | "failed" | "low_confidence";
+
+export interface DocumentPageItem {
+  page_number: number;
+  classification: string | null;
+  extraction_status: PageExtractionStatus | null;
+  question_count: number;
+  error_message: string | null;
+}
+
+export interface DocumentPagesResponse {
+  document_id: string;
+  page_count: number;
+  pages: DocumentPageItem[];
+  expected_question_count: number | null;
+  extracted_question_count: number;
+  pending_question_count: number;
+  missing_question_count: number | null;
+  missing_numbers: number[];
+  missing_numbers_truncated: boolean;
+  zero_question_pages: number[];
+  failed_pages: number[];
+  low_confidence_pages: number[];
+}
+
+export interface ExpectedCountResponse {
+  document_id: string;
+  expected_question_count: number | null;
+  missing_question_count: number | null;
+}
+
+export interface PageRetryResponse {
+  document_id: string;
+  page_number: number;
+  job_id: string;
+  status: string;
+  existing_job: boolean;
+}
+
+export async function getDocumentPages(
+  accessToken: string,
+  id: string,
+): Promise<DocumentPagesResponse> {
+  return request<DocumentPagesResponse>(`/api/v1/documents/${id}/pages`, accessToken);
+}
+
+export async function setExpectedQuestionCount(
+  accessToken: string,
+  id: string,
+  expectedQuestionCount: number | null,
+): Promise<ExpectedCountResponse> {
+  return request<ExpectedCountResponse>(`/api/v1/documents/${id}`, accessToken, {
+    method: "PATCH",
+    body: JSON.stringify({ expected_question_count: expectedQuestionCount }),
+  });
+}
+
+export async function retryDocumentPage(
+  accessToken: string,
+  id: string,
+  pageNumber: number,
+): Promise<PageRetryResponse> {
+  return request<PageRetryResponse>(
+    `/api/v1/documents/${id}/pages/${pageNumber}/retry`,
+    accessToken,
+    { method: "POST" },
+  );
+}
+
 export async function getJob(accessToken: string, jobId: string): Promise<DocumentJob> {
   return request<DocumentJob>(`/api/v1/jobs/${jobId}`, accessToken);
 }

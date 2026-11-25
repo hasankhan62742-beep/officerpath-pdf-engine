@@ -97,10 +97,14 @@ def _persist_parse(
     data: bytes,
     page_count: int,
     matched,
+    debug: dict | None = None,
     file_type: str = "pdf",
 ) -> uuid.UUID:
     """Create Document + Job rows (done — ADR-011) and persist the
-    matched result under ``document_id``. Returns the job id."""
+    matched result under ``document_id``. Returns the job id.
+    Also records the A3 page inventory when ``debug`` is given
+    (the sync path never recorded DocumentPage rows at ingest,
+    so the inventory upserts them)."""
     document = db.Document(
         id=document_id,
         user_id=user_id,
@@ -127,6 +131,16 @@ def _persist_parse(
         job_id=job.id,
         matched=matched,
     )
+    if debug is not None:
+        from app.services.pages import record_page_inventory
+
+        record_page_inventory(
+            session,
+            document_id=document.id,
+            job_id=job.id,
+            matched=matched,
+            debug=debug,
+        )
     return job.id
 
 
@@ -200,6 +214,7 @@ def parse_document(
                 data=data,
                 page_count=debug["page_count"],
                 matched=matched,
+                debug=debug,
                 file_type=kind,
             )
             persisted = True
@@ -274,6 +289,7 @@ def parse_image(
                 data=data,
                 page_count=debug["page_count"],
                 matched=matched,
+                debug=debug,
                 file_type=file_type,
             )
             persisted = True

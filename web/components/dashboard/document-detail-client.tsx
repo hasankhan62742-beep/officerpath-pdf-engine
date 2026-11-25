@@ -21,6 +21,7 @@ import { Modal } from "@/components/ui/modal";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { Spinner } from "@/components/ui/spinner";
 import { JobStatusBadge, isJobActive } from "@/components/dashboard/job-status-badge";
+import { DocumentPages } from "@/components/dashboard/document-pages";
 import { DocumentResults } from "@/components/dashboard/document-results";
 import {
   ApiError,
@@ -270,17 +271,21 @@ export function DocumentDetailClient({ id }: { id: string }) {
         </dl>
       </Card>
 
+      <DocumentPages documentId={id} jobActive={isJobActive(job?.status)} />
+
       {job?.status === "done" ? (
-        <Card className="p-5">
-          <CardTitle>Extraction results</CardTitle>
-          <CardDescription>
-            Questions, answers and evidence from the engine — nothing here
-            is guessed. Unknown answers stay unknown.
-          </CardDescription>
-          <div className="mt-4">
-            <DocumentResults documentId={id} />
-          </div>
-        </Card>
+        <div id="extraction-results">
+          <Card className="p-5">
+            <CardTitle>Extraction results</CardTitle>
+            <CardDescription>
+              Questions, answers and evidence from the engine — nothing here
+              is guessed. Unknown answers stay unknown.
+            </CardDescription>
+            <div className="mt-4">
+              <DocumentResults documentId={id} />
+            </div>
+          </Card>
+        </div>
       ) : null}
 
       <Modal

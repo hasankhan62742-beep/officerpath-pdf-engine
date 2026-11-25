@@ -59,6 +59,259 @@ def _parse_field(field: str) -> tuple[str, int | None]:
     )
 
 
+def _store_question(
+    session: Session,
+    *,
+    document_id: uuid.UUID,
+    job_id: uuid.UUID | None,
+    question: ResolvedMCQ,
+    validation_status: str,
+    rule_set_version: str = "m6",
+) -> db.ExtractedQuestion:
+    """Store one resolved MCQ (+ options + answer + evidence) as
+    an ExtractedQuestion row. Extracted from
+    :func:`persist_matched_document` (A3) so a page-scoped
+    replacement can store the same rows with the same shape —
+    the two paths must never drift apart."""
+    row = db.ExtractedQuestion(
+        document_id=document_id,
+        job_id=job_id,
+        question_number=str(question.number) if question.number is not None else None,
+        original_text=question.text,
+        normalized_text=question.text,
+        source_pages=[question.page] if question.page else None,
+        extraction_method="m6-matching",
+        rule_set_version=rule_set_version,
+        extraction_confidence=question.confidence,
+        validation_status=validation_status,
+        duplicate_of_id=None,
+    )
+    session.add(row)
+    session.flush()  # assign row.id for options/answers
+    for position, option_text in enumerate(question.options):
+        session.add(
+            db.QuestionOption(
+                question_id=row.id,
+                original_label=chr(65 + position),
+                normalized_label=chr(65 + position),
+                label_inferred=False,
+                original_text=option_text,
+                normalized_text=option_text,
+                position=position,
+            )
+        )
+    if question.status == "answered" and question.correct_index >= 0:
+        answer = db.ExtractedAnswer(
+            question_id=row.id,
+            document_id=document_id,
+            status=(
+                "verified_explicit_key"
+                if question.verified
+                else "detected_inline"
+                if question.answer_source in ("inline", "trailing-key")
+                else "detected_visual"
+                if question.answer_source == "visual"
+                else "detected_digital_style"
+            ),
+            resolved_label=question.correct_letter,
+            resolution_method=question.answer_source,
+            resolution_score=question.confidence,
+        )
+        session.add(answer)
+        session.flush()
+        for evidence in question.evidences:
+            session.add(
+                db.AnswerEvidence(
+                    answer_id=answer.id,
+                    source_type=evidence.get("detector", ""),
+                    value_normalized=evidence.get("correct_letter", ""),
+                    page_number=question.page or None,
+                    detector=evidence.get("detector", ""),
+                    detector_confidence=evidence.get("confidence"),
+                    artifact_ref=evidence.get("evidence", ""),
+                )
+            )
+    return row
+
+
+def _question_dedup_key(question: ResolvedMCQ) -> tuple[str, tuple[str, ...]]:
+    """Identity of a question for cross-page dedup: normalized
+    text + options, collapsed whitespace, lowercased. Two rows
+    with the same key are the same question even when the parse
+    found it on two pages (page-break split, repeated header)."""
+
+    def _norm(text: str) -> str:
+        return " ".join(text.split()).lower()
+
+    return (_norm(question.text), tuple(_norm(o) for o in question.options))
+
+
+def _row_dedup_key(row: db.ExtractedQuestion, options: list[str]) -> tuple[str, tuple[str, ...]]:
+    def _norm(text: str) -> str:
+        return " ".join(text.split()).lower()
+
+    return (_norm(row.normalized_text), tuple(_norm(o) for o in options))
+
+
+def replace_page_questions(
+    session: Session,
+    *,
+    document_id: uuid.UUID,
+    job_id: uuid.UUID | None,
+    page_number: int,
+    matched: MatchedDocument,
+    rule_set_version: str = "m6",
+) -> dict:
+    """Replace ONLY one page's stored questions with a fresh
+    parse's results for that page (A3 page retry). Every other
+    page's rows are untouched — their ids, timestamps, and any
+    manual corrections on them survive. A new question that
+    duplicates a question already stored on another page is
+    skipped (counted, never inserted twice). Repeats inside the
+    retried page itself are stored as-is, exactly like the
+    original full parse stored them, so a deterministic re-parse
+    reproduces the page's original rows. Raises ValueError
+    when a question on this page has a manual correction — the
+    retry must never silently wipe a user's correction; the
+    caller turns that into a 409. Commits once at the end."""
+    rows = (
+        session.query(db.ExtractedQuestion)
+        .filter(db.ExtractedQuestion.document_id == document_id)
+        .all()
+    )
+    page_rows = [r for r in rows if page_number in (r.source_pages or [])]
+    if page_rows:
+        corrected = (
+            session.query(db.ManualCorrection)
+            .filter(db.ManualCorrection.target_id.in_([r.id for r in page_rows]))
+            .first()
+        )
+        if corrected is not None:
+            raise ValueError(
+                "page has manually corrected questions; retry refused "
+                "so the corrections are not lost"
+            )
+    # Dedup keys of the questions that stay (other pages).
+    kept_ids = {r.id for r in rows} - {r.id for r in page_rows}
+    kept_options: dict[uuid.UUID, list[str]] = {}
+    if kept_ids:
+        for opt in (
+            session.query(db.QuestionOption)
+            .filter(db.QuestionOption.question_id.in_(list(kept_ids)))
+            .order_by(db.QuestionOption.question_id, db.QuestionOption.position)
+            .all()
+        ):
+            kept_options.setdefault(opt.question_id, []).append(opt.normalized_text)
+    kept_keys = {_row_dedup_key(r, kept_options.get(r.id, [])) for r in rows if r.id in kept_ids}
+    for row in page_rows:
+        session.delete(row)
+    session.flush()
+    inserted = 0
+    skipped_duplicates = 0
+    candidates: list[tuple[ResolvedMCQ, str]] = [
+        (q, q.status) for q in matched.questions if q.page == page_number
+    ]
+    for pending in matched.pending:
+        if pending.get("page", 0) == page_number:
+            candidates.append(
+                (
+                    ResolvedMCQ(
+                        number=pending.get("number"),
+                        text=pending.get("text", ""),
+                        options=list(pending.get("options", [])),
+                        status="unknown",
+                        page=pending.get("page", 0),
+                        paper=pending.get("paper", ""),
+                    ),
+                    "pending",
+                )
+            )
+    for question, validation_status in candidates:
+        key = _question_dedup_key(question)
+        if key in kept_keys:
+            skipped_duplicates += 1
+            continue
+        _store_question(
+            session,
+            document_id=document_id,
+            job_id=job_id,
+            question=question,
+            validation_status=validation_status,
+            rule_set_version=rule_set_version,
+        )
+        # NOTE: the key is deliberately NOT added to kept_keys.
+        # persist_matched_document stores every parsed question,
+        # including repeats of the same question inside one page
+        # (the NOA Urdu fixture has 7 such repeats on page 2), so
+        # a retry must store the same repeats to reproduce the
+        # original page. Only duplicates of questions surviving on
+        # OTHER pages are skipped.
+        inserted += 1
+    session.commit()
+    return {
+        "page": page_number,
+        "replaced": len(page_rows),
+        "inserted": inserted,
+        "skipped_duplicates": skipped_duplicates,
+    }
+
+
+def rebuild_report_counts(
+    session: Session,
+    *,
+    document_id: uuid.UUID,
+    job_id: uuid.UUID | None,
+    summary_extra: dict | None = None,
+) -> dict | None:
+    """Recompute a document's latest ExtractionReport question
+    counts from the stored rows (A3: after a page retry changed
+    one page's rows). Counts that cannot be derived from rows
+    (duplicates_found, conflicting_answers, unmatched key
+    entries) keep their previous values. Returns the new counts
+    dict, or None when the document never had a report."""
+    report = (
+        session.query(db.ExtractionReport)
+        .filter(db.ExtractionReport.document_id == document_id)
+        .order_by(db.ExtractionReport.created_at.desc())
+        .first()
+    )
+    if report is None:
+        return None
+    rows = (
+        session.query(db.ExtractedQuestion)
+        .filter(db.ExtractedQuestion.document_id == document_id)
+        .all()
+    )
+    option_counts: dict[uuid.UUID, int] = {}
+    if rows:
+        for opt in (
+            session.query(db.QuestionOption)
+            .filter(
+                db.QuestionOption.question_id.in_([r.id for r in rows]),
+            )
+            .all()
+        ):
+            option_counts[opt.question_id] = option_counts.get(opt.question_id, 0) + 1
+    questions = [r for r in rows if r.validation_status != "pending"]
+    pending = [r for r in rows if r.validation_status == "pending"]
+    report.questions_extracted = len(questions)
+    report.questions_missing_options = sum(1 for r in questions if option_counts.get(r.id, 0) < 4)
+    report.uncertain_answers = sum(1 for r in questions if r.validation_status == "unknown")
+    report.requires_review = bool(
+        pending or report.uncertain_answers or (report.review_reasons or [])
+    )
+    if summary_extra:
+        report.summary = {**(report.summary or {}), **summary_extra}
+    session.commit()
+    return {
+        "questions_extracted": report.questions_extracted,
+        "questions_missing_options": report.questions_missing_options,
+        "uncertain_answers": report.uncertain_answers,
+        "pending": len(pending),
+        "requires_review": report.requires_review,
+    }
+
+
 def persist_matched_document(
     session: Session,
     *,
@@ -87,70 +340,16 @@ def persist_matched_document(
     stored_questions = 0
     stored_pending = 0
 
-    def _store_question(question: ResolvedMCQ, *, validation_status: str) -> db.ExtractedQuestion:
-        row = db.ExtractedQuestion(
-            document_id=document_id,
-            job_id=job_id,
-            question_number=str(question.number) if question.number is not None else None,
-            original_text=question.text,
-            normalized_text=question.text,
-            source_pages=[question.page] if question.page else None,
-            extraction_method="m6-matching",
-            rule_set_version=rule_set_version,
-            extraction_confidence=question.confidence,
-            validation_status=validation_status,
-            duplicate_of_id=None,
-        )
-        session.add(row)
-        session.flush()  # assign row.id for options/answers
-        for position, option_text in enumerate(question.options):
-            session.add(
-                db.QuestionOption(
-                    question_id=row.id,
-                    original_label=chr(65 + position),
-                    normalized_label=chr(65 + position),
-                    label_inferred=False,
-                    original_text=option_text,
-                    normalized_text=option_text,
-                    position=position,
-                )
-            )
-        if question.status == "answered" and question.correct_index >= 0:
-            answer = db.ExtractedAnswer(
-                question_id=row.id,
-                document_id=document_id,
-                status=(
-                    "verified_explicit_key"
-                    if question.verified
-                    else "detected_inline"
-                    if question.answer_source in ("inline", "trailing-key")
-                    else "detected_visual"
-                    if question.answer_source == "visual"
-                    else "detected_digital_style"
-                ),
-                resolved_label=question.correct_letter,
-                resolution_method=question.answer_source,
-                resolution_score=question.confidence,
-            )
-            session.add(answer)
-            session.flush()
-            for evidence in question.evidences:
-                session.add(
-                    db.AnswerEvidence(
-                        answer_id=answer.id,
-                        source_type=evidence.get("detector", ""),
-                        value_normalized=evidence.get("correct_letter", ""),
-                        page_number=question.page or None,
-                        detector=evidence.get("detector", ""),
-                        detector_confidence=evidence.get("confidence"),
-                        artifact_ref=evidence.get("evidence", ""),
-                    )
-                )
-        return row
-
     for question in matched.questions:
         status = question.status  # answered | unknown | conflict-resolved
-        _store_question(question, validation_status=status)
+        _store_question(
+            session,
+            document_id=document_id,
+            job_id=job_id,
+            question=question,
+            validation_status=status,
+            rule_set_version=rule_set_version,
+        )
         stored_questions += 1
     for pending in matched.pending:
         pending_mcq = ResolvedMCQ(
@@ -161,7 +360,14 @@ def persist_matched_document(
             page=pending.get("page", 0),
             paper=pending.get("paper", ""),
         )
-        _store_question(pending_mcq, validation_status="pending")
+        _store_question(
+            session,
+            document_id=document_id,
+            job_id=job_id,
+            question=pending_mcq,
+            validation_status="pending",
+            rule_set_version=rule_set_version,
+        )
         stored_pending += 1
     report = db.ExtractionReport(
         document_id=document_id,
